@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Weibloem — żywienie stada</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#24493a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Weibloem">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --tlo:#E6EAE5; --pow:#FAFBF8; --pow2:#F1F4F0; --tusz:#1C2924; --tusz2:#56645D; --linia:#C8D0C9;
+  --gl:#24493A; --gl2:#3F7A57; --gl3:#DCE9DF;
+  --obj:#6E8B33; --tres:#C9862A; --dod:#4A68A0; --nd:#8A6A3E;
+  --ok:#2E7D4F; --zolty:#B8901C; --zly:#B23A2E;
+  --font:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --font-w:'Barlow Condensed','Arial Narrow',var(--font);
+}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+body{background:var(--tlo);color:var(--tusz);font:15px/1.4 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gl2);outline-offset:2px}
+
+/* ===== NAGŁÓWEK ===== */
+header{background:var(--gl);color:#EEF3EE;position:sticky;top:0;z-index:50}
+.gora{display:flex;align-items:center;gap:14px;padding:10px 18px 4px;max-width:1560px;margin:0 auto}
+.marka{display:flex;align-items:baseline;gap:10px}
+.marka b{font:700 24px/1 var(--font-w);letter-spacing:.5px}
+.marka span{font-size:13px;opacity:.75}
+.firma-nag{font-size:13px;opacity:.8;margin-left:auto;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+#sync{font-size:12.5px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.12);white-space:nowrap;cursor:default}
+#sync.ok::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#7FD69B;margin-right:6px}
+#sync.zapis{background:rgba(232,190,90,.28)}
+#sync.offline,#sync.blad{background:rgba(214,92,77,.4)}
+nav#zakladki{display:flex;gap:2px;padding:6px 14px 0;max-width:1560px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+nav#zakladki::-webkit-scrollbar{display:none}
+nav#zakladki button{border:0;background:transparent;color:#D6E2D9;padding:8px 14px 9px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:600;white-space:nowrap}
+nav#zakladki button:hover{background:rgba(255,255,255,.08)}
+nav#zakladki button.akt{background:var(--tlo);color:var(--tusz)}
+
+main{max-width:1560px;margin:0 auto;padding:16px 18px 60px}
+
+/* ===== ELEMENTY OGÓLNE ===== */
+.panel{background:var(--pow);border:1px solid var(--linia);border-radius:8px;margin-bottom:16px}
+.ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--linia)}
+.ph h2{font:600 19px/1.2 var(--font-w);margin:0;letter-spacing:.2px}
+.ph .opis{color:var(--tusz2);font-size:13px}
+.ph .prawo{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pb{padding:12px 14px}
+.przewin{overflow-x:auto}
+.btn{border:1px solid var(--linia);background:var(--pow);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:14px;line-height:1.2;white-space:nowrap}
+.btn:hover{background:var(--pow2)}
+.btn.glowny{background:var(--gl);border-color:var(--gl);color:#fff}
+.btn.glowny:hover{background:var(--gl2)}
+.btn.maly{padding:3px 8px;font-size:13px}
+.btn.ikona{padding:2px 7px;font-size:13px;line-height:1.3}
+.btn.usun{color:var(--zly)}
+.btn.usun:hover{background:#F8E6E3}
+.btn:disabled{opacity:.45;cursor:default}
+.pole{border:1px solid var(--linia);border-radius:4px;padding:5px 7px;background:#fff;min-width:0}
+.pole:focus{border-color:var(--gl2);outline:none;box-shadow:0 0 0 2px var(--gl3)}
+.pole.num{text-align:right;width:84px}
+.pole.krotkie{width:62px}
+.pole.szer{width:100%}
+select.pole{padding:4px 6px}
+textarea.pole{resize:vertical;min-height:34px;width:100%}
+label.et{display:block;font-size:12.5px;color:var(--tusz2);margin-bottom:3px;font-weight:600}
+.wiersz{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.wiersz>div{flex:1;min-width:140px}
+.cichy{color:var(--tusz2);font-size:13px}
+.ostrz{color:var(--zly);font-weight:600}
+.dobry{color:var(--ok);font-weight:600}
+.znacznik{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:10px;background:var(--pow2);border:1px solid var(--linia);color:var(--tusz2);white-space:nowrap}
+.kat-kropka{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.pusto{padding:28px 16px;text-align:center;color:var(--tusz2)}
+.pusto b{display:block;color:var(--tusz);font-size:16px;margin-bottom:4px}
+.baner{padding:9px 14px;border-radius:6px;margin-bottom:14px;font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.baner.info{background:#E3ECF3;border:1px solid #B8CBDA}
+.baner.uwaga{background:#FBF1DA;border:1px solid #E5CF92}
+
+/* ===== TABELE ===== */
+table.t{border-collapse:collapse;width:100%;font-size:14px}
+table.t th{font-weight:600;font-size:12.5px;color:var(--tusz2);text-align:right;padding:7px 8px;border-bottom:2px solid var(--linia);background:var(--pow);vertical-align:bottom;white-space:nowrap}
+table.t td{padding:5px 8px;border-bottom:1px solid #E2E7E2;text-align:right;vertical-align:middle}
+table.t th.l,table.t td.l{text-align:left}
+table.t tr.kat td{background:var(--pow2);font-weight:700;text-align:left;font-family:var(--font-w);font-size:15px;letter-spacing:.2px}
+table.t tr.suma td{font-weight:700;border-top:2px solid var(--linia);background:#F4F7F3}
+table.t tr.pod td{font-weight:600;background:#F7F9F6}
+table.t tbody tr:hover td{background:#F5F8F4}
+table.t tr.kat:hover td{background:var(--pow2)}
+.nazwa-sur{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.strz{display:inline-flex;flex-direction:column;line-height:.8}
+.strz button{border:0;background:none;cursor:pointer;font-size:10px;padding:1px 3px;color:var(--tusz2)}
+.strz button:disabled{opacity:.2;cursor:default}
+
+/* ===== RECEPTURY ===== */
+table.rec td.kom{padding:3px 5px;position:relative}
+table.rec .pole.num{width:72px}
+table.rec th.rk{text-align:center;min-width:118px;vertical-align:top;padding:8px 6px}
+.rk-nazwa{font:600 16px/1.15 var(--font-w);color:var(--tusz);cursor:pointer}
+.rk-nazwa:hover{text-decoration:underline}
+.rk-grupy{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin:5px 0}
+.rk-grupy span{font-size:11px;padding:0 5px;border-radius:3px;color:#fff;font-weight:600}
+.rk-akcje{display:flex;gap:3px;justify-content:center}
+.nr-mini{position:absolute;left:2px;top:2px;font-size:10px;font-weight:700;color:var(--gl2)}
+th.rk.numerowanie,td.kom.numerowanie{background:#EEF5EF}
+button.nr{width:30px;height:30px;border-radius:50%;border:2px dashed var(--gl2);background:#fff;color:var(--gl2);font-weight:700;cursor:pointer;font-size:14px;transition:transform .15s}
+button.nr:hover{transform:scale(1.1)}
+button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);color:#fff}
+.nr-kg{font-size:12px;color:var(--tusz2);margin-left:6px}
+.pasek-num{position:sticky;top:calc(var(--hdr,92px) + 6px);z-index:20;background:var(--gl);color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 6px 18px rgba(20,40,30,.25)}
+.pasek-num .btn{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff}
+.pasek-num .btn:hover{background:rgba(255,255,255,.2)}
+.pasek-num select{color:var(--tusz)}
+
+/* ===== GRUPY ===== */
+.grupa{display:grid;grid-template-columns:8px 1fr;border-bottom:1px solid var(--linia)}
+.grupa:last-child{border-bottom:0}
+.grupa .kol{cursor:pointer}
+.grupa .tresc{padding:10px 14px;display:grid;grid-template-columns:minmax(220px,1.1fr) minmax(260px,1.5fr) minmax(200px,.9fr);gap:12px 20px}
+@media(max-width:1000px){.grupa .tresc{grid-template-columns:1fr}}
+.g-gora{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.g-gora .pole.nazwa{font-weight:700;width:130px}
+.przel{display:inline-flex;border:1px solid var(--linia);border-radius:6px;overflow:hidden}
+.przel button{border:0;background:#fff;padding:4px 10px;cursor:pointer;font-weight:600;font-size:13px}
+.przel button.akt{background:var(--gl);color:#fff}
+.sektory{display:flex;flex-wrap:wrap;gap:6px}
+.sektor-ed{display:flex;align-items:center;gap:4px;background:var(--pow2);border:1px solid var(--linia);border-radius:6px;padding:3px 4px 3px 8px}
+.sektor-ed .pole{padding:3px 5px}
+.liczby-g{display:grid;grid-template-columns:auto auto;gap:2px 12px;font-size:13.5px;align-content:start}
+.liczby-g b{text-align:right}
+
+/* ===== WÓZ PASZOWY ===== */
+.woz-gora{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.dzien-nav{display:flex;align-items:center;gap:4px;background:var(--pow);border:1px solid var(--linia);border-radius:8px;padding:4px}
+.dzien-nav .pole{border:0;font-weight:600}
+.dzien-tyt{font:600 22px/1 var(--font-w);margin-right:6px}
+.woz-uklad{display:grid;grid-template-columns:310px minmax(0,1fr);gap:16px;align-items:start}
+.woz-uklad>*{min-width:0}
+@media(max-width:920px){.woz-uklad{grid-template-columns:minmax(0,1fr)}}
+.boczny{position:sticky;top:calc(var(--hdr,92px) + 10px);max-height:calc(100vh - var(--hdr,92px) - 20px);overflow:auto;padding-right:2px}
+.opis-boczny{font-size:12.5px;margin-bottom:6px}
+.nd-tyt{margin-top:16px!important}
+@media(max-width:920px){
+  .boczny{top:var(--hdr,92px);z-index:30;background:var(--tlo);max-height:none;overflow:visible;margin:0 -10px;padding:6px 10px 8px;border-bottom:1px solid var(--linia);box-shadow:0 6px 12px -8px rgba(20,40,30,.35)}
+  .boczny h3{font-size:15px;margin:2px 0 4px}.nd-tyt{margin-top:6px!important}
+  .opis-boczny,.boczny .grupa-et{display:none}
+  .lista-sek{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+  .lista-sek .chip{min-width:178px;margin:0;flex:0 0 auto}
+  .lista-sek .chip.nd{min-width:290px}
+  .lista-sek .pusto{padding:6px}
+}
+.boczny h3{font:600 17px var(--font-w);margin:4px 0 6px;display:flex;align-items:center;gap:6px}
+.grupa-et{font-size:12px;font-weight:700;color:var(--tusz2);margin:10px 0 3px;display:flex;align-items:center;gap:6px}
+.grupa-et i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.chip{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;align-items:center;background:var(--pow);border:1px solid var(--linia);border-left-width:6px;border-radius:6px;padding:6px 8px;margin-bottom:5px;cursor:grab;user-select:none;-webkit-user-select:none;transition:transform .12s,box-shadow .12s}
+.chip:hover{box-shadow:0 2px 8px rgba(30,50,40,.12)}
+.chip .uchwyt{grid-row:span 2;color:var(--tusz2);font-size:15px;letter-spacing:-2px;padding:6px 2px;touch-action:none;cursor:grab}
+.chip .n{font-weight:700;font-size:14.5px}
+.chip .s{font-size:12.5px;color:var(--tusz2);text-align:right}
+.chip .post{grid-column:2/4;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tusz2)}
+.post-bar{flex:1;height:5px;border-radius:3px;background:#E1E6E1;overflow:hidden}
+.post-bar i{display:block;height:100%;background:var(--gl2);transition:width .35s}
+.chip.pelny .post-bar i{background:var(--ok)}
+.chip.pelny .n::after{content:' ✓';color:var(--ok)}
+.chip.nd{border-left-color:var(--nd);background:repeating-linear-gradient(135deg,#FBF7EF 0 8px,#F6EEDD 8px 16px)}
+.kursy-kol{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:16px;align-items:start}
+@media(max-width:520px){.kursy-kol{grid-template-columns:1fr}}
+.zad-tyt{font:600 20px var(--font-w);margin:0 0 8px;display:flex;align-items:baseline;gap:8px}
+.zad-tyt small{font:500 13px var(--font);color:var(--tusz2)}
+.kurs{background:var(--pow);border:1px solid var(--linia);border-radius:10px;margin-bottom:14px;overflow:hidden;animation:wjazd .28s ease-out}
+.kurs-pas{height:6px}
+.kurs-nag{display:flex;align-items:center;gap:8px;padding:8px 10px 6px;flex-wrap:wrap}
+.kurs-nr{font:700 21px/1 var(--font-w);white-space:nowrap}
+.kurs-nag .uchwyt{cursor:grab;color:var(--tusz2);padding:4px;touch-action:none;font-size:16px;letter-spacing:-2px}
+.kurs-nag select{max-width:190px}
+.kurs-nag .prawo{margin-left:auto;display:flex;gap:4px}
+.wanna-wrap{padding:2px 10px 4px}
+.wanna{position:relative;height:38px;border-radius:3px 3px 16px 16px;background:#E2E7E1;box-shadow:inset 0 2px 4px rgba(0,0,0,.12);overflow:hidden;display:flex}
+.wanna .seg{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px var(--font-w);overflow:hidden;transition:width .45s cubic-bezier(.2,.8,.2,1);border-right:1px solid rgba(255,255,255,.35);min-width:0}
+.wanna .seg.nd{background:repeating-linear-gradient(45deg,#8A6A3E 0 6px,#AD8B5A 6px 12px)}
+.wanna .poj{position:absolute;top:-2px;bottom:-2px;border-left:2px dashed var(--zly)}
+.wanna.pusta::after{content:'Wóz pusty — przeciągnij tu sektor';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tusz2);font-size:13px}
+.wanna-opis{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--tusz2);padding:3px 2px 0;flex-wrap:wrap}
+.wanna-opis b{color:var(--tusz)}
+.kurs-wiersze{padding:4px 10px 6px}
+.kw{display:grid;grid-template-columns:12px minmax(90px,1fr) 52px 74px 84px 60px 52px 26px;gap:6px;align-items:center;padding:5px 4px;border-bottom:1px solid #E6EBE6;font-size:13.5px;border-radius:4px}
+.kw.nag{font-size:11.5px;color:var(--tusz2);font-weight:600;border-bottom:1px solid var(--linia)}
+.kw.nag span{text-align:right}
+.kw .r{text-align:right}
+.kw .dot{width:10px;height:10px;border-radius:50%}
+.kw .pole.num{width:100%;padding:3px 5px}
+.kw.ndw{background:repeating-linear-gradient(135deg,#FBF7EF 0 8px,#F6EEDD 8px 16px)}
+@media(max-width:520px){.kw{grid-template-columns:10px minmax(0,1fr) 72px 40px 46px 26px;gap:5px}.kw .ukr{display:none}.kurs-nag select{flex:1;min-width:0;max-width:none}.kurs-nag .prawo{margin-left:0}}
+.proc{font-weight:700;font-size:12px;text-align:center;border-radius:10px;padding:1px 0;color:#fff}
+.proc.ok{background:var(--ok)}.proc.sr{background:var(--zolty)}.proc.zle{background:var(--zly)}
+.upusc{margin:6px 10px 10px;border:2px dashed var(--linia);border-radius:8px;padding:9px;text-align:center;color:var(--tusz2);font-size:13px;transition:background .15s,border-color .15s}
+.nowy-kurs{border:2px dashed var(--linia);border-radius:10px;padding:18px;text-align:center;color:var(--tusz2);margin-bottom:14px}
+.nowy-kurs .btn{margin-top:6px}
+.cel-ok{outline:3px dashed var(--gl2)!important;outline-offset:2px;background-color:#EEF6EF!important}
+.upusc.cel-ok,.nowy-kurs.cel-ok{border-color:var(--gl2);color:var(--gl)}
+.duch{position:fixed;z-index:1000;pointer-events:none;opacity:.93;transform:rotate(-2deg) scale(1.03);box-shadow:0 12px 28px rgba(20,40,30,.3);width:260px}
+.przeciagany{opacity:.35}
+.wpada{animation:wpada 1s ease-out}
+.odrzut{animation:odrzut .4s}
+@keyframes wpada{0%{background:#FCE7A6}100%{background:transparent}}
+@keyframes odrzut{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes wjazd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.legenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--tusz2);margin:4px 0 10px}
+.legenda i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.nd-info{font-size:12px;color:var(--tusz2);grid-column:2/4}
+.nd-info .pole{width:70px;padding:2px 5px}
+
+/* ===== MODAL I TOAST ===== */
+#modal{position:fixed;inset:0;background:rgba(20,32,26,.45);display:none;align-items:flex-start;justify-content:center;z-index:900;padding:8vh 12px 12px;overflow:auto}
+#modal.otw{display:flex}
+.m-okno{background:var(--pow);border-radius:10px;max-width:520px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.3);animation:wjazd .2s}
+.m-tyt{padding:14px 16px 10px;font:600 20px var(--font-w);border-bottom:1px solid var(--linia)}
+.m-tresc{padding:14px 16px;display:grid;gap:12px}
+.m-stopka{padding:10px 16px 14px;display:flex;justify-content:flex-end;gap:8px}
+.lista-wyb{display:grid;gap:6px}
+.lista-wyb button{text-align:left;border:1px solid var(--linia);background:#fff;border-radius:6px;padding:8px 10px;cursor:pointer}
+.lista-wyb button:hover{background:var(--gl3)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--tusz);color:#fff;padding:10px 16px;border-radius:8px;opacity:0;transition:.25s;z-index:1000;max-width:min(560px,92vw);font-size:14px;pointer-events:none}
+#toast.pok{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.zly{background:var(--zly)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+@media(max-width:600px){main{padding:12px 10px 60px}.gora{padding:8px 12px 2px}.firma-nag{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="gora">
+    <div class="marka"><b>Weibloem</b><span>żywienie stada</span></div>
+    <div class="firma-nag" id="firmaNag"></div>
+    <div id="sync" title="Stan synchronizacji">…</div>
+  </div>
+  <nav id="zakladki"></nav>
+</header>
+<main id="widok"></main>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"></div>
+<script>
+'use strict';
+/* =====================================================================
+   1. KONFIGURACJA
+   ===================================================================== */
+// Wklej tu obiekt firebaseConfig z konsoli Firebase (Ustawienia projektu → Twoje aplikacje → SDK).
+// Dopóki jest null, aplikacja działa tylko lokalnie (localStorage) na tym urządzeniu.
+const FIREBASE_CONFIG = null;
+const KOL_MODULY = 'weibloem_moduly';  // kolekcja: jeden dokument = jeden moduł
+const KOL_DNI    = 'weibloem_dni';     // kolekcja: jeden dokument = jeden dzień żywienia (id RRRR-MM-DD)
+const WERSJA_DANYCH = 1;               // sufiks kluczy localStorage; zmiana struktury = +1 i wpis w MIGRACJE
+const DEBOUNCE_MS = 800;
+const DNI_WSTECZ = 60;                 // ile dni wstecz nasłuchujemy na żywo
+const DNI_STANY_MAX = 180;             // najdalej wstecz liczymy zużycie do stanów
+const MIESIAC_DNI = 30;
+const MODULY = ['surowce','receptury','grupy','wozy','ustawienia'];
+
+/* =====================================================================
+   2. NARZĘDZIA
+   ===================================================================== */
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+// Jedyna funkcja parsująca liczby w aplikacji – przecinek dziesiętny, spacje tysięcy
+function parseFloatPL(v){
+  if(v==null) return NaN;
+  if(typeof v==='number') return v;
+  const s=String(v).trim().replace(/[\s\u00a0]/g,'').replace(',','.');
+  if(s==='') return NaN;
+  return parseFloat(s);
+}
+function liczba(v,dom=0){ const n=parseFloatPL(v); return Number.isFinite(n)?n:dom; }
+const _nf={};
+function fmt(n,min=0,max){
+  if(n==null||!Number.isFinite(n)) return '–';
+  max=max??min; const k=min+'_'+max; const p=10**max; n=Math.round((n+Math.sign(n)*1e-9)*p)/p;  // korekta błędu zmiennoprzecinkowego (28,355 → 28,36)
+  if(!_nf[k]) _nf[k]=new Intl.NumberFormat('pl-PL',{minimumFractionDigits:min,maximumFractionDigits:max});
+  return _nf[k].format(n).replace(/\u00a0/g,' ');
+}
+function fmtIn(n,max=3){ if(n==null||n===''||!Number.isFinite(+n)) return ''; const p=10**max; return String(Math.round(n*p)/p).replace('.',','); }
+function cenaKg(cenaT){ return fmt((cenaT||0)/1000,2,3); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(p='x'){ return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function isoData(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dzis(){ return isoData(new Date()); }
+function dataPlus(iso,n){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return isoData(d); }
+function roznicaDni(a,b){ return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5); }
+function dataPL(iso){ if(!iso) return '–'; const [y,m,d]=iso.split('-'); return d+'.'+m+'.'+y; }
+const DNI_TYG=['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+function dzienTyg(iso){ return DNI_TYG[new Date(iso+'T12:00:00').getDay()]; }
+function klon(o){ return o===undefined?null:JSON.parse(JSON.stringify(o)); }
+function stabilny(o){ // JSON niezależny od kolejności kluczy (Firestore nie zachowuje kolejności pól)
+  if(Array.isArray(o)) return '['+o.map(stabilny).join(',')+']';
+  if(o&&typeof o==='object') return '{'+Object.keys(o).sort().map(k=>JSON.stringify(k)+':'+stabilny(o[k])).join(',')+'}';
+  return JSON.stringify(o);
+}
+let _tt;
+function toast(t,typ){ const e=$('#toast'); e.textContent=t; e.className='pok'+(typ?' '+typ:''); clearTimeout(_tt); _tt=setTimeout(()=>e.className='',typ==='zly'?4200:2600); }
+
+const KAT={obj:'Pasze objętościowe',tres:'Pasze treściwe',dod:'Dodatki paszowe'};
+const KAT_KR={obj:'Objętościowa',tres:'Treściwa',dod:'Dodatek'};
+const KAT_KOL={obj:'#6E8B33',tres:'#C9862A',dod:'#4A68A0'};
+const KAT_ODC={obj:['#6E8B33','#87A447','#5A7428'],tres:['#C9862A','#DDA24B','#AE7020'],dod:['#4A68A0','#6685BE','#3A5688']};
+const KOLORY_GRUP=['#3E7C59','#C0773A','#3D6FA3','#A2475E','#7A5BA6','#2E8C8C','#A68B22','#6D7F3A','#A85C3C','#4F5D75','#B05A8C','#5C8A2E'];
+
+/* =====================================================================
+   3. PAMIĘĆ LOKALNA + MIGRACJE (klucze z sufiksem wersji)
+   ===================================================================== */
+const LS='wb_v'+WERSJA_DANYCH+':';
+function lsCzytaj(k){ try{ const v=localStorage.getItem(LS+k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lsZapisz(k,v){ try{ localStorage.setItem(LS+k,JSON.stringify(v)); }catch(e){ console.warn(e); toast('Pamięć lokalna pełna – zmiany idą tylko do chmury','zly'); } }
+// MIGRACJE[n] = funkcja(mapa) przekształcająca dane z wersji n-1 do n.
+// Mapa ma postać {klucz: wartość}, np. {'m:surowce':{d,ts,niezsync}, 'd:2026-10-05':{...}}.
+// Stary klucz zostaje nietknięty – migracja zapisuje do nowego.
+const MIGRACJE={
+  // 2: mapa => { ...przekształcenie... ; return mapa; }
+};
+function migrujPamiec(){
+  const klucze=Object.keys(localStorage);
+  if(klucze.some(k=>k.startsWith(LS))) return;
+  for(let v=WERSJA_DANYCH-1; v>=1; v--){
+    const pref='wb_v'+v+':';
+    const stare=klucze.filter(k=>k.startsWith(pref));
+    if(!stare.length) continue;
+    let mapa={};
+    stare.forEach(k=>{ try{ mapa[k.slice(pref.length)]=JSON.parse(localStorage.getItem(k)); }catch(e){} });
+    for(let n=v+1; n<=WERSJA_DANYCH; n++){ if(MIGRACJE[n]) mapa=MIGRACJE[n](mapa); }
+    Object.entries(mapa).forEach(([k,w])=>lsZapisz(k,w));
+    console.info('Migracja danych lokalnych v'+v+' → v'+WERSJA_DANYCH);
+    return;
+  }
+}
+
+/* =====================================================================
+   4. SYNCHRONIZACJA – chirurgiczna, jednostka = moduł albo dzień
+   ===================================================================== */
+const DEV=(()=>{ let d=localStorage.getItem('wb_urzadzenie'); if(!d){ d=uid('u'); localStorage.setItem('wb_urzadzenie',d); } return d; })();
+let fs=null, syncBlad=false;
+const J={};          // klucz ('m:surowce' | 'd:2026-10-05') → jednostka synchronizacji
+let wersja=0;        // licznik zmian – unieważnia pamięć podręczną obliczeń
+
+function jednostka(klucz,opcje){
+  if(J[klucz]) return J[klucz];
+  const zap=lsCzytaj(klucz);
+  const u=J[klucz]={klucz,...opcje,ts:zap?.ts||0,niezsync:!!zap?.niezsync,pierwszy:false,timer:null,wyslanyTs:0,wTrakcie:false,zSeedu:false};
+  if(zap && zap.d!=null) u.ustaw(zap.d);
+  return u;
+}
+function zapiszLokalnie(u){ lsZapisz(u.klucz,{d:u.pobierz(),ts:u.ts,niezsync:u.niezsync}); }
+
+// Wywoływane po każdej lokalnej edycji – zapis lokalny od razu, do chmury z opóźnieniem
+function oznaczZmiane(klucz){
+  const u=J[klucz]; if(!u) return;
+  wersja++;
+  u.ts=Date.now(); u.niezsync=true; zapiszLokalnie(u);
+  clearTimeout(u.timer); u.timer=setTimeout(()=>wypchnij(klucz),DEBOUNCE_MS);
+  pokazSync();
+}
+function wypchnij(klucz){
+  const u=J[klucz]; if(!u) return;
+  clearTimeout(u.timer); u.timer=null;
+  if(!fs || !u.pierwszy){ pokazSync(); return; }   // czekamy na pierwszy snapshot – nie nadpisujemy chmury starym cache
+  const dane=u.pobierz(); if(dane==null){ pokazSync(); return; }
+  const ts=u.ts; u.wyslanyTs=ts; u.wTrakcie=true; pokazSync();
+  u.ref().set({d:klon(dane),_ts:ts,_dev:DEV,_v:WERSJA_DANYCH})
+    .then(()=>{ u.wTrakcie=false; if(u.ts===ts && !u.timer){ u.niezsync=false; zapiszLokalnie(u); } syncBlad=false; pokazSync(); })
+    .catch(e=>{ u.wTrakcie=false; console.warn('Zapis '+klucz,e); syncBlad=true; pokazSync(); });
+}
+function saveModule(nazwa){ oznaczZmiane('m:'+nazwa); }
+function saveDzien(data){ jednostkaDnia(data); oznaczZmiane('d:'+data); }
+
+function przyjmijSnapshot(klucz,snap){
+  const u=J[klucz]; if(!u) return;
+  if(snap.metadata && snap.metadata.hasPendingWrites) return;      // echo własnego zapisu
+  const pierwszy=!u.pierwszy; u.pierwszy=true;
+  if(!snap.exists){
+    // brak dokumentu w chmurze: jednorazowy seed z tego urządzenia (tylko ten moduł/dzień)
+    if(pierwszy && (u.niezsync || u.zSeedu)) wypchnij(klucz);
+    pokazSync(); return;
+  }
+  const r=snap.data()||{};
+  if(r._dev===DEV && r._ts===u.wyslanyTs){ pokazSync(); return; }  // potwierdzenie własnego zapisu
+  if(u.timer || u.wTrakcie){ pokazSync(); return; }                  // lokalna zmiana w drodze – zostanie wysłana
+  if(u.niezsync && u.ts>(r._ts||0)){ wypchnij(klucz); return; }       // edycje offline nowsze niż chmura
+  u.ustaw(r.d); u.ts=r._ts||0; u.niezsync=false; u.zSeedu=false; zapiszLokalnie(u);
+  wersja++; pokazSync(); odswiezZdalnie();
+}
+
+function startSync(){
+  if(!FIREBASE_CONFIG || typeof firebase==='undefined'){ pokazSync(); return; }
+  try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); fs=firebase.firestore(); }
+  catch(e){ console.warn('Firebase',e); syncBlad=true; pokazSync(); return; }
+  MODULY.forEach(m=>{
+    const k='m:'+m;
+    fs.collection(KOL_MODULY).doc(m).onSnapshot(s=>przyjmijSnapshot(k,s),e=>{ console.warn(k,e); syncBlad=true; pokazSync(); });
+  });
+  podlaczDni();
+  addEventListener('online',ponowWysylke);
+  pokazSync();
+}
+function ponowWysylke(){ Object.values(J).forEach(u=>{ if(u.niezsync && !u.timer && !u.wTrakcie) wypchnij(u.klucz); }); pokazSync(); }
+function wypchnijOczekujace(){ Object.values(J).forEach(u=>{ if(u.timer) wypchnij(u.klucz); }); }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') wypchnijOczekujace(); });
+addEventListener('pagehide',wypchnijOczekujace);
+addEventListener('offline',()=>pokazSync());
+
+/* --- dni: jeden nasłuch zakresu + pojedyncze dla starszych dat --- */
+let odDniaNasluch=null, dniGotowe=false;
+const nasluchPojedynczy={};
+function najstarszyPotrzebnyDzien(){
+  let od=dataPlus(dzis(),-DNI_WSTECZ);
+  const granica=dataPlus(dzis(),-DNI_STANY_MAX);
+  D.surowce.forEach(s=>{ if(s.stanData && s.stanData<od) od=s.stanData; });
+  Object.values(J).forEach(u=>{ if(u.klucz.startsWith('d:') && u.niezsync && u.klucz.slice(2)<od) od=u.klucz.slice(2); });
+  return od<granica?granica:od;
+}
+function podlaczDni(){
+  odDniaNasluch=najstarszyPotrzebnyDzien();
+  fs.collection(KOL_DNI).where(firebase.firestore.FieldPath.documentId(),'>=',odDniaNasluch).onSnapshot(qs=>{
+    qs.docChanges().forEach(ch=>{ if(ch.type==='removed') return; jednostkaDnia(ch.doc.id); przyjmijSnapshot('d:'+ch.doc.id,ch.doc); });
+    if(!dniGotowe){
+      dniGotowe=true;
+      Object.values(J).forEach(u=>{
+        if(!u.klucz.startsWith('d:') || u.pierwszy) return;
+        if(u.klucz.slice(2)>=odDniaNasluch){ u.pierwszy=true; if(u.niezsync) wypchnij(u.klucz); }
+      });
+    }
+    pokazSync();
+  },e=>{ console.warn('dni',e); syncBlad=true; pokazSync(); });
+}
+function jednostkaDnia(data){
+  const k='d:'+data;
+  if(J[k]) return J[k];
+  const u=jednostka(k,{ref:()=>fs.collection(KOL_DNI).doc(data),pobierz:()=>DNI[data]??null,ustaw:d=>{ DNI[data]=normalizujDzien(d,data); }});
+  if(fs){
+    if(odDniaNasluch && data>=odDniaNasluch){ if(dniGotowe) u.pierwszy=true; }
+    else if(odDniaNasluch && !nasluchPojedynczy[data]){
+      nasluchPojedynczy[data]=fs.collection(KOL_DNI).doc(data).onSnapshot(s=>przyjmijSnapshot(k,s),e=>console.warn(k,e));
+    }
+  }
+  return u;
+}
+
+function pokazSync(){
+  const e=$('#sync'); if(!e) return;
+  const lista=Object.values(J);
+  let kl='', t='';
+  if(!FIREBASE_CONFIG || typeof firebase==='undefined'){ kl='offline'; t=FIREBASE_CONFIG?'Brak SDK Firebase – zapis lokalny':'Tylko to urządzenie'; }
+  else if(!fs){ kl='blad'; t='Błąd połączenia z Firebase'; }
+  else if(!navigator.onLine){ kl='offline'; t='Offline – zapis lokalny'; }
+  else if(MODULY.some(m=>!J['m:'+m]?.pierwszy) || !dniGotowe){ kl='zapis'; t='Łączenie…'; }
+  else if(lista.some(u=>u.timer||u.wTrakcie)){ kl='zapis'; t='Zapisywanie…'; }
+  else if(syncBlad){ kl='blad'; t='Błąd zapisu – ponowię'; }
+  else if(lista.some(u=>u.niezsync)){ kl='zapis'; t='Oczekuje na wysłanie'; }
+  else { kl='ok'; t='Zsynchronizowano'; }
+  e.className=kl; e.textContent=t;
+}
+
+/* =====================================================================
+   5. DANE STARTOWE (z raportu kosztów Weibloem 07.07.2026)
+   ===================================================================== */
+const SEED={
+  surowce:[
+    {id:'trawa', nazwa:'Trawa kiszonka',           kat:'obj', cenaT:135},
+    {id:'kuk',   nazwa:'Kiszonka z kukurydzy',     kat:'obj', cenaT:190},
+    {id:'sloma', nazwa:'Słoma pszenna',            kat:'obj', cenaT:250},
+    {id:'pulpa', nazwa:'Pulpa kukurydziano-żytnia',kat:'tres',cenaT:290},
+    {id:'rzep',  nazwa:'Śruta rzepakowa',          kat:'tres',cenaT:1400},
+    {id:'soja',  nazwa:'Śruta sojowa',             kat:'tres',cenaT:1720},
+    {id:'zboz',  nazwa:'Śruta zbożowa',            kat:'tres',cenaT:800},
+    {id:'ccm',   nazwa:'CCM',                      kat:'tres',cenaT:490},
+    {id:'megal', nazwa:'MegaLac',                  kat:'tres',cenaT:7400},
+    {id:'melas', nazwa:'Melasa',                   kat:'tres',cenaT:1585},
+    {id:'bovb',  nazwa:'Bovino Baza',              kat:'dod', cenaT:4000},
+    {id:'witkz', nazwa:'Witaminer KZ',             kat:'dod', cenaT:6500},
+    {id:'dcab',  nazwa:'BOVINO DCAB',              kat:'dod', cenaT:6500},
+    {id:'witj',  nazwa:'Witaminer Jałówka',        kat:'dod', cenaT:3500},
+    {id:'vitp',  nazwa:'Vitaminer PLUS',           kat:'dod', cenaT:4200}
+  ].map(s=>({...s,stanBazT:0,stanData:null,dostawy:[]})),
+  receptury:[
+    {id:'r12', nazwa:'Wysokowydajne', uwagi:'MegaLac: ODS 0,33 kg/szt, na wozie 0,50 kg/szt (+52%) – koszt wg ODS.',
+      sk:[['trawa',10],['kuk',35],['sloma',.7],['pulpa',5],['rzep',3],['soja',2.4],['zboz',5],['ccm',4],['megal',.33],['bovb',.5]]},
+    {id:'r3',  nazwa:'Średnio wydajne', uwagi:'', sk:[['trawa',15],['kuk',30],['sloma',.7],['pulpa',5],['rzep',2.8],['soja',1],['zboz',2],['ccm',2],['bovb',.5]]},
+    {id:'r68', nazwa:'Fresh', uwagi:'', sk:[['trawa',11],['kuk',30],['sloma',.7],['pulpa',5],['rzep',2.5],['soja',1.6],['zboz',2],['ccm',3],['megal',.5],['bovb',.5]]},
+    {id:'r5',  nazwa:'Zasuszone', uwagi:'', sk:[['trawa',10],['kuk',16],['sloma',1],['rzep',.7],['soja',.7],['zboz',.7],['ccm',1],['witkz',.2],['dcab',.15]]},
+    {id:'r21', nazwa:'Jałówki objętościowa', uwagi:'', sk:[['trawa',38],['sloma',4],['witkz',.1]]},
+    {id:'r22', nazwa:'Jałówki krycie', uwagi:'', sk:[['trawa',16],['kuk',20],['sloma',.5],['rzep',.5],['witj',.1]]},
+    {id:'r13', nazwa:'Młodzież', uwagi:'', sk:[['trawa',8],['kuk',8],['sloma',.5],['soja',1.5],['zboz',3.5],['witj',.1]]}
+  ].map(r=>({...r,sk:r.sk.map(([s,kg])=>({s,kg})),kolejnosc:[]})),
+  grupy:[
+    ['g1','Grupa 1','wysoko wyd.','r12',107,2,true,''],
+    ['g2','Grupa 2','pierwiastki','r12',59,2,true,''],
+    ['g3','Grupa 3','śr. wyd.','r3',48,2,true,''],
+    ['g68','Gr. 6,8','fresh','r68',74,2,true,''],
+    ['g5','GR 5','zasusz.','r5',18,1,false,''],
+    ['g21','Gr. 21','','r21',32,1,false,'Dawka wg ODS; realnie wóz 7 zawiera też kiszonkę kuk. i śrutę rzepakową.'],
+    ['g2223','Gr. 22+23','jał. krycie','r22',58,1,false,''],
+    ['g25','Gr. 25','','r21',54,1,false,''],
+    ['g1314','gr. 13+14','młodzież','r13',90,1,false,'Dodatkowo otrzymuje resztki TMR z gr. 1 i 2.']
+  ].map(([id,nazwa,opis,recepturaId,sztuki,zadania,dojna,uwagi],i)=>({id,nazwa,opis,recepturaId,zadania,dojna,uwagi,kolor:KOLORY_GRUP[i%KOLORY_GRUP.length],
+     sektory:[{id:'s'+id.slice(1),nazwa:'Sektor '+nazwa.replace(/^(Grupa|Gr\.|GR|gr\.)\s*/,''),sztuki}]})),
+  wozy:[{id:'w1',nazwa:'Wóz 1',pojemnoscKg:0}],
+  ustawienia:{firma:'Dochowo Dairy „Weibloem” Sp. z o.o.',nrObory:'77-27001',zrodla:'arkusz dawek DAWKI_I_ILOŚCI_WEIBLOEM.ods, karty wozów, raporty RW-1/RW-11 PFHB'}
+};
+
+/* =====================================================================
+   6. STAN APLIKACJI
+   ===================================================================== */
+const D={surowce:[],receptury:[],grupy:[],wozy:[],ustawienia:{}};
+const DNI={};   // data → dokument dnia
+
+function normalizujModul(m,d){
+  if(m==='ustawienia') return (d&&typeof d==='object'&&!Array.isArray(d))?d:{};
+  const a=Array.isArray(d)?d:[];
+  if(m==='surowce') a.forEach(s=>{ s.dostawy=s.dostawy||[]; s.kat=s.kat||'obj'; });
+  if(m==='receptury') a.forEach(r=>{ r.sk=r.sk||[]; r.kolejnosc=r.kolejnosc||[]; });
+  if(m==='grupy') a.forEach(g=>{ g.sektory=g.sektory||[]; g.zadania=g.zadania||1; });
+  return a;
+}
+function normalizujDzien(d,data){
+  d=(d&&typeof d==='object')?d:{};
+  d.data=data; d.kursy=Array.isArray(d.kursy)?d.kursy:[]; d.niedojady=Array.isArray(d.niedojady)?d.niedojady:[];
+  d.kursy.forEach(k=>{ k.rozdzial=Array.isArray(k.rozdzial)?k.rozdzial:[]; k.zadanie=k.zadanie||1; });
+  d.niedojady.forEach(n=>{ n.alok=Array.isArray(n.alok)?n.alok:[]; });
+  d.uwagi=d.uwagi||''; d.snap=d.snap||null;
+  return d;
+}
+function inicjujDane(){
+  migrujPamiec();
+  MODULY.forEach(m=>{
+    const u=jednostka('m:'+m,{ref:()=>fs.collection(KOL_MODULY).doc(m),pobierz:()=>D[m],ustaw:d=>{ D[m]=normalizujModul(m,d); }});
+    if(!lsCzytaj('m:'+m)){
+      D[m]=normalizujModul(m,klon(SEED[m]));
+      if(m==='surowce') D.surowce.forEach(s=>s.stanData=dzis());
+      u.zSeedu=true; zapiszLokalnie(u);
+    }
+  });
+  Object.keys(localStorage).filter(k=>k.startsWith(LS+'d:')).forEach(k=>jednostkaDnia(k.slice(LS.length+2)));
+}
+
+/* =====================================================================
+   7. OBLICZENIA
+   ===================================================================== */
+const surowiec=id=>D.surowce.find(s=>s.id===id);
+const receptura=id=>D.receptury.find(r=>r.id===id);
+const grupa=id=>D.grupy.find(g=>g.id===id);
+
+// Kontekst = wszystko, co potrzebne do policzenia dnia. Dla dnia z wpisami jest zamrożony w dokumencie dnia.
+let _kb=null,_kbW=-1;
+function kontekstBiezacy(){
+  if(_kbW===wersja && _kb) return _kb;
+  const ceny={},sur={},receptury={},grupy={},sektory={};
+  D.surowce.forEach((s,i)=>{ ceny[s.id]=s.cenaT||0; sur[s.id]={nazwa:s.nazwa,kat:s.kat,kolejnosc:i}; });
+  D.receptury.forEach(r=>{ receptury[r.id]={nazwa:r.nazwa,sk:r.sk.filter(x=>x.kg>0).map(x=>({s:x.s,kg:x.kg}))}; });  // kolejność załadunku nie jest zamrażana – zawsze aktualna
+  D.grupy.forEach((g,i)=>{
+    grupy[g.id]={nazwa:g.nazwa,opis:g.opis||'',recepturaId:g.recepturaId||'',zadania:g.zadania||1,kolor:g.kolor||'#888',dojna:!!g.dojna,kolejnosc:i};
+    (g.sektory||[]).forEach((s,j)=>{ sektory[s.id]={nazwa:s.nazwa,sztuki:s.sztuki||0,grupaId:g.id,kolejnosc:j}; });
+  });
+  _kb={ceny,sur,receptury,grupy,sektory}; _kbW=wersja;
+  return _kb;
+}
+function kontekst(data){ const d=DNI[data]; return (d&&d.snap)?d.snap:kontekstBiezacy(); }
+function snapRozni(data){ const d=DNI[data]; if(!d||!d.snap) return false; const {ts,...s}=d.snap; return stabilny(s)!==stabilny(kontekstBiezacy()); }
+function grupyC(C){ return Object.entries(C.grupy).map(([id,g])=>({id,...g})).sort((a,b)=>a.kolejnosc-b.kolejnosc); }
+function sektoryGrupyC(C,gid){ return Object.entries(C.sektory).filter(([,s])=>s.grupaId===gid).map(([id,s])=>({id,...s})).sort((a,b)=>a.kolejnosc-b.kolejnosc); }
+function surowceKolejnosc(C){ return Object.keys(C.sur).sort((a,b)=>{ const ia=D.surowce.findIndex(s=>s.id===a), ib=D.surowce.findIndex(s=>s.id===b); return (ia<0?999:ia)-(ib<0?999:ib); }); }
+
+function statRec(C,rid){
+  const r=C.receptury[rid];
+  if(!r) return {kg:0,koszt:0,kosztKg:0,sk:[]};
+  const kg=r.sk.reduce((a,x)=>a+x.kg,0);
+  const koszt=r.sk.reduce((a,x)=>a+x.kg*(C.ceny[x.s]||0)/1000,0);
+  return {kg,koszt,kosztKg:kg>0?koszt/kg:0,sk:r.sk};
+}
+function planSek(C,sid){ const s=C.sektory[sid]; if(!s) return 0; const g=C.grupy[s.grupaId]; return statRec(C,g?.recepturaId).kg*s.sztuki; }
+
+// Kolejność załadunku: najpierw ponumerowane, potem pozostałe w kolejności bazy
+function kolejnoscZaladunku(C,rid){
+  const r=C.receptury[rid]; if(!r) return [];
+  const obecne=r.sk.map(x=>x.s);
+  const nr=(receptura(rid)?.kolejnosc||[]).filter(s=>obecne.includes(s));
+  const reszta=surowceKolejnosc(C).filter(s=>obecne.includes(s)&&!nr.includes(s));
+  return [...nr.map((s,i)=>({s,nr:i+1})),...reszta.map(s=>({s,nr:null}))];
+}
+
+/* Analiza dnia: trzy dawki per sektor + zużycie surowców i koszt (tylko świeża część).
+   plan:true → ignoruje kursy, liczy wg dawki obliczonej. */
+let _an={},_anW=-1;
+function analizaDnia(data,opc={}){
+  if(_anW!==wersja){ _an={}; _anW=wersja; }
+  const klucz=data+(opc.plan?'|p':'');
+  if(_an[klucz]) return _an[klucz];
+  const C=kontekst(data), d=opc.plan?null:DNI[data], jutro=DNI[dataPlus(data,1)];
+  const sek={}, zuz={};
+  Object.entries(C.sektory).forEach(([id,s])=>{
+    const g=C.grupy[s.grupaId]; const st=statRec(C,g?.recepturaId);
+    sek[id]={id,...s,grupa:g,obl:st.kg,planKg:st.kg*s.sztuki,swiezeKg:0,ndKg:0,maKurs:false,zPlanu:false,zebraneJutro:null,zuz:{},koszt:0};
+  });
+  const dodajZuz=(s,sid,kg)=>{ zuz[sid]=(zuz[sid]||0)+kg; if(s) s.zuz[sid]=(s.zuz[sid]||0)+kg; };
+  (d?.kursy||[]).forEach(k=>{
+    const st=statRec(C,k.recepturaId);
+    k.rozdzial.forEach(r=>{
+      const s=sek[r.sektorId], kg=r.kg||0;
+      if(s){ s.swiezeKg+=kg; s.maKurs=true; s.koszt+=kg*st.kosztKg; }
+      if(st.kg>0) st.sk.forEach(x=>dodajZuz(s,x.s,kg*x.kg/st.kg));
+    });
+  });
+  (d?.niedojady||[]).forEach(n=>n.alok.forEach(a=>{ const s=sek[a.sektorId]; if(s) s.ndKg+=a.kg||0; }));
+  Object.values(sek).forEach(s=>{
+    if(!s.maKurs){
+      s.zPlanu=true; s.swiezeKg=s.planKg;
+      const st=statRec(C,s.grupa?.recepturaId); s.koszt=s.planKg*st.kosztKg;
+      st.sk.forEach(x=>dodajZuz(s,x.s,s.sztuki*x.kg));
+    }
+    s.zadanaKg=s.swiezeKg+s.ndKg;
+    s.zadana=s.sztuki>0?s.zadanaKg/s.sztuki:0;
+  });
+  if(jutro && !opc.plan) jutro.niedojady.forEach(n=>{ const s=sek[n.sektorId]; if(s) s.zebraneJutro=(s.zebraneJutro||0)+(n.kg||0); });
+  Object.values(sek).forEach(s=>{ s.pobrana=(jutro&&!opc.plan&&s.sztuki>0)?(s.zadanaKg-(s.zebraneJutro||0))/s.sztuki:null; });
+  const wynik={data,C,d,sek,zuz};
+  _an[klucz]=wynik;
+  return wynik;
+}
+// Agregacja sektorów do grup
+function grupyDnia(A){
+  return grupyC(A.C).map(g=>{
+    const ss=sektoryGrupyC(A.C,g.id).map(s=>A.sek[s.id]).filter(Boolean);
+    const o={...g,sektory:ss,sztuki:0,planKg:0,swiezeKg:0,ndKg:0,zadanaKg:0,koszt:0,zuz:{},zPlanu:0,zebrane:0,pobranaOk:ss.length>0};
+    ss.forEach(s=>{
+      o.sztuki+=s.sztuki; o.planKg+=s.planKg; o.swiezeKg+=s.swiezeKg; o.ndKg+=s.ndKg; o.zadanaKg+=s.zadanaKg; o.koszt+=s.koszt;
+      if(s.zPlanu) o.zPlanu++;
+      if(s.pobrana==null) o.pobranaOk=false; else o.zebrane+=s.zebraneJutro||0;
+      Object.entries(s.zuz).forEach(([k,v])=>o.zuz[k]=(o.zuz[k]||0)+v);
+    });
+    o.obl=statRec(A.C,g.recepturaId).kg;
+    o.pobrana=(o.pobranaOk&&o.sztuki>0)?(o.zadanaKg-o.zebrane)/o.sztuki:null;
+    return o;
+  });
+}
+function kosztKatGrupy(C,zuz){ const o={obj:0,tres:0,dod:0}; Object.entries(zuz).forEach(([s,kg])=>{ const k=C.sur[s]?.kat||'obj'; o[k]+=kg*(C.ceny[s]||0)/1000; }); return o; }
+
+// Stan magazynowy: spis (stan po żywieniu w dniu spisu) + dostawy po spisie − zużycie z kolejnych dni
+function stanSurowca(s,doDnia=dzis()){
+  let t=s.stanBazT||0; const od=s.stanData||doDnia;
+  (s.dostawy||[]).forEach(x=>{ if(x.data>od && x.data<=doDnia) t+=x.t||0; });
+  let d=dataPlus(od,1), n=0;
+  while(d<=doDnia && n<DNI_STANY_MAX+5){ t-=(analizaDnia(d).zuz[s.id]||0)/1000; d=dataPlus(d,1); n++; }
+  return t;
+}
+function procKlasa(p){ if(p==null||!Number.isFinite(p)) return ''; const r=Math.abs(p-100); return r<=3?'ok':r<=10?'sr':'zle'; }
+
+/* =====================================================================
+   8. POWŁOKA INTERFEJSU
+   ===================================================================== */
+const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['cielaki','Cielaki'],['ustawienia','Ustawienia']];
+const UI={tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
+const R={};   // renderery zakładek
+let odroczonyRender=false;
+
+function rysujZakladki(){
+  $('#zakladki').innerHTML=ZAKLADKI.map(([k,t])=>`<button class="${UI.tab===k?'akt':''}" onclick="pokazZakladke('${k}')">${t}</button>`).join('');
+  $('#firmaNag').textContent=D.ustawienia.firma||'';
+}
+function pokazZakladke(k){ UI.tab=k; localStorage.setItem('wb_tab',k); UI.numerRec=null; rysujZakladki(); render(); window.scrollTo({top:0}); }
+function render(){
+  const w=$('#widok');
+  const akt=document.activeElement, fid=akt&&akt.dataset?akt.dataset.fid:null;
+  let sel=null; try{ if(fid&&akt.selectionStart!=null) sel=[akt.selectionStart,akt.selectionEnd]; }catch(e){}
+  try{ w.innerHTML=(R[UI.tab]||R.woz)(); }
+  catch(e){ console.error(e); w.innerHTML=`<div class="panel pb"><b>Błąd widoku:</b> ${esc(e.message)}</div>`; }
+  odroczonyRender=false;
+  if(fid){ const n=w.querySelector(`[data-fid="${fid}"]`); if(n){ n.focus({preventScroll:true}); if(sel) try{ n.setSelectionRange(sel[0],sel[1]); }catch(e){} } }
+  if(UI.swiezy){ const n=w.querySelector(`[data-swiezy="${UI.swiezy}"]`); if(n) n.classList.add('wpada'); UI.swiezy=null; }
+  $('#firmaNag').textContent=D.ustawienia.firma||'';
+  ustawHdr();
+}
+function ustawHdr(){ document.documentElement.style.setProperty('--hdr',$('header').offsetHeight+'px'); }
+addEventListener('resize',ustawHdr);
+// Zmiana z innego urządzenia: nie przerywamy pisania – odświeżymy po wyjściu z pola
+function odswiezZdalnie(){
+  const a=document.activeElement;
+  if(a && a.closest && a.closest('#widok') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)){ odroczonyRender=true; return; }
+  if($('#modal').classList.contains('otw')){ odroczonyRender=true; return; }
+  render();
+}
+document.addEventListener('focusout',()=>setTimeout(()=>{
+  if(!odroczonyRender) return;
+  const a=document.activeElement;
+  if(a && a.closest && a.closest('#widok') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
+  render();
+},0));
+
+/* --- modal --- */
+let _mAkcje=[];
+function modal(tytul,html,akcje){
+  _mAkcje=akcje||[{t:'Zamknij'}];
+  $('#modal').innerHTML=`<div class="m-okno"><div class="m-tyt">${tytul}</div><div class="m-tresc">${html}</div>
+    <div class="m-stopka">${_mAkcje.map((a,i)=>`<button class="btn ${a.k||''}" onclick="mAkcja(${i})">${a.t}</button>`).join('')}</div></div>`;
+  $('#modal').classList.add('otw');
+  setTimeout(()=>{ const p=$('#modal input:not([type=hidden]),#modal select'); if(p) p.focus(); },30);
+}
+function mAkcja(i){ const a=_mAkcje[i]; if(a&&a.f&&a.f()===false) return; zamknijModal(); }
+function zamknijModal(){ $('#modal').classList.remove('otw'); $('#modal').innerHTML=''; if(odroczonyRender) render(); }
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') zamknijModal(); });
+document.addEventListener('keydown',e=>{
+  if(!$('#modal').classList.contains('otw')) return;
+  if(e.key==='Escape') zamknijModal();
+  if(e.key==='Enter' && e.target.tagName!=='TEXTAREA'){ const i=_mAkcje.findIndex(a=>a.k==='glowny'); if(i>=0){ e.preventDefault(); mAkcja(i); } }
+});
+const mv=id=>$('#'+id)?.value??'';
+
+/* =====================================================================
+   9. ZAKŁADKA: SUROWCE
+   ===================================================================== */
+R.surowce=()=>{
+  const plan=analizaDnia(dzis(),{plan:true}).zuz;
+  const wiersze=D.surowce.map((s,i)=>{
+    const stan=stanSurowca(s), du=plan[s.id]||0;
+    let wyst='<span class="cichy">nie w dawkach</span>';
+    if(du>0){
+      const dni=Math.floor(stan*1000/du);
+      wyst=stan<=0?'<span class="ostrz">brak na stanie</span>':`<span class="${dni<14?'ostrz':'dobry'}">${dataPL(dataPlus(dzis(),dni))}</span> <span class="cichy">(${dni} d)</span>`;
+    }
+    const nDost=(s.dostawy||[]).length, rozw=UI.rozwDost[s.id];
+    let h=`<tr>
+      <td class="l"><div class="nazwa-sur"><span class="strz"><button ${i===0?'disabled':''} onclick="przesunSur('${s.id}',-1)" aria-label="W górę">▲</button><button ${i===D.surowce.length-1?'disabled':''} onclick="przesunSur('${s.id}',1)" aria-label="W dół">▼</button></span>
+        <input class="pole" style="width:210px" data-fid="sn_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSur('${s.id}','nazwa',this.value)"></div></td>
+      <td class="l"><span class="kat-kropka" style="background:${KAT_KOL[s.kat]}"></span><select class="pole" onchange="ustawSur('${s.id}','kat',this.value)">${Object.entries(KAT_KR).map(([k,t])=>`<option value="${k}" ${s.kat===k?'selected':''}>${t}</option>`).join('')}</select></td>
+      <td><input class="pole num" inputmode="decimal" data-fid="sc_${s.id}" value="${fmtIn(s.cenaT,2)}" onchange="ustawSur('${s.id}','cenaT',this.value)"></td>
+      <td>${cenaKg(s.cenaT)}</td>
+      <td><b class="${stan<0?'ostrz':''}">${fmt(stan,2)}</b><div class="cichy" style="font-size:11.5px">spis ${dataPL(s.stanData)}</div></td>
+      <td><button class="btn maly" onclick="modalSpis('${s.id}')">Spis</button></td>
+      <td><button class="btn maly glowny" onclick="modalDostawa('${s.id}')">+ Dostawa</button> ${nDost?`<button class="btn maly" onclick="UI.rozwDost['${s.id}']=!UI.rozwDost['${s.id}'];render()">${rozw?'▾':'▸'} ${nDost}</button>`:''}</td>
+      <td>${fmt(du,0)}</td>
+      <td class="l">${wyst}</td>
+      <td><button class="btn ikona usun" onclick="usunSur('${s.id}')" aria-label="Usuń">✕</button></td></tr>`;
+    if(rozw && nDost){
+      h+=`<tr><td colspan="10" class="l" style="background:var(--pow2)"><table class="t" style="max-width:720px"><thead><tr><th class="l">Data dostawy</th><th>Ilość (t)</th><th class="l">Uwagi</th><th class="l">Wpływ na stan</th><th></th></tr></thead><tbody>
+        ${[...s.dostawy].sort((a,b)=>b.data.localeCompare(a.data)).map(x=>`<tr><td class="l">${dataPL(x.data)}</td><td>${fmt(x.t,2)}</td><td class="l">${esc(x.uwagi||'')}</td>
+        <td class="l">${x.data<=s.stanData?'<span class="cichy">przed spisem – już w stanie</span>':x.data>dzis()?'<span class="cichy">przyszła</span>':'doliczona'}</td>
+        <td><button class="btn ikona usun" onclick="usunDostawe('${s.id}','${x.id}')">✕</button></td></tr>`).join('')}</tbody></table></td></tr>`;
+    }
+    return h;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Surowce i stany magazynowe</h2>
+      <span class="opis">Stan = spis + dostawy po spisie − zużycie z dawek zadanych (dni bez kursów liczone wg planu)</span>
+      <div class="prawo"><button class="btn" onclick="drukujSurowce()">Drukuj</button><button class="btn glowny" onclick="modalNowySur()">+ Surowiec</button></div></div>
+    <div class="przewin"><table class="t"><thead><tr><th class="l">Surowiec</th><th class="l">Kategoria</th><th>Cena zł/t</th><th>zł/kg</th><th>Stan (t)</th><th></th><th class="l">Dostawy</th><th>Zużycie<br>kg/dzień</th><th class="l">Wystarczy do</th><th></th></tr></thead>
+    <tbody>${wiersze||'<tr><td colspan="10"><div class="pusto"><b>Brak surowców</b>Dodaj pierwszy surowiec przyciskiem „+ Surowiec”.</div></td></tr>'}</tbody></table></div></div>`;
+};
+function ustawSur(id,pole,v){
+  const s=surowiec(id); if(!s) return;
+  if(pole==='cenaT') s.cenaT=Math.max(0,liczba(v)); else if(pole==='nazwa'){ v=v.trim(); if(!v){ toast('Nazwa nie może być pusta','zly'); render(); return; } s.nazwa=v; } else s[pole]=v;
+  saveModule('surowce'); render();
+}
+function przesunSur(id,dir){ const i=D.surowce.findIndex(s=>s.id===id), j=i+dir; if(i<0||j<0||j>=D.surowce.length) return; [D.surowce[i],D.surowce[j]]=[D.surowce[j],D.surowce[i]]; saveModule('surowce'); render(); }
+function usunSur(id){
+  const s=surowiec(id); const uzyte=D.receptury.filter(r=>r.sk.some(x=>x.s===id&&x.kg>0));
+  if(uzyte.length){ toast(`„${s.nazwa}” jest w recepturach: ${uzyte.map(r=>r.nazwa).join(', ')}. Najpierw usuń go z dawek.`,'zly'); return; }
+  if(!confirm(`Usunąć surowiec „${s.nazwa}” wraz z historią dostaw?`)) return;
+  D.surowce=D.surowce.filter(x=>x.id!==id);
+  let rz=false; D.receptury.forEach(r=>{ const n=r.sk.length; r.sk=r.sk.filter(x=>x.s!==id); r.kolejnosc=r.kolejnosc.filter(x=>x!==id); if(r.sk.length!==n) rz=true; });
+  saveModule('surowce'); if(rz) saveModule('receptury'); render(); toast('Usunięto surowiec');
+}
+function modalNowySur(){
+  modal('Nowy surowiec',`<div><label class="et">Nazwa</label><input class="pole szer" id="ns-n"></div>
+    <div class="wiersz"><div><label class="et">Kategoria</label><select class="pole szer" id="ns-k">${Object.entries(KAT_KR).map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></div>
+    <div><label class="et">Cena (zł/t)</label><input class="pole szer" id="ns-c" inputmode="decimal"></div>
+    <div><label class="et">Stan teraz (t)</label><input class="pole szer" id="ns-s" inputmode="decimal" value="0"></div></div>`,
+  [{t:'Anuluj'},{t:'Dodaj surowiec',k:'glowny',f:()=>{
+    const n=mv('ns-n').trim(); if(!n){ toast('Podaj nazwę surowca','zly'); return false; }
+    D.surowce.push({id:uid('s'),nazwa:n,kat:mv('ns-k'),cenaT:Math.max(0,liczba(mv('ns-c'))),stanBazT:liczba(mv('ns-s')),stanData:dzis(),dostawy:[]});
+    saveModule('surowce'); render(); toast('Dodano surowiec');
+  }}]);
+}
+function modalSpis(id){
+  const s=surowiec(id);
+  modal('Spis z natury — '+esc(s.nazwa),`<p class="cichy" style="margin:0">Wpisz stan po żywieniu w dniu spisu. Od następnego dnia stan zmniejsza się o zużycie z dawek, a dostawy z późniejszą datą są doliczane.</p>
+    <div class="wiersz"><div><label class="et">Stan (t)</label><input class="pole szer" id="sp-t" inputmode="decimal" value="${fmtIn(stanSurowca(s),2)}"></div>
+    <div><label class="et">Data spisu</label><input class="pole szer" type="date" id="sp-d" value="${dzis()}" max="${dzis()}"></div></div>`,
+  [{t:'Anuluj'},{t:'Zapisz spis',k:'glowny',f:()=>{
+    const d=mv('sp-d')||dzis();
+    if(d<dataPlus(dzis(),-DNI_STANY_MAX)){ toast('Spis może mieć najwyżej '+DNI_STANY_MAX+' dni','zly'); return false; }
+    s.stanBazT=liczba(mv('sp-t')); s.stanData=d; saveModule('surowce'); render(); toast('Zapisano spis: '+fmt(s.stanBazT,2)+' t');
+  }}]);
+}
+function modalDostawa(id){
+  const s=surowiec(id);
+  modal('Dostawa — '+esc(s.nazwa),`<div class="wiersz"><div><label class="et">Ilość (t)</label><input class="pole szer" id="dv-t" inputmode="decimal" placeholder="np. 24,5"></div>
+    <div><label class="et">Data dostawy</label><input class="pole szer" type="date" id="dv-d" value="${dzis()}"></div></div>
+    <div><label class="et">Uwagi</label><input class="pole szer" id="dv-u" placeholder="nr faktury, dostawca"></div>
+    <p class="cichy" style="margin:0">Dostawa z wcześniejszą datą jest liczona od tamtego dnia – zużycie od tej daty odejmie się samo. Dostawa sprzed ostatniego spisu (${dataPL(s.stanData)}) nie zmienia stanu.</p>`,
+  [{t:'Anuluj'},{t:'Przyjmij dostawę',k:'glowny',f:()=>{
+    const t=liczba(mv('dv-t')); if(t<=0){ toast('Podaj ilość dostawy w tonach','zly'); return false; }
+    const d=mv('dv-d')||dzis();
+    s.dostawy.push({id:uid('d'),data:d,t,uwagi:mv('dv-u').trim(),ts:Date.now()});
+    saveModule('surowce'); render();
+    toast(d<=s.stanData?'Zapisano – dostawa sprzed spisu, stan bez zmian':`Przyjęto ${fmt(t,2)} t → stan ${fmt(stanSurowca(s),2)} t`);
+  }}]);
+}
+function usunDostawe(sid,did){ const s=surowiec(sid); if(!confirm('Usunąć wpis dostawy?')) return; s.dostawy=s.dostawy.filter(x=>x.id!==did); saveModule('surowce'); render(); }
+
+/* =====================================================================
+   10. ZAKŁADKA: DAWKI (receptury + grupy i sektory)
+   ===================================================================== */
+R.dawki=()=>{
+  const C=kontekstBiezacy();
+  const wRec=new Set(); D.receptury.forEach(r=>r.sk.forEach(x=>wRec.add(x.s)));
+  const wiersze=D.surowce.filter(s=>wRec.has(s.id));
+  const nr=UI.numerRec;
+  const grupyRec=rid=>D.grupy.filter(g=>g.recepturaId===rid);
+  const nag=D.receptury.map(r=>{
+    const st=statRec(C,r.id), kol=kolejnoscZaladunku(C,r.id), ileNr=kol.filter(x=>x.nr).length;
+    return `<th class="rk ${nr===r.id?'numerowanie':''}"><div class="rk-nazwa" onclick="modalRec('${r.id}')" title="Zmień nazwę i uwagi">${esc(r.nazwa)}</div>
+      <div class="rk-grupy">${grupyRec(r.id).map(g=>`<span style="background:${g.kolor}">${esc(g.nazwa)}</span>`).join('')||'<span style="background:#9aa39d">bez grupy</span>'}</div>
+      <div class="rk-akcje"><button class="btn ikona" title="Kolejność załadunku" onclick="numeruj('${r.id}')">🔢 ${ileNr}/${kol.length}</button><button class="btn ikona" title="Duplikuj" onclick="duplikujRec('${r.id}')">⧉</button><button class="btn ikona usun" title="Usuń" onclick="usunRec('${r.id}')">✕</button></div></th>`;
+  }).join('');
+  const body=wiersze.map(s=>`<tr><td class="l"><div class="nazwa-sur"><span class="kat-kropka" style="background:${KAT_KOL[s.kat]}"></span>${esc(s.nazwa)} <span class="cichy">${cenaKg(s.cenaT)} zł/kg</span>
+      <button class="btn ikona" style="margin-left:auto" title="Usuń wiersz ze wszystkich receptur" onclick="usunWierszRec('${s.id}')">✕</button></div></td>
+    ${D.receptury.map(r=>{
+      const x=r.sk.find(y=>y.s===s.id), kg=x?x.kg:0;
+      if(nr===r.id){
+        if(!(kg>0)) return `<td class="kom numerowanie"></td>`;
+        const n=kolejnoscZaladunku(C,r.id).find(y=>y.s===s.id)?.nr;
+        return `<td class="kom numerowanie" style="text-align:left"><button class="nr ${n?'ma':''}" onclick="klikNumer('${r.id}','${s.id}')" aria-label="Kolejność">${n||'+'}</button><span class="nr-kg">${fmt(kg,2,3)} kg</span></td>`;
+      }
+      const n=kg>0?(r.kolejnosc||[]).filter(id=>r.sk.some(y=>y.s===id&&y.kg>0)).indexOf(s.id)+1:0;
+      return `<td class="kom">${n?`<span class="nr-mini">${n}</span>`:''}<input class="pole num" inputmode="decimal" data-fid="rk_${r.id}_${s.id}" value="${kg?fmtIn(kg,3):''}" placeholder="–" onchange="ustawKg('${r.id}','${s.id}',this.value)"></td>`;
+    }).join('')}</tr>`).join('');
+  const suma=k=>D.receptury.map(r=>{ const st=statRec(C,r.id); return `<td>${k(st)}</td>`; }).join('');
+  let pasek='';
+  if(nr && receptura(nr)){
+    const r=receptura(nr);
+    pasek=`<div class="pasek-num"><b>Kolejność załadunku: ${esc(r.nazwa)}</b><span>Klikaj surowce w kolejności wsypywania do wozu. Kliknięty numer usuwa się, a dalsze przesuwają.</span>
+      <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn maly" onclick="kolejnoscKategorie('${r.id}')">Objętościowe → treściwe → dodatki</button>
+      <select class="pole" onchange="if(this.value)kopiujKolejnosc('${r.id}',this.value)"><option value="">Kopiuj z receptury…</option>${D.receptury.filter(x=>x.id!==r.id).map(x=>`<option value="${x.id}">${esc(x.nazwa)}</option>`).join('')}</select>
+      <button class="btn maly" onclick="wyczyscKolejnosc('${r.id}')">Wyczyść</button><button class="btn maly" style="background:#fff;color:var(--gl)" onclick="UI.numerRec=null;render()">Gotowe</button></span></div>`;
+  }
+  return pasek+`<div class="panel"><div class="ph"><h2>Receptury</h2><span class="opis">kg świeżej masy na sztukę na dobę · liczba w rogu pola = kolejność załadunku</span>
+      <div class="prawo"><button class="btn" onclick="modalWierszRec()">+ Surowiec do receptur</button><button class="btn glowny" onclick="nowaRec()">+ Receptura</button></div></div>
+    <div class="przewin">${D.receptury.length?`<table class="t rec"><thead><tr><th class="l" style="min-width:260px;vertical-align:bottom">Surowiec</th>${nag}</tr></thead>
+      <tbody>${body||`<tr><td colspan="${D.receptury.length+1}"><div class="pusto"><b>Receptury są puste</b>Dodaj surowce przyciskiem „+ Surowiec do receptur”.</div></td></tr>`}</tbody>
+      <tfoot><tr class="suma"><td class="l">Dawka obliczona, kg/szt/dobę</td>${suma(st=>fmt(st.kg,2))}</tr>
+      <tr class="pod"><td class="l">Koszt surowcowy, zł/szt/dobę</td>${suma(st=>fmt(st.koszt,2))}</tr>
+      <tr class="pod"><td class="l">Koszt kg TMR, zł/kg</td>${suma(st=>fmt(st.kosztKg,3))}</tr></tfoot></table>`
+      :'<div class="pusto"><b>Brak receptur</b>Utwórz pierwszą recepturę przyciskiem „+ Receptura”.</div>'}</div></div>`
+  +R._grupy(C);
+};
+R._grupy=C=>{
+  const lista=D.grupy.map((g,i)=>{
+    const st=statRec(C,g.recepturaId), szt=g.sektory.reduce((a,s)=>a+(s.sztuki||0),0);
+    return `<div class="grupa"><div class="kol" style="background:${g.kolor}" title="Zmień kolor" onclick="kolorGrupy('${g.id}')"></div><div class="tresc">
+      <div><div class="g-gora"><span class="strz"><button ${i===0?'disabled':''} onclick="przesunGrupe('${g.id}',-1)">▲</button><button ${i===D.grupy.length-1?'disabled':''} onclick="przesunGrupe('${g.id}',1)">▼</button></span>
+        <input class="pole nazwa" data-fid="gn_${g.id}" value="${esc(g.nazwa)}" onchange="ustawGrupe('${g.id}','nazwa',this.value)">
+        <input class="pole" style="width:110px" data-fid="go_${g.id}" value="${esc(g.opis||'')}" placeholder="opis" onchange="ustawGrupe('${g.id}','opis',this.value)">
+        <button class="btn ikona usun" style="margin-left:auto" onclick="usunGrupe('${g.id}')">✕</button></div>
+        <div class="g-gora" style="margin-top:8px"><select class="pole" style="flex:1" onchange="ustawGrupe('${g.id}','recepturaId',this.value)"><option value="">— receptura —</option>${D.receptury.map(r=>`<option value="${r.id}" ${g.recepturaId===r.id?'selected':''}>${esc(r.nazwa)}</option>`).join('')}</select></div>
+        <div class="g-gora" style="margin-top:8px"><span class="przel" title="Ile razy dziennie zadawana – dawka dobowa dzieli się na tyle kursów">${[1,2].map(z=>`<button class="${(g.zadania||1)===z?'akt':''}" onclick="ustawGrupe('${g.id}','zadania',${z})">${z}× dziennie</button>`).join('')}</span>
+          <label class="cichy" style="display:flex;gap:5px;align-items:center"><input type="checkbox" ${g.dojna?'checked':''} onchange="ustawGrupe('${g.id}','dojna',this.checked)"> krowy dojne</label></div></div>
+      <div><label class="et">Sektory i sztuki</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
+          <input class="pole krotkie num" inputmode="numeric" data-fid="ss_${s.id}" value="${s.sztuki}" onchange="ustawSektor('${g.id}','${s.id}','sztuki',this.value)"> szt
+          <button class="btn ikona usun" onclick="usunSektor('${g.id}','${s.id}')">✕</button></span>`).join('')}
+          <button class="btn maly" onclick="dodajSektor('${g.id}')">+ Sektor</button></div>
+        <label class="et" style="margin-top:8px">Uwagi do grupy (trafiają do raportu kosztów)</label><textarea class="pole" rows="1" data-fid="gu_${g.id}" onchange="ustawGrupe('${g.id}','uwagi',this.value)">${esc(g.uwagi||'')}</textarea></div>
+      <div class="liczby-g"><span>Sztuk razem</span><b>${szt}</b><span>Dawka obliczona</span><b>${fmt(st.kg,1,2)} kg/szt</b>
+        <span>Plan na dobę</span><b>${fmt(st.kg*szt,0)} kg</b><span>Na jeden kurs</span><b>${fmt(st.kg*szt/(g.zadania||1),0)} kg</b>
+        <span>Koszt</span><b>${fmt(st.koszt,2)} zł/szt/d</b><span>Koszt grupy</span><b>${fmt(st.koszt*szt,0)} zł/d</b></div>
+    </div></div>`;
+  }).join('');
+  const szt=D.grupy.reduce((a,g)=>a+g.sektory.reduce((b,s)=>b+(s.sztuki||0),0),0);
+  return `<div class="panel"><div class="ph"><h2>Grupy żywieniowe i sektory</h2><span class="opis">${D.grupy.length} grup · ${szt} szt</span>
+    <div class="prawo"><button class="btn glowny" onclick="nowaGrupa()">+ Grupa</button></div></div>${lista||'<div class="pusto"><b>Brak grup</b>Dodaj grupę, przypisz jej recepturę i sektory.</div>'}</div>`;
+};
+function ustawKg(rid,sid,v){
+  const r=receptura(rid); const kg=Math.max(0,liczba(v));
+  const x=r.sk.find(y=>y.s===sid); if(x) x.kg=kg; else r.sk.push({s:sid,kg});
+  saveModule('receptury'); render();
+}
+function modalWierszRec(){
+  const juz=new Set(); D.receptury.forEach(r=>r.sk.forEach(x=>juz.add(x.s)));
+  const wolne=D.surowce.filter(s=>!juz.has(s.id));
+  if(!D.receptury.length){ toast('Najpierw dodaj recepturę','zly'); return; }
+  if(!wolne.length){ toast('Wszystkie surowce z bazy są już w tabeli. Nowy surowiec dodasz w zakładce Surowce.'); return; }
+  modal('Surowiec do receptur',`<div><label class="et">Surowiec z bazy</label><select class="pole szer" id="wr-s">${wolne.map(s=>`<option value="${s.id}">${esc(s.nazwa)}</option>`).join('')}</select></div>`,
+  [{t:'Anuluj'},{t:'Dodaj wiersz',k:'glowny',f:()=>{ const sid=mv('wr-s'); D.receptury.forEach(r=>{ if(!r.sk.some(x=>x.s===sid)) r.sk.push({s:sid,kg:0}); }); saveModule('receptury'); render(); }}]);
+}
+function usunWierszRec(sid){
+  const s=surowiec(sid);
+  if(D.receptury.some(r=>r.sk.some(x=>x.s===sid&&x.kg>0)) && !confirm(`„${s?.nazwa}” ma niezerowe kg w recepturach. Usunąć go ze wszystkich receptur?`)) return;
+  D.receptury.forEach(r=>{ r.sk=r.sk.filter(x=>x.s!==sid); r.kolejnosc=r.kolejnosc.filter(x=>x!==sid); });
+  saveModule('receptury'); render();
+}
+function nowaRec(){
+  modal('Nowa receptura',`<div><label class="et">Nazwa</label><input class="pole szer" id="nr-n" placeholder="np. Wysokowydajne"></div>`,
+  [{t:'Anuluj'},{t:'Utwórz',k:'glowny',f:()=>{ const n=mv('nr-n').trim(); if(!n){ toast('Podaj nazwę','zly'); return false; }
+    const wiersze=new Set(); D.receptury.forEach(r=>r.sk.forEach(x=>wiersze.add(x.s)));
+    D.receptury.push({id:uid('r'),nazwa:n,uwagi:'',sk:[...wiersze].map(s=>({s,kg:0})),kolejnosc:[]}); saveModule('receptury'); render(); }}]);
+}
+function modalRec(rid){
+  const r=receptura(rid);
+  modal('Receptura',`<div><label class="et">Nazwa</label><input class="pole szer" id="mr-n" value="${esc(r.nazwa)}"></div>
+    <div><label class="et">Uwagi (trafiają do raportu kosztów)</label><textarea class="pole" id="mr-u" rows="3">${esc(r.uwagi||'')}</textarea></div>`,
+  [{t:'Anuluj'},{t:'Zapisz',k:'glowny',f:()=>{ const n=mv('mr-n').trim(); if(!n){ toast('Podaj nazwę','zly'); return false; } r.nazwa=n; r.uwagi=mv('mr-u').trim(); saveModule('receptury'); render(); }}]);
+}
+function duplikujRec(rid){ const r=receptura(rid); const k=klon(r); k.id=uid('r'); k.nazwa=r.nazwa+' (kopia)'; D.receptury.splice(D.receptury.indexOf(r)+1,0,k); saveModule('receptury'); render(); toast('Utworzono kopię receptury'); }
+function usunRec(rid){
+  const r=receptura(rid); const g=D.grupy.filter(x=>x.recepturaId===rid);
+  if(g.length){ toast(`Receptura jest przypisana do: ${g.map(x=>x.nazwa).join(', ')}. Zmień im recepturę przed usunięciem.`,'zly'); return; }
+  if(!confirm(`Usunąć recepturę „${r.nazwa}”?`)) return;
+  D.receptury=D.receptury.filter(x=>x.id!==rid); if(UI.numerRec===rid) UI.numerRec=null; saveModule('receptury'); render();
+}
+/* --- kolejność załadunku --- */
+function numeruj(rid){ UI.numerRec=UI.numerRec===rid?null:rid; render(); }
+function klikNumer(rid,sid){
+  const r=receptura(rid); r.kolejnosc=(r.kolejnosc||[]).filter(id=>r.sk.some(x=>x.s===id&&x.kg>0));
+  const i=r.kolejnosc.indexOf(sid); if(i>=0) r.kolejnosc.splice(i,1); else r.kolejnosc.push(sid);
+  saveModule('receptury'); render();
+}
+function kolejnoscKategorie(rid){ const r=receptura(rid); const kol=['obj','tres','dod']; r.kolejnosc=D.surowce.filter(s=>r.sk.some(x=>x.s===s.id&&x.kg>0)).sort((a,b)=>kol.indexOf(a.kat)-kol.indexOf(b.kat)).map(s=>s.id); saveModule('receptury'); render(); }
+function kopiujKolejnosc(rid,zrodlo){ const r=receptura(rid), z=receptura(zrodlo); const maja=z.kolejnosc.filter(id=>r.sk.some(x=>x.s===id&&x.kg>0)); r.kolejnosc=maja; saveModule('receptury'); render(); toast(`Skopiowano ${maja.length} pozycji – pozostałe dopisz kliknięciem`); }
+function wyczyscKolejnosc(rid){ receptura(rid).kolejnosc=[]; saveModule('receptury'); render(); }
+/* --- grupy i sektory --- */
+function ustawGrupe(gid,pole,v){
+  const g=grupa(gid); if(!g) return;
+  if(pole==='nazwa'){ v=v.trim(); if(!v){ toast('Nazwa grupy nie może być pusta','zly'); render(); return; } }
+  g[pole]=v; saveModule('grupy'); render();
+}
+function przesunGrupe(gid,dir){ const i=D.grupy.findIndex(g=>g.id===gid), j=i+dir; if(j<0||j>=D.grupy.length) return; [D.grupy[i],D.grupy[j]]=[D.grupy[j],D.grupy[i]]; saveModule('grupy'); render(); }
+function kolorGrupy(gid){ const g=grupa(gid); const i=KOLORY_GRUP.indexOf(g.kolor); g.kolor=KOLORY_GRUP[(i+1)%KOLORY_GRUP.length]; saveModule('grupy'); render(); }
+function nowaGrupa(){
+  modal('Nowa grupa żywieniowa',`<div class="wiersz"><div><label class="et">Nazwa</label><input class="pole szer" id="ng-n" placeholder="np. Gr. 4"></div><div><label class="et">Opis</label><input class="pole szer" id="ng-o" placeholder="np. jałówki"></div></div>
+    <div><label class="et">Receptura</label><select class="pole szer" id="ng-r"><option value="">— wybierz —</option>${D.receptury.map(r=>`<option value="${r.id}">${esc(r.nazwa)}</option>`).join('')}</select></div>
+    <div class="wiersz"><div><label class="et">Pierwszy sektor</label><input class="pole szer" id="ng-s" placeholder="np. Sektor 4"></div><div><label class="et">Sztuk</label><input class="pole szer" id="ng-z" inputmode="numeric" value="0"></div></div>`,
+  [{t:'Anuluj'},{t:'Dodaj grupę',k:'glowny',f:()=>{ const n=mv('ng-n').trim(); if(!n){ toast('Podaj nazwę grupy','zly'); return false; }
+    D.grupy.push({id:uid('g'),nazwa:n,opis:mv('ng-o').trim(),recepturaId:mv('ng-r'),zadania:1,dojna:false,uwagi:'',kolor:KOLORY_GRUP[D.grupy.length%KOLORY_GRUP.length],
+      sektory:[{id:uid('s'),nazwa:mv('ng-s').trim()||'Sektor '+n,sztuki:Math.max(0,Math.round(liczba(mv('ng-z'))))}]});
+    saveModule('grupy'); render(); }}]);
+}
+function usunGrupe(gid){ const g=grupa(gid); if(!confirm(`Usunąć grupę „${g.nazwa}” razem z sektorami? Zapisane dni zachowają jej dane.`)) return; D.grupy=D.grupy.filter(x=>x.id!==gid); saveModule('grupy'); render(); }
+function dodajSektor(gid){ const g=grupa(gid); g.sektory.push({id:uid('s'),nazwa:'Sektor '+(g.sektory.length+1),sztuki:0}); saveModule('grupy'); render(); }
+function ustawSektor(gid,sid,pole,v){
+  const s=grupa(gid).sektory.find(x=>x.id===sid); if(!s) return;
+  if(pole==='sztuki') s.sztuki=Math.max(0,Math.round(liczba(v))); else { v=v.trim(); if(!v){ render(); return; } s.nazwa=v; }
+  saveModule('grupy'); render();
+}
+function usunSektor(gid,sid){ const g=grupa(gid); if(g.sektory.length===1){ toast('Grupa musi mieć co najmniej jeden sektor','zly'); return; } if(!confirm('Usunąć sektor?')) return; g.sektory=g.sektory.filter(x=>x.id!==sid); saveModule('grupy'); render(); }
+
+/* =====================================================================
+   11. ZAKŁADKA: WÓZ PASZOWY
+   ===================================================================== */
+function dzienDoEdycji(data){
+  if(!DNI[data]) DNI[data]=normalizujDzien({},data);
+  jednostkaDnia(data);
+  if(!DNI[data].snap) DNI[data].snap={...klon(kontekstBiezacy()),ts:Date.now()};
+  return DNI[data];
+}
+function kursyDnia(d,z){ return (d?.kursy||[]).filter(k=>k.zadanie===z); }
+function numerKursu(d,kid){ const lista=[...kursyDnia(d,1),...kursyDnia(d,2)]; return lista.findIndex(k=>k.id===kid)+1; }
+function alokacjeKursu(d,kid){ const o=[]; (d?.niedojady||[]).forEach(n=>n.alok.forEach((a,i)=>{ if(a.kursId===kid) o.push({n,a,i}); })); return o; }
+function masaKursu(d,k){ const sw=k.rozdzial.reduce((a,r)=>a+(r.kg||0),0); const nd=alokacjeKursu(d,k.id).reduce((a,x)=>a+(x.a.kg||0),0); return {sw,nd,razem:sw+nd}; }
+function woz(id){ return D.wozy.find(w=>w.id===id); }
+function przypisaneSektora(d,sid,z){ return (d?.kursy||[]).filter(k=>z==null||k.zadanie===z).reduce((a,k)=>a+k.rozdzial.filter(r=>r.sektorId===sid).reduce((b,r)=>b+(r.kg||0),0),0); }
+
+R.woz=()=>{
+  const data=UI.data, d=DNI[data], C=kontekst(data), A=analizaDnia(data), wczoraj=dataPlus(data,-1), Aw=analizaDnia(wczoraj);
+  const maZad2=grupyC(C).some(g=>g.zadania>=2)||kursyDnia(d,2).length>0;
+  const gr=grupyC(C);
+  // --- panel boczny: sektory ---
+  const chipy=gr.map(g=>{
+    const ss=sektoryGrupyC(C,g.id); if(!ss.length) return '';
+    const rec=C.receptury[g.recepturaId];
+    return `<div class="grupa-et"><i style="background:${g.kolor}"></i>${esc(g.nazwa)} <span class="cichy" style="font-weight:500">${rec?esc(rec.nazwa):'brak receptury'} · ${g.zadania}×</span></div>`+
+      ss.map(s=>{
+        const plan=planSek(C,s.id), przyp=przypisaneSektora(d,s.id), p=plan>0?Math.min(100,przyp/plan*100):0;
+        return `<div class="chip ${p>=97?'pelny':''}" style="border-left-color:${g.kolor}" data-drag="sek" data-id="${s.id}" onclick="tapSektor('${s.id}')">
+          <span class="uchwyt" aria-hidden="true">⋮⋮</span><span class="n">${esc(s.nazwa)}</span><span class="s">${s.sztuki} szt</span>
+          <span class="post"><span class="post-bar"><i style="width:${p}%"></i></span>${fmt(przyp,0)} / ${fmt(plan,0)} kg</span></div>`;
+      }).join('');
+  }).join('');
+  // --- panel boczny: niedojady ---
+  const nd=(d?.niedojady||[]).map(n=>{
+    const s=C.sektory[n.sektorId]||kontekst(wczoraj).sektory[n.sektorId], g=s?C.grupy[s.grupaId]:null;
+    const przydz=n.alok.reduce((a,x)=>a+(x.kg||0),0), reszta=(n.kg||0)-przydz;
+    const sw=Aw.sek[n.sektorId];
+    return `<div class="chip nd" data-drag="nd" data-id="${n.id}" onclick="tapNd('${n.id}',event)">
+      <span class="uchwyt" aria-hidden="true">⋮⋮</span><span class="n">♻ ${esc(s?.nazwa||'?')}</span>
+      <span class="s"><input class="pole num" style="width:74px;padding:2px 5px" inputmode="decimal" data-fid="ndkg_${n.id}" value="${fmtIn(n.kg,0)}" onclick="event.stopPropagation()" onchange="ustawNd('${n.id}',this.value)"> kg</span>
+      <span class="nd-info">${przydz>0?`domieszano ${fmt(przydz,0)} kg · `:''}${reszta>0.5?`<b>${fmt(reszta,0)} kg</b> do rozdania lub wyrzucenia`:'rozdane w całości'}
+        ${sw&&sw.sztuki>0?`<br>pobrane ${dataPL(wczoraj).slice(0,5)}: <b>${fmt(sw.pobrana,1)}</b> kg/szt z zadanych ${fmt(sw.zadana,1)} (${g?esc(g.nazwa):''})`:''}
+        <button class="btn ikona usun" style="float:right" onclick="event.stopPropagation();usunNd('${n.id}')">✕</button></span></div>`;
+  }).join('');
+  // --- kursy ---
+  const kol=z=>{
+    const lista=kursyDnia(d,z);
+    return `<div><div class="zad-tyt">${z===1?'1. zadanie':'2. zadanie'} <small>${z===1?'rano':'po południu'} · ${lista.length} ${lista.length===1?'kurs':'kursów'}</small></div>
+      ${lista.map(k=>kursHTML(d,C,A,k)).join('')}
+      <div class="nowy-kurs" data-drop="nowy" data-accept="sek kurs" data-zad="${z}">Upuść tu sektor, aby utworzyć nowy kurs<br><button class="btn maly" onclick="nowyKurs(${z})">+ Pusty kurs</button></div></div>`;
+  };
+  let baner='';
+  if(!d||!d.snap) baner=`<div class="baner info">Ten dzień nie ma jeszcze wpisów – sektory pokazują plan wg aktualnych dawek. Pierwsza zmiana zamrozi dawki i ceny dla tego dnia.</div>`;
+  else if(snapRozni(data)) baner=`<div class="baner uwaga">Dawki, ceny lub sektory zmieniły się od ${new Date(d.snap.ts).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}, gdy ten dzień został zamrożony. <button class="btn maly" onclick="zastosujAktualne()">Przelicz wg aktualnych</button></div>`;
+  const kat=`<div class="legenda"><span><i style="background:${KAT_KOL.obj}"></i>objętościowe</span><span><i style="background:${KAT_KOL.tres}"></i>treściwe</span><span><i style="background:${KAT_KOL.dod}"></i>dodatki</span><span><i style="background:repeating-linear-gradient(45deg,#8A6A3E 0 3px,#AD8B5A 3px 6px)"></i>niedojady</span><span>· liczby w wozie = kolejność załadunku</span></div>`;
+  return `<div class="woz-gora"><span class="dzien-tyt">${dzienTyg(data)[0].toUpperCase()+dzienTyg(data).slice(1)}</span>
+      <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)" aria-label="Poprzedni dzień">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)" aria-label="Następny dzień">▶</button></div>
+      ${data!==dzis()?`<button class="btn maly" onclick="UI.data=dzis();render()">Dziś</button>`:''}
+      <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" onclick="ulozKursy()">⚡ Ułóż kursy wg planu</button><button class="btn" onclick="drukujKarty()">Drukuj karty załadunku</button></span></div>
+    ${baner}
+    <div class="woz-uklad"><aside class="boczny">
+        <h3>Sektory</h3><div class="cichy opis-boczny">Przeciągnij sektor na kurs albo stuknij, żeby wybrać kurs. Pasek: rozwiezione / plan na dobę.</div><div class="lista-sek">${chipy||'<div class="pusto">Brak sektorów – dodaj je w zakładce Dawki.</div>'}</div>
+        <h3 class="nd-tyt">♻ Niedojady zebrane rano <button class="btn maly" style="margin-left:auto" onclick="modalNd()">+ Wpisz</button></h3><div class="cichy opis-boczny">Resztki z żywienia ${dataPL(wczoraj)} – liczą się do dawki pobranej tamtego dnia. Przeciągnij na sektor w kursie, żeby je domieszać.</div>
+        <div class="lista-sek">${nd}</div>
+      </aside>
+      <section>${kat}<div class="kursy-kol">${kol(1)}${maZad2?kol(2):''}</div>
+        <div class="panel" style="margin-top:4px"><div class="ph"><h2>Uwagi do dnia</h2><span class="opis">trafiają do raportu kosztów</span></div><div class="pb"><textarea class="pole" rows="2" data-fid="uw_dnia" onchange="ustawUwagiDnia(this.value)">${esc(d?.uwagi||'')}</textarea></div></div>
+      </section></div>`;
+};
+function kursHTML(d,C,A,k){
+  const rec=C.receptury[k.recepturaId], st=statRec(C,k.recepturaId), m=masaKursu(d,k), w=woz(k.wozId), poj=w?.pojemnoscKg||0;
+  const skala=Math.max(m.razem,poj,1);
+  const kolory=[...new Set(k.rozdzial.map(r=>C.grupy[C.sektory[r.sektorId]?.grupaId]?.kolor).filter(Boolean))];
+  const pas=kolory.length?(kolory.length===1?kolory[0]:`linear-gradient(90deg,${kolory.join(',')})`):'var(--linia)';
+  // segmenty wanny w kolejności załadunku
+  const licz={obj:0,tres:0,dod:0};
+  const segs=st.kg>0?kolejnoscZaladunku(C,k.recepturaId).map((x,i)=>{
+    const sk=st.sk.find(y=>y.s===x.s), kg=m.sw*sk.kg/st.kg, kat=C.sur[x.s]?.kat||'obj', kol=KAT_ODC[kat][licz[kat]++%3];
+    const pr=kg/skala*100;
+    return `<div class="seg" style="width:${pr}%;background:${kol}" title="${x.nr?x.nr+'. ':''}${esc(C.sur[x.s]?.nazwa)} – ${fmt(kg,0)} kg">${pr>3.2?(x.nr||'·'):''}</div>`;
+  }).join(''):'';
+  const segNd=m.nd>0?`<div class="seg nd" style="width:${m.nd/skala*100}%" title="Niedojady – ${fmt(m.nd,0)} kg">${m.nd/skala*100>4?'♻':''}</div>`:'';
+  const przekr=poj>0&&m.razem>poj;
+  const wiersze=k.rozdzial.map(r=>{
+    const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null;
+    const planK=planSek(C,r.sektorId)/(g?.zadania||1), p=planK>0?(r.kg||0)/planK*100:null;
+    return `<div class="kw" data-drop="ndsek" data-accept="nd" data-kurs="${k.id}" data-sek="${r.sektorId}" data-swiezy="${k.id}_${r.sektorId}">
+      <span class="dot" style="background:${g?.kolor||'#999'}"></span><span><b>${esc(s?.nazwa||'(usunięty sektor)')}</b></span>
+      <span class="r ukr">${s?.sztuki??'–'}</span><span class="r ukr">${fmt(planK,0)}</span>
+      <input class="pole num" inputmode="decimal" data-fid="rz_${k.id}_${r.sektorId}" value="${fmtIn(r.kg,0)}" onchange="ustawRozdzial('${k.id}','${r.sektorId}',this.value)">
+      <span class="r">${s&&s.sztuki>0?fmt((r.kg||0)/s.sztuki,1):'–'}</span>
+      <span class="proc ${procKlasa(p)}">${p==null?'–':fmt(p,0)+'%'}</span>
+      <button class="btn ikona usun" onclick="usunRozdzial('${k.id}','${r.sektorId}')" aria-label="Usuń">✕</button></div>`;
+  }).join('');
+  const ndW=alokacjeKursu(d,k.id).map(({n,a,i})=>{
+    const zr=C.sektory[n.sektorId]||kontekst(dataPlus(d.data,-1)).sektory[n.sektorId], cel=C.sektory[a.sektorId];
+    return `<div class="kw ndw" data-swiezy="nd_${n.id}_${k.id}_${a.sektorId}"><span>♻</span><span>z ${esc(zr?.nazwa||'?')} → <b>${esc(cel?.nazwa||'?')}</b></span><span class="ukr"></span><span class="ukr"></span>
+      <input class="pole num" inputmode="decimal" data-fid="al_${n.id}_${i}" value="${fmtIn(a.kg,0)}" onchange="ustawAlok('${n.id}',${i},this.value)">
+      <span class="r">${cel&&cel.sztuki>0?fmt((a.kg||0)/cel.sztuki,1):'–'}</span><span></span>
+      <button class="btn ikona usun" onclick="usunAlok('${n.id}',${i})" aria-label="Usuń">✕</button></div>`;
+  }).join('');
+  return `<div class="kurs" data-drop="kurs" data-accept="sek nd kurs" data-id="${k.id}">
+    <div class="kurs-pas" style="background:${pas}"></div>
+    <div class="kurs-nag"><span class="uchwyt" data-drag="kurs" data-id="${k.id}" title="Przeciągnij, żeby zmienić kolejność">⋮⋮</span><span class="kurs-nr">Kurs ${numerKursu(d,k.id)}</span>
+      <select class="pole" onchange="ustawKurs('${k.id}','wozId',this.value)" aria-label="Wóz"><option value="">— wóz —</option>${D.wozy.map(w=>`<option value="${w.id}" ${k.wozId===w.id?'selected':''}>${esc(w.nazwa)}</option>`).join('')}</select>
+      <select class="pole" onchange="ustawKurs('${k.id}','recepturaId',this.value)" aria-label="Receptura"><option value="">— receptura —</option>${Object.entries(C.receptury).map(([id,r])=>`<option value="${id}" ${k.recepturaId===id?'selected':''}>${esc(r.nazwa)}</option>`).join('')}</select>
+      <span class="prawo"><button class="btn ikona" title="Karta załadunku" onclick="drukujKarty('${k.id}')">🖨</button><button class="btn ikona usun" title="Usuń kurs" onclick="usunKurs('${k.id}')">✕</button></span></div>
+    <div class="wanna-wrap"><div class="wanna ${m.razem>0?'':'pusta'}" style="${przekr?'box-shadow:inset 0 0 0 2px var(--zly)':''}">${segs}${segNd}${poj>0&&m.razem>poj?`<div class="poj" style="left:${poj/skala*100}%"></div>`:''}</div>
+      <div class="wanna-opis"><span>Masa: <b>${fmt(m.razem,0)} kg</b>${m.nd>0?` (świeży TMR ${fmt(m.sw,0)} + ♻ ${fmt(m.nd,0)})`:''}</span>
+      <span>${poj>0?(przekr?`<span class="ostrz">ponad pojemność o ${fmt(m.razem-poj,0)} kg</span>`:`pojemność ${fmt(poj,0)} kg · ${fmt(m.razem/poj*100,0)}%`):(rec?`${esc(rec.nazwa)} · ${fmt(st.kosztKg,3)} zł/kg`:'wybierz recepturę')}</span></div></div>
+    <div class="kurs-wiersze">${(wiersze||ndW)?`<div class="kw nag"><span></span><span style="text-align:left">Sektor</span><span class="ukr">szt</span><span class="ukr">plan kg</span><span>zadane kg</span><span>kg/szt</span><span>% planu</span><span></span></div>`:''}${wiersze}${ndW}</div>
+    <div class="upusc">Upuść sektor lub niedojady</div></div>`;
+}
+function zmienDate(n){ UI.data=dataPlus(UI.data,n); render(); }
+function zastosujAktualne(){ const d=DNI[UI.data]; if(!d) return; d.snap={...klon(kontekstBiezacy()),ts:Date.now()}; saveDzien(UI.data); render(); toast('Dzień przeliczony wg aktualnych dawek i cen'); }
+function ustawUwagiDnia(v){ const d=dzienDoEdycji(UI.data); d.uwagi=v; saveDzien(UI.data); }
+
+function nowyKurs(z,sid){
+  const d=dzienDoEdycji(UI.data);
+  const k={id:uid('k'),wozId:D.wozy[0]?.id||'',recepturaId:'',zadanie:z,rozdzial:[]};
+  d.kursy.push(k);
+  if(sid){ if(!dodajSektorDoKursu(k.id,sid,true)){ d.kursy=d.kursy.filter(x=>x.id!==k.id); } }
+  saveDzien(UI.data); render();
+}
+function dodajSektorDoKursu(kid,sid,bezZapisu){
+  const d=dzienDoEdycji(UI.data), C=kontekst(UI.data), k=d.kursy.find(x=>x.id===kid), s=C.sektory[sid];
+  if(!k||!s) return false;
+  const g=C.grupy[s.grupaId];
+  if(!g?.recepturaId){ toast(`Grupa „${g?.nazwa}” nie ma receptury – ustaw ją w zakładce Dawki`,'zly'); return false; }
+  if(k.recepturaId && k.recepturaId!==g.recepturaId){
+    odrzuc(kid);
+    toast(`Kurs ${numerKursu(d,kid)} wiezie „${C.receptury[k.recepturaId]?.nazwa}”, a ${s.nazwa} je „${C.receptury[g.recepturaId]?.nazwa}”. Jeden wóz – jedna receptura.`,'zly');
+    return false;
+  }
+  if(k.rozdzial.some(r=>r.sektorId===sid)){ odrzuc(kid); toast(`${s.nazwa} jest już w tym kursie`); return false; }
+  k.recepturaId=g.recepturaId;
+  const planK=planSek(C,sid)/(g.zadania||1), juz=przypisaneSektora(d,sid,k.zadanie), kg=Math.max(0,Math.round(planK-juz));
+  k.rozdzial.push({sektorId:sid,kg});
+  UI.swiezy=kid+'_'+sid;
+  if(kg===0) toast(`${s.nazwa} ma już rozwiezioną dawkę w tym zadaniu – wpisz kg ręcznie`);
+  if(!bezZapisu){ saveDzien(UI.data); render(); }
+  return true;
+}
+function odrzuc(kid){ const e=$(`.kurs[data-id="${kid}"]`); if(e){ e.classList.remove('odrzut'); void e.offsetWidth; e.classList.add('odrzut'); } }
+function ustawKurs(kid,pole,v){
+  const d=dzienDoEdycji(UI.data), C=kontekst(UI.data), k=d.kursy.find(x=>x.id===kid); if(!k) return;
+  if(pole==='recepturaId'){
+    const obce=k.rozdzial.filter(r=>C.grupy[C.sektory[r.sektorId]?.grupaId]?.recepturaId!==v);
+    if(obce.length && v){
+      if(!confirm(`Sektory ${obce.map(r=>C.sektory[r.sektorId]?.nazwa).join(', ')} jedzą inną recepturę i zostaną zdjęte z kursu. Kontynuować?`)){ render(); return; }
+      k.rozdzial=k.rozdzial.filter(r=>!obce.includes(r));
+      d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>!(a.kursId===kid && obce.some(r=>r.sektorId===a.sektorId))));
+    }
+  }
+  k[pole]=v; saveDzien(UI.data); render();
+}
+function ustawRozdzial(kid,sid,v){ const d=dzienDoEdycji(UI.data), r=d.kursy.find(x=>x.id===kid)?.rozdzial.find(x=>x.sektorId===sid); if(!r) return; r.kg=Math.max(0,Math.round(liczba(v))); saveDzien(UI.data); render(); }
+function usunRozdzial(kid,sid){
+  const d=dzienDoEdycji(UI.data), k=d.kursy.find(x=>x.id===kid); if(!k) return;
+  k.rozdzial=k.rozdzial.filter(r=>r.sektorId!==sid);
+  d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>!(a.kursId===kid&&a.sektorId===sid)));
+  if(!k.rozdzial.length) k.recepturaId='';
+  saveDzien(UI.data); render();
+}
+function usunKurs(kid){
+  const d=dzienDoEdycji(UI.data), k=d.kursy.find(x=>x.id===kid);
+  if(k.rozdzial.length && !confirm(`Usunąć kurs ${numerKursu(d,kid)} z ${k.rozdzial.length} sektorami?`)) return;
+  d.kursy=d.kursy.filter(x=>x.id!==kid); d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>a.kursId!==kid));
+  saveDzien(UI.data); render();
+}
+function przeniesKurs(kid,przedKid,z){
+  const d=dzienDoEdycji(UI.data), k=d.kursy.find(x=>x.id===kid); if(!k||kid===przedKid) return;
+  d.kursy=d.kursy.filter(x=>x.id!==kid);
+  if(przedKid){ const cel=d.kursy.find(x=>x.id===przedKid); k.zadanie=cel.zadanie; d.kursy.splice(d.kursy.indexOf(cel),0,k); }
+  else { k.zadanie=z; d.kursy.push(k); }
+  saveDzien(UI.data); render();
+}
+function ulozKursy(){
+  const data=UI.data, ist=DNI[data];
+  if(ist&&ist.kursy.length&&!confirm('Zastąpić kursy tego dnia planem? Domieszane niedojady zostaną odpięte od kursów.')) return;
+  const d=dzienDoEdycji(data), C=kontekst(data), w=D.wozy[0], poj=w?.pojemnoscKg||0;
+  const kursy=[]; let brakRec=[];
+  [1,2].forEach(z=>{
+    const kolej=[], per={};
+    grupyC(C).forEach(g=>{
+      if((g.zadania||1)<z) return;
+      if(!g.recepturaId){ if(z===1) brakRec.push(g.nazwa); return; }
+      sektoryGrupyC(C,g.id).forEach(s=>{
+        const kg=Math.round(planSek(C,s.id)/(g.zadania||1)); if(kg<=0) return;
+        if(!per[g.recepturaId]){ per[g.recepturaId]=[]; kolej.push(g.recepturaId); }
+        per[g.recepturaId].push({sektorId:s.id,kg});
+      });
+    });
+    kolej.forEach(rid=>{
+      let b=null, suma=0;
+      per[rid].forEach(r=>{
+        if(!b || (poj>0 && suma+r.kg>poj && b.rozdzial.length)){ b={id:uid('k'),wozId:w?.id||'',recepturaId:rid,zadanie:z,rozdzial:[]}; kursy.push(b); suma=0; }
+        b.rozdzial.push(r); suma+=r.kg;
+      });
+    });
+  });
+  d.kursy=kursy; d.niedojady.forEach(n=>n.alok=[]);
+  saveDzien(data); render();
+  toast(`Ułożono ${kursy.length} kursów`+(poj>0?'':' – wpisz pojemność wozu w Ustawieniach, żeby dzielić duże partie')+(brakRec.length?`. Bez receptury: ${brakRec.join(', ')}`:''), brakRec.length?'zly':'');
+}
+/* --- niedojady --- */
+function modalNd(){
+  const C=kontekst(dataPlus(UI.data,-1));
+  const opcje=grupyC(C).map(g=>`<optgroup label="${esc(g.nazwa)}">${sektoryGrupyC(C,g.id).map(s=>`<option value="${s.id}">${esc(s.nazwa)}</option>`).join('')}</optgroup>`).join('');
+  modal('Niedojady zebrane rano',`<p class="cichy" style="margin:0">Resztki zebrane dziś rano ze stołu paszowego – pomniejszą dawkę pobraną dnia ${dataPL(dataPlus(UI.data,-1))}.</p>
+    <div class="wiersz"><div><label class="et">Z sektora</label><select class="pole szer" id="nd-s">${opcje}</select></div><div><label class="et">Zebrano (kg)</label><input class="pole szer" id="nd-kg" inputmode="decimal"></div></div>`,
+  [{t:'Anuluj'},{t:'Zapisz niedojady',k:'glowny',f:()=>{
+    const kg=liczba(mv('nd-kg')); if(kg<=0){ toast('Podaj ilość w kg','zly'); return false; }
+    const d=dzienDoEdycji(UI.data), sid=mv('nd-s'), ist=d.niedojady.find(n=>n.sektorId===sid);
+    if(ist) ist.kg=(ist.kg||0)+kg; else d.niedojady.push({id:uid('n'),sektorId:sid,kg,alok:[]});
+    saveDzien(UI.data); render(); toast(ist?'Dodano do istniejącego wpisu z tego sektora':'Zapisano niedojady');
+  }}]);
+}
+function ustawNd(nid,v){
+  const d=dzienDoEdycji(UI.data), n=d.niedojady.find(x=>x.id===nid); if(!n) return;
+  const kg=Math.max(0,liczba(v)), przydz=n.alok.reduce((a,x)=>a+(x.kg||0),0);
+  if(kg<przydz){ toast(`Domieszano już ${fmt(przydz,0)} kg z tego sektora – zmniejsz najpierw domieszki`,'zly'); render(); return; }
+  n.kg=kg; saveDzien(UI.data); render();
+}
+function usunNd(nid){ const d=dzienDoEdycji(UI.data); if(!confirm('Usunąć wpis niedojadów razem z domieszkami?')) return; d.niedojady=d.niedojady.filter(x=>x.id!==nid); saveDzien(UI.data); render(); }
+function alokuj(nid,kid,sid,kg){
+  const d=dzienDoEdycji(UI.data), n=d.niedojady.find(x=>x.id===nid); if(!n) return;
+  const wolne=(n.kg||0)-n.alok.reduce((a,x)=>a+(x.kg||0),0);
+  if(wolne<=0.5){ toast('Te niedojady są już rozdane w całości','zly'); return; }
+  const ile=Math.min(wolne,kg??wolne);
+  const ist=n.alok.find(a=>a.kursId===kid&&a.sektorId===sid);
+  if(ist) ist.kg=(ist.kg||0)+ile; else n.alok.push({kursId:kid,sektorId:sid,kg:Math.round(ile)});
+  UI.swiezy='nd_'+nid+'_'+kid+'_'+sid;
+  saveDzien(UI.data); render(); toast(`Domieszano ${fmt(ile,0)} kg niedojadów`);
+}
+function ustawAlok(nid,i,v){
+  const d=dzienDoEdycji(UI.data), n=d.niedojady.find(x=>x.id===nid); if(!n||!n.alok[i]) return;
+  const inne=n.alok.reduce((a,x,j)=>a+(j===i?0:(x.kg||0)),0), max=Math.max(0,(n.kg||0)-inne);
+  let kg=Math.max(0,Math.round(liczba(v)));
+  if(kg>max){ kg=Math.round(max); toast(`Z tego sektora zebrano ${fmt(n.kg,0)} kg – domieszka ograniczona do ${fmt(kg,0)} kg`,'zly'); }
+  n.alok[i].kg=kg; saveDzien(UI.data); render();
+}
+function usunAlok(nid,i){ const d=dzienDoEdycji(UI.data), n=d.niedojady.find(x=>x.id===nid); if(!n) return; n.alok.splice(i,1); saveDzien(UI.data); render(); }
+/* --- obsługa stuknięciem (bez przeciągania) --- */
+let _poDrag=false;
+function tapSektor(sid){
+  if(_poDrag) return;
+  const d=DNI[UI.data], C=kontekst(UI.data), s=C.sektory[sid], g=C.grupy[s.grupaId];
+  const pasujace=(d?.kursy||[]).filter(k=>!k.recepturaId||k.recepturaId===g?.recepturaId);
+  window._tap=sid;
+  modal(`Dodaj „${esc(s.nazwa)}” do kursu`,`<div class="lista-wyb">${pasujace.map(k=>`<button onclick="zamknijModal();dodajSektorDoKursu('${k.id}',window._tap)"><b>Kurs ${numerKursu(d,k.id)}</b> · ${k.zadanie}. zadanie · ${esc(C.receptury[k.recepturaId]?.nazwa||'bez receptury')} · ${fmt(masaKursu(d,k).razem,0)} kg</button>`).join('')}
+    <button onclick="zamknijModal();nowyKurs(1,window._tap)"><b>+ Nowy kurs</b> · 1. zadanie (rano)</button>
+    ${(g?.zadania||1)>=2||kursyDnia(d,2).length?`<button onclick="zamknijModal();nowyKurs(2,window._tap)"><b>+ Nowy kurs</b> · 2. zadanie (po południu)</button>`:''}</div>`,[{t:'Anuluj'}]);
+}
+function tapNd(nid,e){
+  if(_poDrag || (e&&e.target.closest('input,button'))) return;
+  const d=DNI[UI.data], C=kontekst(UI.data);
+  const cele=[]; (d?.kursy||[]).forEach(k=>k.rozdzial.forEach(r=>cele.push({k,r})));
+  if(!cele.length){ toast('Najpierw dodaj kursy – niedojady domieszuje się do sektora w kursie'); return; }
+  window._tap=nid;
+  modal('Domieszaj niedojady do…',`<div class="lista-wyb">${cele.map(({k,r})=>`<button onclick="zamknijModal();alokuj(window._tap,'${k.id}','${r.sektorId}')"><b>${esc(C.sektory[r.sektorId]?.nazwa||'?')}</b> · Kurs ${numerKursu(d,k.id)} (${k.zadanie}. zadanie)</button>`).join('')}</div>`,[{t:'Anuluj'}]);
+}
+
+/* =====================================================================
+   12. PRZECIĄGANIE (Pointer Events – mysz i dotyk)
+   ===================================================================== */
+let drag=null;
+document.addEventListener('pointerdown',e=>{
+  if(e.button>0) return;
+  const h=e.target.closest('[data-drag]'); if(!h) return;
+  if(e.target.closest('input,select,textarea,button')) return;
+  if(e.pointerType!=='mouse' && !e.target.closest('.uchwyt')) return;   // na dotyku tylko za uchwyt – reszta przewija
+  if(drag&&drag.start) koniecDrag(null,true);   // poprzednie przeciąganie bez puszczenia (np. poza oknem)
+  drag={el:h,typ:h.dataset.drag,id:h.dataset.id,x0:e.clientX,y0:e.clientY,start:false,duch:null,cel:null};
+});
+document.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  if(!drag.start){
+    if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<6) return;
+    drag.start=true;
+    const zrodlo=drag.typ==='kurs'?drag.el.closest('.kurs'):drag.el;
+    const duch=zrodlo.cloneNode(true); duch.classList.add('duch'); duch.style.width=Math.min(zrodlo.offsetWidth,320)+'px';
+    $$('input,select',duch).forEach(x=>x.disabled=true);
+    document.body.appendChild(duch); drag.duch=duch; zrodlo.classList.add('przeciagany'); drag.zrodlo=zrodlo;
+    document.body.style.userSelect='none';
+  }
+  e.preventDefault();
+  drag.duch.style.left=(e.clientX-24)+'px'; drag.duch.style.top=(e.clientY-18)+'px';
+  let t=document.elementFromPoint(e.clientX,e.clientY), cel=null;
+  while(t && t!==document.body){ t=t.closest('[data-drop]'); if(!t) break; if(t.dataset.accept.split(' ').includes(drag.typ) && !(drag.typ==='kurs'&&t.dataset.id===drag.id)){ cel=t; break; } t=t.parentElement; }
+  if(drag.cel!==cel){ drag.cel?.classList.remove('cel-ok'); cel?.classList.add('cel-ok'); drag.cel=cel; }
+  const m=60; if(e.clientY<m) scrollBy(0,-14); else if(e.clientY>innerHeight-m) scrollBy(0,14);
+},{passive:false});
+function koniecDrag(e,anuluj){
+  if(!drag) return;
+  const dd=drag; drag=null;
+  if(!dd.start) return;
+  dd.duch.remove(); dd.zrodlo.classList.remove('przeciagany'); dd.cel?.classList.remove('cel-ok'); document.body.style.userSelect='';
+  _poDrag=true; setTimeout(()=>_poDrag=false,60);
+  if(anuluj||!dd.cel) return;
+  upusc(dd.typ,dd.id,dd.cel);
+}
+document.addEventListener('pointerup',e=>koniecDrag(e,false));
+document.addEventListener('pointercancel',e=>koniecDrag(e,true));
+addEventListener('blur',()=>koniecDrag(null,true));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&drag) koniecDrag(null,true); });
+function upusc(typ,id,cel){
+  const rodzaj=cel.dataset.drop;
+  if(typ==='sek'){
+    if(rodzaj==='kurs') dodajSektorDoKursu(cel.dataset.id,id);
+    else if(rodzaj==='nowy') nowyKurs(+cel.dataset.zad,id);
+  } else if(typ==='nd'){
+    if(rodzaj==='ndsek') alokuj(id,cel.dataset.kurs,cel.dataset.sek);
+    else if(rodzaj==='kurs'){
+      const k=DNI[UI.data]?.kursy.find(x=>x.id===cel.dataset.id);
+      if(!k||!k.rozdzial.length){ odrzuc(cel.dataset.id); toast('Kurs nie ma sektorów – upuść niedojady na wiersz sektora','zly'); return; }
+      if(k.rozdzial.length===1) alokuj(id,k.id,k.rozdzial[0].sektorId);
+      else { const C=kontekst(UI.data); window._tap=id; modal('Do którego sektora?',`<div class="lista-wyb">${k.rozdzial.map(r=>`<button onclick="zamknijModal();alokuj(window._tap,'${k.id}','${r.sektorId}')">${esc(C.sektory[r.sektorId]?.nazwa||'?')}</button>`).join('')}</div>`,[{t:'Anuluj'}]); }
+    }
+  } else if(typ==='kurs'){
+    if(rodzaj==='kurs') przeniesKurs(id,cel.dataset.id);
+    else if(rodzaj==='nowy') przeniesKurs(id,null,+cel.dataset.zad);
+  }
+}
+
+/* =====================================================================
+   13. WYDRUKI (osobne okno, własne style)
+   ===================================================================== */
+const STYL_DRUKU=`body{font-family:Arial,Helvetica,sans-serif;font-size:10.5px;color:#111;margin:0}
+h1{font-size:16px;margin:0 0 2px}h2{font-size:12.5px;margin:12px 0 3px}.meta{color:#444;margin-bottom:8px;font-size:10.5px}
+table{border-collapse:collapse;width:100%;margin:4px 0 10px}th,td{border:1px solid #9aa;padding:3px 5px;text-align:right;vertical-align:top}
+th{background:#e4eae4;font-weight:bold}td.l,th.l{text-align:left}tr.suma td{font-weight:bold;background:#eef2ee}tr.pod td{background:#f6f8f6}
+tr.kat td{background:#dde6dd;font-weight:bold;text-align:left}.uw{font-size:9.5px;color:#333;margin-top:6px}.nr{font-size:15px;font-weight:bold}
+.karta{page-break-inside:avoid;margin-bottom:18px;border:2px solid #333;padding:8px}.duze td{font-size:13px;padding:5px 6px}.razem{font-size:15px;font-weight:bold}`;
+function drukuj(tytul,tresc,poziomo){
+  const w=window.open('','_blank');
+  if(!w){ toast('Przeglądarka zablokowała okno wydruku – zezwól na wyskakujące okna dla tej strony','zly'); return; }
+  w.document.write(`<!DOCTYPE html><html lang="pl"><head><meta charset="utf-8"><title>${esc(tytul)}</title><style>@page{size:A4 ${poziomo?'landscape':'portrait'};margin:10mm}${STYL_DRUKU}</style></head><body>${tresc}<script>window.onload=function(){setTimeout(function(){window.print()},200)}<\/script></body></html>`);
+  w.document.close();
+}
+function naglowekDruku(tytul,data){ const u=D.ustawienia; return `<h1>${esc(tytul)}</h1><div class="meta">${esc(u.firma||'')}${u.nrObory?' — nr obory '+esc(u.nrObory):''}${data?' | '+dataPL(data)+' ('+dzienTyg(data)+')':''}</div>`; }
+function drukujKarty(kid){
+  const d=DNI[UI.data], C=kontekst(UI.data);
+  const lista=[...kursyDnia(d,1),...kursyDnia(d,2)].filter(k=>!kid||k.id===kid);
+  if(!lista.length){ toast('Brak kursów do wydruku – ułóż kursy wg planu albo dodaj je ręcznie','zly'); return; }
+  const karty=lista.map(k=>{
+    const st=statRec(C,k.recepturaId), m=masaKursu(d,k), w=woz(k.wozId);
+    let nar=0;
+    const wiersze=st.kg>0?kolejnoscZaladunku(C,k.recepturaId).map(x=>{ const sk=st.sk.find(y=>y.s===x.s), kg=m.sw*sk.kg/st.kg; nar+=kg;
+      return `<tr><td class="nr">${x.nr||'–'}</td><td class="l">${esc(C.sur[x.s]?.nazwa)}</td><td>${fmt(sk.kg,2,3)}</td><td><b>${fmt(kg,0)}</b></td><td>${fmt(nar,0)}</td><td style="width:60px"></td></tr>`; }).join(''):'';
+    const nd=alokacjeKursu(d,k.id).map(({n,a})=>{ nar+=a.kg||0; return `<tr><td class="nr">♻</td><td class="l">Niedojady z ${esc((C.sektory[n.sektorId]||kontekst(dataPlus(UI.data,-1)).sektory[n.sektorId])?.nazwa||'?')} → ${esc(C.sektory[a.sektorId]?.nazwa||'?')}</td><td></td><td><b>${fmt(a.kg,0)}</b></td><td>${fmt(nar,0)}</td><td></td></tr>`; }).join('');
+    const rozw=k.rozdzial.map(r=>{ const s=C.sektory[r.sektorId]; const ndS=alokacjeKursu(d,k.id).filter(x=>x.a.sektorId===r.sektorId).reduce((a,x)=>a+(x.a.kg||0),0);
+      return `<tr><td class="l"><b>${esc(s?.nazwa||'?')}</b> (${esc(C.grupy[s?.grupaId]?.nazwa||'')})</td><td>${s?.sztuki??''}</td><td><b>${fmt((r.kg||0)+ndS,0)}</b></td><td>${s&&s.sztuki?fmt(((r.kg||0)+ndS)/s.sztuki,1):''}</td></tr>`; }).join('');
+    return `<div class="karta"><h2 style="margin-top:0;font-size:15px">Kurs ${numerKursu(d,k.id)} · ${k.zadanie}. zadanie · ${esc(w?.nazwa||'wóz nieprzypisany')} · ${esc(C.receptury[k.recepturaId]?.nazwa||'bez receptury')}</h2>
+      <table class="duze"><thead><tr><th>Kolejność</th><th class="l">Surowiec</th><th>kg/szt</th><th>Załadować kg</th><th>Narastająco kg</th><th>✓</th></tr></thead><tbody>${wiersze}${nd}
+      <tr class="suma"><td></td><td class="l">RAZEM WÓZ</td><td>${fmt(st.kg,1,2)}</td><td class="razem">${fmt(m.razem,0)}</td><td></td><td></td></tr></tbody></table>
+      <table class="duze"><thead><tr><th class="l">Rozwieźć na sektory</th><th>Sztuk</th><th>kg</th><th>kg/szt</th></tr></thead><tbody>${rozw}</tbody></table></div>`;
+  }).join('');
+  drukuj('Karty załadunku '+UI.data,naglowekDruku(kid?'Karta załadunku wozu':'Karty załadunku wozów',UI.data)+karty+(d?.uwagi?`<div class="uw"><b>Uwagi:</b> ${esc(d.uwagi)}</div>`:''));
+}
+
+/* =====================================================================
+   14. ZAKŁADKA: KOSZTY (struktura raportu kosztów żywienia)
+   ===================================================================== */
+function danePodstawy(data){ return UI.podstawa==='plan'?analizaDnia(data,{plan:true}):analizaDnia(data); }
+function tabeleKosztow(data){
+  const A=danePodstawy(data), C=A.C;
+  const G=grupyDnia(A).filter(g=>g.sztuki>0);
+  const zw=G.reduce((a,g)=>a+g.sztuki,0), dojne=G.filter(g=>g.dojna).reduce((a,g)=>a+g.sztuki,0);
+  const surs=surowceKolejnosc(C).filter(s=>(A.zuz[s]||0)>0.0001);
+  const katy=['obj','tres','dod'];
+  const plan=g=>g.zPlanu?' *':'';
+  const opisG=g=>`${esc(g.nazwa)}${g.opis?`<br><span style="font-weight:400">(${esc(g.opis)})</span>`:''}<br><span style="font-weight:400">${g.sztuki} szt${plan(g)}</span>`;
+  // Sekcja 1
+  let s1=`<table class="t"><thead><tr><th class="l">Surowiec (cena zł/kg)</th>${G.map(g=>`<th>${opisG(g)}</th>`).join('')}</tr></thead><tbody>`;
+  katy.forEach(k=>{
+    const ss=surs.filter(s=>C.sur[s]?.kat===k); if(!ss.length) return;
+    s1+=ss.map(s=>`<tr><td class="l"><span class="kat-kropka" style="background:${KAT_KOL[k]}"></span>${esc(C.sur[s].nazwa)} <span class="cichy">(${cenaKg(C.ceny[s])})</span></td>${G.map(g=>{ const v=(g.zuz[s]||0)/g.sztuki; return `<td>${v>0.00001?fmt(v,2):'–'}</td>`; }).join('')}</tr>`).join('');
+  });
+  const maNd=G.some(g=>g.ndKg>0);
+  if(maNd) s1+=`<tr><td class="l">♻ Niedojady domieszane</td>${G.map(g=>`<td>${g.ndKg>0?fmt(g.ndKg/g.sztuki,2):'–'}</td>`).join('')}</tr>`;
+  s1+=`</tbody><tfoot><tr class="suma"><td class="l">SUMA kg TMR/szt</td>${G.map(g=>`<td>${fmt(g.zadanaKg/g.sztuki,1)}</td>`).join('')}</tr>
+    <tr class="suma"><td class="l">KOSZT zł/szt/dzień</td>${G.map(g=>`<td>${fmt(g.koszt/g.sztuki,2)}</td>`).join('')}</tr>
+    <tr class="pod"><td class="l">KOSZT zł/szt/miesiąc</td>${G.map(g=>`<td>${fmt(g.koszt/g.sztuki*MIESIAC_DNI,0)}</td>`).join('')}</tr></tfoot></table>`;
+  // Sekcja 2
+  const razem=Object.entries(A.zuz).reduce((a,[s,kg])=>a+kg*(C.ceny[s]||0)/1000,0);
+  let s2=`<table class="t"><thead><tr><th class="l">Surowiec</th><th>Cena zł/kg</th><th>kg/dzień</th><th>kg/miesiąc</th><th>zł/dzień</th><th>zł/miesiąc</th><th>Udział</th></tr></thead><tbody>`;
+  let kgR=0;
+  katy.forEach(k=>{
+    const ss=surs.filter(s=>C.sur[s]?.kat===k); if(!ss.length) return;
+    let kgK=0,zlK=0;
+    s2+=`<tr class="kat"><td colspan="7">${KAT[k].toUpperCase()}</td></tr>`+ss.map(s=>{ const kg=A.zuz[s], zl=kg*(C.ceny[s]||0)/1000; kgK+=kg; zlK+=zl;
+      return `<tr><td class="l">${esc(C.sur[s].nazwa)}</td><td>${cenaKg(C.ceny[s])}</td><td>${fmt(kg,0)}</td><td>${fmt(kg*MIESIAC_DNI,0)}</td><td>${fmt(zl,2)}</td><td>${fmt(zl*MIESIAC_DNI,0)}</td><td>${fmt(razem>0?zl/razem*100:0,1)}%</td></tr>`; }).join('');
+    kgR+=kgK;
+    s2+=`<tr class="pod"><td class="l">Razem ${KAT[k].toLowerCase()}</td><td></td><td>${fmt(kgK,0)}</td><td>${fmt(kgK*MIESIAC_DNI,0)}</td><td>${fmt(zlK,2)}</td><td>${fmt(zlK*MIESIAC_DNI,0)}</td><td>${fmt(razem>0?zlK/razem*100:0,1)}%</td></tr>`;
+  });
+  s2+=`</tbody><tfoot><tr class="suma"><td class="l">RAZEM STADO</td><td></td><td>${fmt(kgR,0)}</td><td>${fmt(kgR*MIESIAC_DNI,0)}</td><td>${fmt(razem,2)}</td><td>${fmt(razem*MIESIAC_DNI,0)}</td><td>100%</td></tr></tfoot></table>`;
+  // Sekcja 3
+  const kosztG=G.reduce((a,g)=>a+g.koszt,0);
+  let s3=`<table class="t"><thead><tr><th class="l">Grupa</th><th>Sztuk</th><th>kg TMR/szt</th><th>zł/szt/dzień</th><th>zł/grupa/dzień</th><th>zł/grupa/m-c</th><th>Udział</th></tr></thead><tbody>`+
+    G.map(g=>`<tr><td class="l"><span class="kat-kropka" style="background:${g.kolor}"></span>${esc(g.nazwa)}${g.opis?' ('+esc(g.opis)+')':''}${plan(g)}</td><td>${g.sztuki}</td><td>${fmt(g.zadanaKg/g.sztuki,1)}</td><td>${fmt(g.koszt/g.sztuki,2)}</td><td>${fmt(g.koszt,2)}</td><td>${fmt(g.koszt*MIESIAC_DNI,0)}</td><td>${fmt(kosztG>0?g.koszt/kosztG*100:0,1)}%</td></tr>`).join('')+
+    `</tbody><tfoot><tr class="suma"><td class="l">RAZEM STADO</td><td>${zw}</td><td></td><td></td><td>${fmt(kosztG,2)}</td><td>${fmt(kosztG*MIESIAC_DNI,0)}</td><td>100%</td></tr></tfoot></table>`;
+  // Sekcja 4
+  const sumK={obj:0,tres:0,dod:0};
+  let s4=`<table class="t"><thead><tr><th class="l">Grupa</th><th>Sztuk</th><th>Objętościowe<br>zł/szt</th><th>Treściwe<br>zł/szt</th><th>Dodatki<br>zł/szt</th><th>RAZEM<br>zł/szt</th><th>Obj. %</th><th>Treść. %</th><th>Dod. %</th></tr></thead><tbody>`+
+    G.map(g=>{ const kk=kosztKatGrupy(C,g.zuz), r=kk.obj+kk.tres+kk.dod; katy.forEach(k=>sumK[k]+=kk[k]); const p=k=>r>0?fmt(kk[k]/r*100,0)+'%':'–';
+      return `<tr><td class="l">${esc(g.nazwa)}${g.opis?' ('+esc(g.opis)+')':''}</td><td>${g.sztuki}</td><td>${fmt(kk.obj/g.sztuki,2)}</td><td>${fmt(kk.tres/g.sztuki,2)}</td><td>${fmt(kk.dod/g.sztuki,2)}</td><td><b>${fmt(r/g.sztuki,2)}</b></td><td>${p('obj')}</td><td>${p('tres')}</td><td>${p('dod')}</td></tr>`; }).join('');
+  const sr=sumK.obj+sumK.tres+sumK.dod, ps=k=>sr>0?fmt(sumK[k]/sr*100,0)+'%':'–';
+  s4+=`</tbody><tfoot><tr class="suma"><td class="l">STADO zł/dzień</td><td>${zw}</td><td>${fmt(sumK.obj,2)}</td><td>${fmt(sumK.tres,2)}</td><td>${fmt(sumK.dod,2)}</td><td>${fmt(sr,2)}</td><td>${ps('obj')}</td><td>${ps('tres')}</td><td>${ps('dod')}</td></tr>
+    <tr class="pod"><td class="l">STADO zł/miesiąc</td><td></td><td>${fmt(sumK.obj*MIESIAC_DNI,0)}</td><td>${fmt(sumK.tres*MIESIAC_DNI,0)}</td><td>${fmt(sumK.dod*MIESIAC_DNI,0)}</td><td>${fmt(sr*MIESIAC_DNI,0)}</td><td></td><td></td><td></td></tr></tfoot></table>`;
+  // Uwagi
+  const uw=[];
+  if(G.some(g=>g.zPlanu)) uw.push('* Sektory bez kursów w tym dniu liczone wg dawki obliczonej (plan).');
+  D.grupy.forEach(g=>{ if(g.uwagi&&G.some(x=>x.id===g.id)) uw.push(esc(g.nazwa)+': '+esc(g.uwagi)); });
+  D.receptury.forEach(r=>{ if(r.uwagi&&G.some(g=>g.recepturaId===r.id)) uw.push(esc(r.nazwa)+': '+esc(r.uwagi)); });
+  if(maNd) uw.push('Niedojady domieszane wliczone do kg TMR grupy docelowej; ich koszt poniosła grupa, z której pochodzą.');
+  if(DNI[data]?.uwagi) uw.push(esc(DNI[data].uwagi));
+  uw.push('Ceny netto. Miesiąc = '+MIESIAC_DNI+' dni.');
+  return {A,G,zw,dojne,s1,s2,s3,s4,uw};
+}
+R.koszty=()=>{
+  const data=UI.data, T=tabeleKosztow(data), u=D.ustawienia;
+  const ileZPlanu=T.G.filter(g=>g.zPlanu).length;
+  return `<div class="woz-gora"><span class="dzien-tyt">Koszty żywienia</span>
+      <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
+      <span class="przel">${[['zadana','Dawka zadana'],['plan','Dawka obliczona']].map(([k,t])=>`<button class="${UI.podstawa===k?'akt':''}" onclick="UI.podstawa='${k}';render()">${t}</button>`).join('')}</span>
+      <span style="margin-left:auto"><button class="btn glowny" onclick="drukujKoszty()">Drukuj raport</button></span></div>
+    <div class="baner info">${esc(u.firma||'')} · nr obory ${esc(u.nrObory||'–')} · ${dataPL(data)} · zwierząt <b>${T.zw}</b> szt · krowy dojne <b>${T.dojne}</b> szt
+      ${UI.podstawa==='zadana'&&ileZPlanu?` · <span class="cichy">${ileZPlanu} ${ileZPlanu===1?'grupa':'grup'} bez kursów – liczone wg planu (*)</span>`:''}</div>
+    <div class="panel"><div class="ph"><h2>1. Dawki pasz i koszt surowcowy na sztukę/dzień</h2><span class="opis">kg świeżej masy/szt</span></div><div class="przewin">${T.s1}</div></div>
+    <div class="panel"><div class="ph"><h2>2. Dzienne i miesięczne zużycie surowców wg kategorii</h2></div><div class="przewin">${T.s2}</div></div>
+    <div class="panel"><div class="ph"><h2>3. Łączny koszt surowcowy wg grup żywieniowych</h2></div><div class="przewin">${T.s3}</div></div>
+    <div class="panel"><div class="ph"><h2>4. Koszt surowcowy na sztukę wg kategorii pasz (zł/szt/dzień)</h2></div><div class="przewin">${T.s4}</div></div>
+    <div class="panel"><div class="ph"><h2>Uwagi i źródła</h2></div><div class="pb">
+      <ul style="margin:0 0 10px;padding-left:18px">${T.uw.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <div class="wiersz"><div><label class="et">Uwagi do tego dnia</label><textarea class="pole" rows="2" data-fid="uw_dnia_k" onchange="ustawUwagiDnia(this.value);render()">${esc(T.A.d?.uwagi||DNI[data]?.uwagi||'')}</textarea></div>
+      <div><label class="et">Źródła (stałe dla raportu)</label><textarea class="pole" rows="2" data-fid="zrodla" onchange="ustawUst('zrodla',this.value)">${esc(u.zrodla||'')}</textarea></div></div></div></div>`;
+};
+function drukujKoszty(){
+  const data=UI.data, T=tabeleKosztow(data), u=D.ustawienia;
+  const czysc=h=>h.replace(/<span class="kat-kropka"[^>]*><\/span>/g,'').replace(/ class="t"/g,'');
+  const tresc=`<h1>Analiza kosztów żywienia stada</h1><div class="meta">${esc(u.firma||'')} — nr obory ${esc(u.nrObory||'–')} | Data: ${dataPL(data)} | Zwierząt: ${T.zw} szt | Krowy dojne: ${T.dojne} szt | Podstawa: ${UI.podstawa==='plan'?'dawka obliczona':'dawka zadana'}</div>
+    <h2>1. Dawki pasz i koszt surowcowy na sztukę/dzień</h2>${czysc(T.s1)}<h2>2. Dzienne i miesięczne zużycie surowców wg kategorii</h2>${czysc(T.s2)}
+    <h2>3. Łączny koszt surowcowy wg grup żywieniowych</h2>${czysc(T.s3)}<h2>4. Koszt surowcowy na sztukę wg kategorii pasz (zł/szt/dzień)</h2>${czysc(T.s4)}
+    <div class="uw"><b>Uwagi:</b> ${T.uw.map(x=>'• '+x).join(' ')}</div>${u.zrodla?`<div class="uw"><b>Źródła:</b> ${esc(u.zrodla)}</div>`:''}`;
+  drukuj('Koszty żywienia '+data,tresc,true);
+}
+
+/* =====================================================================
+   15. ZAKŁADKA: RAPORTY
+   ===================================================================== */
+function tabelaRealizacji(data){
+  const A=analizaDnia(data), G=grupyDnia(A).filter(g=>g.sztuki>0);
+  const pc=(a,b)=>(a!=null&&b>0)?a/b*100:null;
+  const kom=p=>p==null?'<td>–</td>':`<td><span class="proc ${procKlasa(p)}" style="display:inline-block;min-width:44px">${fmt(p,0)}%</span></td>`;
+  const wiersz=(o,kl,et)=>`<tr class="${kl}"><td class="l">${et}</td><td>${o.sztuki}</td><td>${fmt(o.obl,1,2)}</td><td>${fmt(o.zadana,1,2)}</td>${kom(pc(o.zadana,o.obl))}
+    <td>${o.ndKg>0?fmt(o.ndKg,0):'–'}</td><td>${o.zebr!=null?fmt(o.zebr,0):'–'}</td><td>${o.pobrana!=null?fmt(o.pobrana,1,2):'–'}</td>${kom(pc(o.pobrana,o.obl))}<td class="l">${o.zrodlo}</td></tr>`;
+  const body=G.map(g=>{
+    const go={sztuki:g.sztuki,obl:g.obl,zadana:g.zadanaKg/g.sztuki,ndKg:g.ndKg,zebr:g.pobranaOk?g.zebrane:null,pobrana:g.pobrana,zrodlo:g.zPlanu===g.sektory.length?'plan':g.zPlanu?'kursy + plan':'kursy'};
+    return wiersz(go,'pod',`<span class="kat-kropka" style="background:${g.kolor}"></span><b>${esc(g.nazwa)}</b>`)+
+      (g.sektory.length>1?g.sektory.map(s=>wiersz({...s,zebr:s.pobrana!=null?(s.zebraneJutro||0):null,zrodlo:s.zPlanu?'plan':'kursy'},'','&nbsp;&nbsp;&nbsp;'+esc(s.nazwa))).join(''):'');
+  }).join('');
+  return `<table class="t"><thead><tr><th class="l">Grupa / sektor</th><th>Szt</th><th>Obliczona<br>kg/szt</th><th>Zadana<br>kg/szt</th><th>Zadana /<br>obliczona</th><th>♻ domieszane<br>kg</th><th>Niedojady<br>nast. dnia kg</th><th>Pobrana<br>kg/szt</th><th>Pobrana /<br>obliczona</th><th class="l">Źródło</th></tr></thead><tbody>${body}</tbody></table>`;
+}
+function tabelaZuzycia(od,doD){
+  const sum={}, zl={}; let dniK=0, dniP=0, n=0;
+  for(let d=od; d<=doD && n<400; d=dataPlus(d,1), n++){
+    const A=analizaDnia(d); const C=A.C;
+    if(A.d && A.d.kursy.length) dniK++; else dniP++;
+    Object.entries(A.zuz).forEach(([s,kg])=>{ sum[s]=(sum[s]||0)+kg; zl[s]=(zl[s]||0)+kg*(C.ceny[s]||0)/1000; });
+  }
+  const C=kontekstBiezacy(); let razem=0, rKg=0;
+  const ss=surowceKolejnosc(C).filter(s=>sum[s]>0.001);
+  let h=`<table class="t"><thead><tr><th class="l">Surowiec</th><th>kg</th><th>t</th><th>śr. kg/dzień</th><th>zł</th></tr></thead><tbody>`;
+  ['obj','tres','dod'].forEach(k=>{
+    const x=ss.filter(s=>C.sur[s]?.kat===k); if(!x.length) return;
+    let kk=0,zz=0;
+    h+=`<tr class="kat"><td colspan="5">${KAT[k]}</td></tr>`+x.map(s=>{ kk+=sum[s]; zz+=zl[s]; return `<tr><td class="l">${esc(C.sur[s].nazwa)}</td><td>${fmt(sum[s],0)}</td><td>${fmt(sum[s]/1000,2)}</td><td>${fmt(sum[s]/n,0)}</td><td>${fmt(zl[s],2)}</td></tr>`; }).join('');
+    h+=`<tr class="pod"><td class="l">Razem</td><td>${fmt(kk,0)}</td><td>${fmt(kk/1000,2)}</td><td>${fmt(kk/n,0)}</td><td>${fmt(zz,2)}</td></tr>`; razem+=zz; rKg+=kk;
+  });
+  h+=`</tbody><tfoot><tr class="suma"><td class="l">RAZEM</td><td>${fmt(rKg,0)}</td><td>${fmt(rKg/1000,2)}</td><td>${fmt(rKg/Math.max(n,1),0)}</td><td>${fmt(razem,2)}</td></tr></tfoot></table>`;
+  return {h,dniK,dniP,n};
+}
+R.raporty=()=>{
+  const p=`<span class="przel">${[['dawki','Realizacja dawek'],['zuzycie','Zużycie surowców']].map(([k,t])=>`<button class="${UI.rapTyp===k?'akt':''}" onclick="UI.rapTyp='${k}';render()">${t}</button>`).join('')}</span>`;
+  if(UI.rapTyp==='zuzycie'){
+    const Z=tabelaZuzycia(UI.rapOd,UI.rapDo);
+    return `<div class="woz-gora"><span class="dzien-tyt">Raporty</span>${p}
+      <label class="cichy">od <input type="date" class="pole" value="${UI.rapOd}" onchange="UI.rapOd=this.value;render()"></label><label class="cichy">do <input type="date" class="pole" value="${UI.rapDo}" onchange="UI.rapDo=this.value;render()"></label>
+      <span style="margin-left:auto"><button class="btn glowny" onclick="drukujZuzycie()">Drukuj</button></span></div>
+      ${UI.rapOd>UI.rapDo?'<div class="baner uwaga">Data „od” jest późniejsza niż „do”.</div>':''}
+      <div class="panel"><div class="ph"><h2>Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}</h2><span class="opis">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu · tylko świeże surowce (bez niedojadów)</span></div><div class="przewin">${Z.h}</div></div>`;
+  }
+  return `<div class="woz-gora"><span class="dzien-tyt">Raporty</span>${p}
+      <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${UI.data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
+      <span style="margin-left:auto"><button class="btn glowny" onclick="drukujRealizacje()">Drukuj</button></span></div>
+    <div class="panel"><div class="ph"><h2>Realizacja dawek — ${dataPL(UI.data)}</h2><span class="opis">obliczona = receptura · zadana = kursy + domieszane niedojady · pobrana = zadana − niedojady zebrane następnego dnia</span></div>
+      <div class="przewin">${tabelaRealizacji(UI.data)}</div></div>`;
+};
+function drukujRealizacje(){ drukuj('Realizacja dawek '+UI.data,naglowekDruku('Realizacja dawek – obliczona, zadana, pobrana',UI.data)+tabelaRealizacji(UI.data).replace(/<span class="(kat-kropka|proc)[^"]*"[^>]*>(.*?)<\/span>/g,'$2'),true); }
+function drukujZuzycie(){ const Z=tabelaZuzycia(UI.rapOd,UI.rapDo); drukuj('Zużycie surowców',naglowekDruku(`Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}`)+`<div class="meta">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu</div>`+Z.h); }
+function drukujSurowce(){
+  const plan=analizaDnia(dzis(),{plan:true}).zuz;
+  const w=D.surowce.map(s=>{ const st=stanSurowca(s), du=plan[s.id]||0, dni=du>0?Math.floor(st*1000/du):null;
+    return `<tr><td class="l">${esc(s.nazwa)}</td><td class="l">${KAT_KR[s.kat]}</td><td>${fmt(s.cenaT,0)}</td><td>${fmt(st,2)}</td><td>${fmt(du,0)}</td><td>${dni==null?'–':st<=0?'brak':dataPL(dataPlus(dzis(),dni))+' ('+dni+' d)'}</td></tr>`; }).join('');
+  drukuj('Stany magazynowe',naglowekDruku('Stany magazynowe surowców',dzis())+`<table><thead><tr><th class="l">Surowiec</th><th class="l">Kategoria</th><th>Cena zł/t</th><th>Stan t</th><th>Zużycie kg/d</th><th>Wystarczy do</th></tr></thead><tbody>${w}</tbody></table>`);
+}
+
+/* =====================================================================
+   16. ZAKŁADKA: CIELAKI (miejsce na później)
+   ===================================================================== */
+R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div class="pusto"><b>Moduł w przygotowaniu</b>Żywienie cieląt (suchy TMR z partii, preparat mlekozastępczy) dodamy w kolejnym etapie.</div></div>`;
+
+/* =====================================================================
+   17. ZAKŁADKA: USTAWIENIA
+   ===================================================================== */
+R.ustawienia=()=>{
+  const u=D.ustawienia;
+  return `<div class="panel"><div class="ph"><h2>Gospodarstwo</h2></div><div class="pb"><div class="wiersz">
+      <div><label class="et">Firma</label><input class="pole szer" data-fid="u_f" value="${esc(u.firma||'')}" onchange="ustawUst('firma',this.value)"></div>
+      <div style="max-width:200px"><label class="et">Nr obory</label><input class="pole szer" data-fid="u_n" value="${esc(u.nrObory||'')}" onchange="ustawUst('nrObory',this.value)"></div></div></div></div>
+    <div class="panel"><div class="ph"><h2>Wozy paszowe</h2><span class="opis">pojemność służy do dzielenia partii przy „Ułóż kursy” i do kontroli przeładowania; 0 = nieznana</span>
+      <div class="prawo"><button class="btn glowny" onclick="D.wozy.push({id:uid('w'),nazwa:'Wóz '+(D.wozy.length+1),pojemnoscKg:0});saveModule('wozy');render()">+ Wóz</button></div></div>
+      <table class="t" style="max-width:560px"><thead><tr><th class="l">Nazwa</th><th>Pojemność kg</th><th></th></tr></thead><tbody>
+      ${D.wozy.map(w=>`<tr><td class="l"><input class="pole" data-fid="wn_${w.id}" value="${esc(w.nazwa)}" onchange="ustawWoz('${w.id}','nazwa',this.value)"></td><td><input class="pole num" inputmode="numeric" data-fid="wp_${w.id}" value="${w.pojemnoscKg||0}" onchange="ustawWoz('${w.id}','pojemnoscKg',this.value)"></td>
+        <td><button class="btn ikona usun" onclick="usunWoz('${w.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>
+    <div class="panel"><div class="ph"><h2>Synchronizacja</h2></div><div class="pb cichy">
+      Firebase: <b>${FIREBASE_CONFIG?'skonfigurowany':'brak konfiguracji – dane tylko na tym urządzeniu'}</b> · urządzenie <code>${DEV}</code> · wersja danych ${WERSJA_DANYCH}
+      <div style="margin-top:10px"><button class="btn" onclick="eksport()">Pobierz kopię danych (JSON)</button></div></div></div>`;
+};
+function ustawUst(pole,v){ D.ustawienia[pole]=v.trim(); saveModule('ustawienia'); if(UI.tab==='ustawienia') render(); else $('#firmaNag').textContent=D.ustawienia.firma||''; }
+function ustawWoz(id,pole,v){ const w=woz(id); if(!w) return; if(pole==='pojemnoscKg') w.pojemnoscKg=Math.max(0,Math.round(liczba(v))); else { v=v.trim(); if(!v){ render(); return; } w.nazwa=v; } saveModule('wozy'); render(); }
+function usunWoz(id){ if(D.wozy.length===1){ toast('Musi zostać co najmniej jeden wóz','zly'); return; } if(!confirm('Usunąć wóz? Kursy z nim zostaną bez przypisanego wozu.')) return; D.wozy=D.wozy.filter(w=>w.id!==id); saveModule('wozy'); render(); }
+function eksport(){
+  const blob=new Blob([JSON.stringify({wersja:WERSJA_DANYCH,eksport:new Date().toISOString(),moduly:D,dni:DNI},null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='weibloem-kopia-'+dzis()+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+/* =====================================================================
+   18. START: najpierw localStorage, potem Firestore
+   ===================================================================== */
+inicjujDane();
+rysujZakladki();
+render();
+pokazSync();
+startSync();
+if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));
+</script>
+</body>
+</html>
