@@ -16,6 +16,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
 :root{
   --tlo:#E6EAE5; --pow:#FAFBF8; --pow2:#F1F4F0; --tusz:#1C2924; --tusz2:#56645D; --linia:#C8D0C9;
@@ -26,6 +28,7 @@
   --font-w:'Barlow Condensed','Arial Narrow',var(--font);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html,body{margin:0}
 body{background:var(--tlo);color:var(--tusz);font:15px/1.4 var(--font);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
@@ -235,6 +238,33 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--tusz);color:#fff;padding:10px 16px;border-radius:8px;opacity:0;transition:.25s;z-index:1000;max-width:min(560px,92vw);font-size:14px;pointer-events:none}
 #toast.pok{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.zly{background:var(--zly)}
+/* ===== LOGOWANIE, KONTO, UPRAWNIENIA ===== */
+#logowanie{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--gl)}
+.login-karta{background:var(--pow);border-radius:14px;width:100%;max-width:380px;padding:26px 24px 22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-karta img{width:84px;height:84px;border-radius:20px;display:block;margin:0 auto 10px}
+.login-karta h1{font:700 30px/1 var(--font-w);text-align:center;margin:0}
+.login-karta .pod-tyt{text-align:center;color:var(--tusz2);margin:4px 0 18px;font-size:14px}
+.login-karta form{display:grid;gap:12px}
+.login-karta .pole{padding:10px 12px;font-size:16px}
+.login-karta .btn.glowny{padding:11px;font-size:16px}
+.login-blad{background:#F8E6E3;color:var(--zly);border-radius:6px;padding:8px 10px;font-size:14px}
+#konto{border:0;background:rgba(255,255,255,.12);color:#EEF3EE;border-radius:20px;padding:4px 12px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
+#konto:hover{background:rgba(255,255,255,.22)}
+.pole:disabled,select.pole:disabled,textarea.pole:disabled{background:transparent;border-color:transparent;color:inherit;opacity:1;-webkit-appearance:none;appearance:none;cursor:default}
+.ukryj-ro{display:none!important}
+.baner.tryb{background:#EDEFF6;border:1px solid #C7CDE2}
+.avatar{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex:0 0 auto}
+.osoba{display:flex;align-items:center;gap:10px}
+.osoba small{display:block;color:var(--tusz2);font-size:12.5px}
+.status{font-size:12px;font-weight:700;padding:2px 9px;border-radius:10px}
+.status.on{background:#DDEFE3;color:var(--ok)}.status.off{background:#F3E1DE;color:var(--zly)}
+.rola-zn{font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:10px;color:#fff;white-space:nowrap}
+table.upr td{text-align:center}
+table.upr th{text-align:center}
+select.lv{border-radius:14px;padding:4px 8px;font-weight:700;font-size:13px;border:1px solid transparent;cursor:pointer;min-width:104px}
+select.lv:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center}
+.lv0{background:#ECEEEC;color:#7A8580}.lv1{background:#DFE8F3;color:#2F5B8C}.lv2{background:#FBEFD2;color:#8A6410}.lv3{background:#D9ECDF;color:#24603C}
+.haslo-pokaz{font:600 20px/1.3 var(--font-w);letter-spacing:.5px;background:var(--pow2);border:1px dashed var(--linia);border-radius:8px;padding:10px 12px;user-select:all}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:600px){main{padding:12px 10px 60px}.gora{padding:8px 12px 2px}.firma-nag{display:none}}
 </style>
@@ -245,10 +275,12 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
     <div class="marka"><b>Weibloem</b><span>żywienie stada</span></div>
     <div class="firma-nag" id="firmaNag"></div>
     <div id="sync" title="Stan synchronizacji">…</div>
+    <button id="konto" hidden onclick="modalKonto()"></button>
   </div>
   <nav id="zakladki"></nav>
 </header>
 <main id="widok"></main>
+<div id="logowanie" hidden></div>
 <div id="modal" role="dialog" aria-modal="true"></div>
 <div id="toast" role="status"></div>
 <script>
@@ -256,9 +288,11 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 /* =====================================================================
    1. KONFIGURACJA
    ===================================================================== */
-// Wklej tu obiekt firebaseConfig z konsoli Firebase (Ustawienia projektu → Twoje aplikacje → SDK).
-// Dopóki jest null, aplikacja działa tylko lokalnie (localStorage) na tym urządzeniu.
-const FIREBASE_CONFIG = null;
+// Konfiguracja Firebase jest w osobnym pliku firebase-config.js (window.FIREBASE_CONFIG),
+// żeby podmiana index.html przy aktualizacji jej nie kasowała. Brak pliku = tryb lokalny bez logowania.
+const FB_CONFIG = window.FIREBASE_CONFIG || null;
+const KOL_UZYT  = 'weibloem_uzytkownicy'; // jeden dokument = jedno konto (id = uid z Firebase Auth)
+const KOL_ADMIN = 'weibloem_admin';       // 'init' (pierwszy twórca utworzony), 'uprawnienia' (macierz ról)
 const KOL_MODULY = 'weibloem_moduly';  // kolekcja: jeden dokument = jeden moduł
 const KOL_DNI    = 'weibloem_dni';     // kolekcja: jeden dokument = jeden dzień żywienia (id RRRR-MM-DD)
 const WERSJA_DANYCH = 1;               // sufiks kluczy localStorage; zmiana struktury = +1 i wpis w MIGRACJE
@@ -377,7 +411,17 @@ function wypchnij(klucz){
   const ts=u.ts; u.wyslanyTs=ts; u.wTrakcie=true; pokazSync();
   u.ref().set({d:klon(dane),_ts:ts,_dev:DEV,_v:WERSJA_DANYCH})
     .then(()=>{ u.wTrakcie=false; if(u.ts===ts && !u.timer){ u.niezsync=false; zapiszLokalnie(u); } syncBlad=false; pokazSync(); })
-    .catch(e=>{ u.wTrakcie=false; console.warn('Zapis '+klucz,e); syncBlad=true; pokazSync(); });
+    .catch(e=>{
+      u.wTrakcie=false; console.warn('Zapis '+klucz,e);
+      if(e && e.code==='permission-denied'){
+        // rola nie może zapisywać tego modułu – cofamy lokalną zmianę do stanu z chmury
+        toast('Brak uprawnień do zapisu ('+klucz.replace(/^m:|^d:/,'')+') – przywrócono dane z chmury','zly');
+        u.niezsync=false; u.zSeedu=false;
+        u.ref().get().then(s=>{ if(s.exists){ const r=s.data(); u.ustaw(r.d); u.ts=r._ts||0; } zapiszLokalnie(u); wersja++; pokazSync(); odswiezZdalnie(); }).catch(()=>{});
+        return;
+      }
+      syncBlad=true; pokazSync();
+    });
 }
 function saveModule(nazwa){ oznaczZmiane('m:'+nazwa); }
 function saveDzien(data){ jednostkaDnia(data); oznaczZmiane('d:'+data); }
@@ -399,10 +443,10 @@ function przyjmijSnapshot(klucz,snap){
   wersja++; pokazSync(); odswiezZdalnie();
 }
 
+let syncUruchomiony=false;
 function startSync(){
-  if(!FIREBASE_CONFIG || typeof firebase==='undefined'){ pokazSync(); return; }
-  try{ if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG); fs=firebase.firestore(); }
-  catch(e){ console.warn('Firebase',e); syncBlad=true; pokazSync(); return; }
+  if(!fs || syncUruchomiony){ pokazSync(); return; }
+  syncUruchomiony=true;
   MODULY.forEach(m=>{
     const k='m:'+m;
     fs.collection(KOL_MODULY).doc(m).onSnapshot(s=>przyjmijSnapshot(k,s),e=>{ console.warn(k,e); syncBlad=true; pokazSync(); });
@@ -458,7 +502,7 @@ function pokazSync(){
   const e=$('#sync'); if(!e) return;
   const lista=Object.values(J);
   let kl='', t='';
-  if(!FIREBASE_CONFIG || typeof firebase==='undefined'){ kl='offline'; t=FIREBASE_CONFIG?'Brak SDK Firebase – zapis lokalny':'Tylko to urządzenie'; }
+  if(!FB_CONFIG || typeof firebase==='undefined'){ kl='offline'; t=FB_CONFIG?'Brak SDK Firebase – zapis lokalny':'Tylko to urządzenie'; }
   else if(!fs){ kl='blad'; t='Błąd połączenia z Firebase'; }
   else if(!navigator.onLine){ kl='offline'; t='Offline – zapis lokalny'; }
   else if(MODULY.some(m=>!J['m:'+m]?.pierwszy) || !dniGotowe){ kl='zapis'; t='Łączenie…'; }
@@ -665,21 +709,23 @@ function procKlasa(p){ if(p==null||!Number.isFinite(p)) return ''; const r=Math.
 /* =====================================================================
    8. POWŁOKA INTERFEJSU
    ===================================================================== */
-const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['cielaki','Cielaki'],['ustawienia','Ustawienia']];
+const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
 const UI={tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
 const R={};   // renderery zakładek
 let odroczonyRender=false;
 
 function rysujZakladki(){
-  $('#zakladki').innerHTML=ZAKLADKI.map(([k,t])=>`<button class="${UI.tab===k?'akt':''}" onclick="pokazZakladke('${k}')">${t}</button>`).join('');
+  const dost=ZAKLADKI.filter(([k])=>poziom(k)>=1);
+  if(dost.length && !dost.some(([k])=>k===UI.tab)) UI.tab=dost[0][0];
+  $('#zakladki').innerHTML=dost.map(([k,t])=>`<button class="${UI.tab===k?'akt':''}" onclick="pokazZakladke('${k}')">${t}</button>`).join('');
   $('#firmaNag').textContent=D.ustawienia.firma||'';
 }
-function pokazZakladke(k){ UI.tab=k; localStorage.setItem('wb_tab',k); UI.numerRec=null; rysujZakladki(); render(); window.scrollTo({top:0}); }
+function pokazZakladke(k){ if(poziom(k)<1) return; UI.tab=k; localStorage.setItem('wb_tab',k); UI.numerRec=null; rysujZakladki(); render(); window.scrollTo({top:0}); }
 function render(){
   const w=$('#widok');
   const akt=document.activeElement, fid=akt&&akt.dataset?akt.dataset.fid:null;
   let sel=null; try{ if(fid&&akt.selectionStart!=null) sel=[akt.selectionStart,akt.selectionEnd]; }catch(e){}
-  try{ w.innerHTML=(R[UI.tab]||R.woz)(); }
+  try{ w.innerHTML=banerPoziomu(UI.tab)+(R[UI.tab]||R.woz)(); zastosujPoziom(w,UI.tab); }
   catch(e){ console.error(e); w.innerHTML=`<div class="panel pb"><b>Błąd widoku:</b> ${esc(e.message)}</div>`; }
   odroczonyRender=false;
   if(fid){ const n=w.querySelector(`[data-fid="${fid}"]`); if(n){ n.focus({preventScroll:true}); if(sel) try{ n.setSelectionRange(sel[0],sel[1]); }catch(e){} } }
@@ -742,8 +788,8 @@ R.surowce=()=>{
       <td><input class="pole num" inputmode="decimal" data-fid="sc_${s.id}" value="${fmtIn(s.cenaT,2)}" onchange="ustawSur('${s.id}','cenaT',this.value)"></td>
       <td>${cenaKg(s.cenaT)}</td>
       <td><b class="${stan<0?'ostrz':''}">${fmt(stan,2)}</b><div class="cichy" style="font-size:11.5px">spis ${dataPL(s.stanData)}</div></td>
-      <td><button class="btn maly" onclick="modalSpis('${s.id}')">Spis</button></td>
-      <td><button class="btn maly glowny" onclick="modalDostawa('${s.id}')">+ Dostawa</button> ${nDost?`<button class="btn maly" onclick="UI.rozwDost['${s.id}']=!UI.rozwDost['${s.id}'];render()">${rozw?'▾':'▸'} ${nDost}</button>`:''}</td>
+      <td data-wpis><button class="btn maly" onclick="modalSpis('${s.id}')">Spis</button></td>
+      <td data-wpis><button class="btn maly glowny" onclick="modalDostawa('${s.id}')">+ Dostawa</button> ${nDost?`<button class="btn maly" data-zawsze onclick="UI.rozwDost['${s.id}']=!UI.rozwDost['${s.id}'];render()">${rozw?'▾':'▸'} ${nDost}</button>`:''}</td>
       <td>${fmt(du,0)}</td>
       <td class="l">${wyst}</td>
       <td><button class="btn ikona usun" onclick="usunSur('${s.id}')" aria-label="Usuń">✕</button></td></tr>`;
@@ -751,13 +797,13 @@ R.surowce=()=>{
       h+=`<tr><td colspan="10" class="l" style="background:var(--pow2)"><table class="t" style="max-width:720px"><thead><tr><th class="l">Data dostawy</th><th>Ilość (t)</th><th class="l">Uwagi</th><th class="l">Wpływ na stan</th><th></th></tr></thead><tbody>
         ${[...s.dostawy].sort((a,b)=>b.data.localeCompare(a.data)).map(x=>`<tr><td class="l">${dataPL(x.data)}</td><td>${fmt(x.t,2)}</td><td class="l">${esc(x.uwagi||'')}</td>
         <td class="l">${x.data<=s.stanData?'<span class="cichy">przed spisem – już w stanie</span>':x.data>dzis()?'<span class="cichy">przyszła</span>':'doliczona'}</td>
-        <td><button class="btn ikona usun" onclick="usunDostawe('${s.id}','${x.id}')">✕</button></td></tr>`).join('')}</tbody></table></td></tr>`;
+        <td data-wpis><button class="btn ikona usun" onclick="usunDostawe('${s.id}','${x.id}')">✕</button></td></tr>`).join('')}</tbody></table></td></tr>`;
     }
     return h;
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Surowce i stany magazynowe</h2>
       <span class="opis">Stan = spis + dostawy po spisie − zużycie z dawek zadanych (dni bez kursów liczone wg planu)</span>
-      <div class="prawo"><button class="btn" onclick="drukujSurowce()">Drukuj</button><button class="btn glowny" onclick="modalNowySur()">+ Surowiec</button></div></div>
+      <div class="prawo"><button class="btn" data-zawsze onclick="drukujSurowce()">Drukuj</button><button class="btn glowny" onclick="modalNowySur()">+ Surowiec</button></div></div>
     <div class="przewin"><table class="t"><thead><tr><th class="l">Surowiec</th><th class="l">Kategoria</th><th>Cena zł/t</th><th>zł/kg</th><th>Stan (t)</th><th></th><th class="l">Dostawy</th><th>Zużycie<br>kg/dzień</th><th class="l">Wystarczy do</th><th></th></tr></thead>
     <tbody>${wiersze||'<tr><td colspan="10"><div class="pusto"><b>Brak surowców</b>Dodaj pierwszy surowiec przyciskiem „+ Surowiec”.</div></td></tr>'}</tbody></table></div></div>`;
 };
@@ -996,7 +1042,7 @@ R.woz=()=>{
     const s=C.sektory[n.sektorId]||kontekst(wczoraj).sektory[n.sektorId], g=s?C.grupy[s.grupaId]:null;
     const przydz=n.alok.reduce((a,x)=>a+(x.kg||0),0), reszta=(n.kg||0)-przydz;
     const sw=Aw.sek[n.sektorId];
-    return `<div class="chip nd" data-drag="nd" data-id="${n.id}" onclick="tapNd('${n.id}',event)">
+    return `<div class="chip nd" data-wpis data-drag="nd" data-id="${n.id}" onclick="tapNd('${n.id}',event)">
       <span class="uchwyt" aria-hidden="true">⋮⋮</span><span class="n">♻ ${esc(s?.nazwa||'?')}</span>
       <span class="s"><input class="pole num" style="width:74px;padding:2px 5px" inputmode="decimal" data-fid="ndkg_${n.id}" value="${fmtIn(n.kg,0)}" onclick="event.stopPropagation()" onchange="ustawNd('${n.id}',this.value)"> kg</span>
       <span class="nd-info">${przydz>0?`domieszano ${fmt(przydz,0)} kg · `:''}${reszta>0.5?`<b>${fmt(reszta,0)} kg</b> do rozdania lub wyrzucenia`:'rozdane w całości'}
@@ -1015,17 +1061,17 @@ R.woz=()=>{
   else if(snapRozni(data)) baner=`<div class="baner uwaga">Dawki, ceny lub sektory zmieniły się od ${new Date(d.snap.ts).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}, gdy ten dzień został zamrożony. <button class="btn maly" onclick="zastosujAktualne()">Przelicz wg aktualnych</button></div>`;
   const kat=`<div class="legenda"><span><i style="background:${KAT_KOL.obj}"></i>objętościowe</span><span><i style="background:${KAT_KOL.tres}"></i>treściwe</span><span><i style="background:${KAT_KOL.dod}"></i>dodatki</span><span><i style="background:repeating-linear-gradient(45deg,#8A6A3E 0 3px,#AD8B5A 3px 6px)"></i>niedojady</span><span>· liczby w wozie = kolejność załadunku</span></div>`;
   return `<div class="woz-gora"><span class="dzien-tyt">${dzienTyg(data)[0].toUpperCase()+dzienTyg(data).slice(1)}</span>
-      <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)" aria-label="Poprzedni dzień">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)" aria-label="Następny dzień">▶</button></div>
-      ${data!==dzis()?`<button class="btn maly" onclick="UI.data=dzis();render()">Dziś</button>`:''}
-      <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" onclick="ulozKursy()">⚡ Ułóż kursy wg planu</button><button class="btn" onclick="drukujKarty()">Drukuj karty załadunku</button></span></div>
+      <div class="dzien-nav" data-zawsze><button class="btn ikona" onclick="zmienDate(-1)" aria-label="Poprzedni dzień">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)" aria-label="Następny dzień">▶</button></div>
+      ${data!==dzis()?`<button class="btn maly" data-zawsze onclick="UI.data=dzis();render()">Dziś</button>`:''}
+      <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn" onclick="ulozKursy()">⚡ Ułóż kursy wg planu</button><button class="btn" data-zawsze onclick="drukujKarty()">Drukuj karty załadunku</button></span></div>
     ${baner}
     <div class="woz-uklad"><aside class="boczny">
         <h3>Sektory</h3><div class="cichy opis-boczny">Przeciągnij sektor na kurs albo stuknij, żeby wybrać kurs. Pasek: rozwiezione / plan na dobę.</div><div class="lista-sek">${chipy||'<div class="pusto">Brak sektorów – dodaj je w zakładce Dawki.</div>'}</div>
-        <h3 class="nd-tyt">♻ Niedojady zebrane rano <button class="btn maly" style="margin-left:auto" onclick="modalNd()">+ Wpisz</button></h3><div class="cichy opis-boczny">Resztki z żywienia ${dataPL(wczoraj)} – liczą się do dawki pobranej tamtego dnia. Przeciągnij na sektor w kursie, żeby je domieszać.</div>
+        <h3 class="nd-tyt">♻ Niedojady zebrane rano <button class="btn maly" data-wpis style="margin-left:auto" onclick="modalNd()">+ Wpisz</button></h3><div class="cichy opis-boczny">Resztki z żywienia ${dataPL(wczoraj)} – liczą się do dawki pobranej tamtego dnia. Przeciągnij na sektor w kursie, żeby je domieszać.</div>
         <div class="lista-sek">${nd}</div>
       </aside>
       <section>${kat}<div class="kursy-kol">${kol(1)}${maZad2?kol(2):''}</div>
-        <div class="panel" style="margin-top:4px"><div class="ph"><h2>Uwagi do dnia</h2><span class="opis">trafiają do raportu kosztów</span></div><div class="pb"><textarea class="pole" rows="2" data-fid="uw_dnia" onchange="ustawUwagiDnia(this.value)">${esc(d?.uwagi||'')}</textarea></div></div>
+        <div class="panel" style="margin-top:4px"><div class="ph"><h2>Uwagi do dnia</h2><span class="opis">trafiają do raportu kosztów</span></div><div class="pb"><textarea class="pole" rows="2" data-wpis data-fid="uw_dnia" onchange="ustawUwagiDnia(this.value)">${esc(d?.uwagi||'')}</textarea></div></div>
       </section></div>`;
 };
 function kursHTML(d,C,A,k){
@@ -1048,14 +1094,14 @@ function kursHTML(d,C,A,k){
     return `<div class="kw" data-drop="ndsek" data-accept="nd" data-kurs="${k.id}" data-sek="${r.sektorId}" data-swiezy="${k.id}_${r.sektorId}">
       <span class="dot" style="background:${g?.kolor||'#999'}"></span><span><b>${esc(s?.nazwa||'(usunięty sektor)')}</b></span>
       <span class="r ukr">${s?.sztuki??'–'}</span><span class="r ukr">${fmt(planK,0)}</span>
-      <input class="pole num" inputmode="decimal" data-fid="rz_${k.id}_${r.sektorId}" value="${fmtIn(r.kg,0)}" onchange="ustawRozdzial('${k.id}','${r.sektorId}',this.value)">
+      <input class="pole num" data-wpis inputmode="decimal" data-fid="rz_${k.id}_${r.sektorId}" value="${fmtIn(r.kg,0)}" onchange="ustawRozdzial('${k.id}','${r.sektorId}',this.value)">
       <span class="r">${s&&s.sztuki>0?fmt((r.kg||0)/s.sztuki,1):'–'}</span>
       <span class="proc ${procKlasa(p)}">${p==null?'–':fmt(p,0)+'%'}</span>
       <button class="btn ikona usun" onclick="usunRozdzial('${k.id}','${r.sektorId}')" aria-label="Usuń">✕</button></div>`;
   }).join('');
   const ndW=alokacjeKursu(d,k.id).map(({n,a,i})=>{
     const zr=C.sektory[n.sektorId]||kontekst(dataPlus(d.data,-1)).sektory[n.sektorId], cel=C.sektory[a.sektorId];
-    return `<div class="kw ndw" data-swiezy="nd_${n.id}_${k.id}_${a.sektorId}"><span>♻</span><span>z ${esc(zr?.nazwa||'?')} → <b>${esc(cel?.nazwa||'?')}</b></span><span class="ukr"></span><span class="ukr"></span>
+    return `<div class="kw ndw" data-wpis data-swiezy="nd_${n.id}_${k.id}_${a.sektorId}"><span>♻</span><span>z ${esc(zr?.nazwa||'?')} → <b>${esc(cel?.nazwa||'?')}</b></span><span class="ukr"></span><span class="ukr"></span>
       <input class="pole num" inputmode="decimal" data-fid="al_${n.id}_${i}" value="${fmtIn(a.kg,0)}" onchange="ustawAlok('${n.id}',${i},this.value)">
       <span class="r">${cel&&cel.sztuki>0?fmt((a.kg||0)/cel.sztuki,1):'–'}</span><span></span>
       <button class="btn ikona usun" onclick="usunAlok('${n.id}',${i})" aria-label="Usuń">✕</button></div>`;
@@ -1065,7 +1111,7 @@ function kursHTML(d,C,A,k){
     <div class="kurs-nag"><span class="uchwyt" data-drag="kurs" data-id="${k.id}" title="Przeciągnij, żeby zmienić kolejność">⋮⋮</span><span class="kurs-nr">Kurs ${numerKursu(d,k.id)}</span>
       <select class="pole" onchange="ustawKurs('${k.id}','wozId',this.value)" aria-label="Wóz"><option value="">— wóz —</option>${D.wozy.map(w=>`<option value="${w.id}" ${k.wozId===w.id?'selected':''}>${esc(w.nazwa)}</option>`).join('')}</select>
       <select class="pole" onchange="ustawKurs('${k.id}','recepturaId',this.value)" aria-label="Receptura"><option value="">— receptura —</option>${Object.entries(C.receptury).map(([id,r])=>`<option value="${id}" ${k.recepturaId===id?'selected':''}>${esc(r.nazwa)}</option>`).join('')}</select>
-      <span class="prawo"><button class="btn ikona" title="Karta załadunku" onclick="drukujKarty('${k.id}')">🖨</button><button class="btn ikona usun" title="Usuń kurs" onclick="usunKurs('${k.id}')">✕</button></span></div>
+      <span class="prawo"><button class="btn ikona" data-zawsze title="Karta załadunku" onclick="drukujKarty('${k.id}')">🖨</button><button class="btn ikona usun" title="Usuń kurs" onclick="usunKurs('${k.id}')">✕</button></span></div>
     <div class="wanna-wrap"><div class="wanna ${m.razem>0?'':'pusta'}" style="${przekr?'box-shadow:inset 0 0 0 2px var(--zly)':''}">${segs}${segNd}${poj>0&&m.razem>poj?`<div class="poj" style="left:${poj/skala*100}%"></div>`:''}</div>
       <div class="wanna-opis"><span>Masa: <b>${fmt(m.razem,0)} kg</b>${m.nd>0?` (świeży TMR ${fmt(m.sw,0)} + ♻ ${fmt(m.nd,0)})`:''}</span>
       <span>${poj>0?(przekr?`<span class="ostrz">ponad pojemność o ${fmt(m.razem-poj,0)} kg</span>`:`pojemność ${fmt(poj,0)} kg · ${fmt(m.razem/poj*100,0)}%`):(rec?`${esc(rec.nazwa)} · ${fmt(st.kosztKg,3)} zł/kg`:'wybierz recepturę')}</span></div></div>
@@ -1383,9 +1429,9 @@ R.koszty=()=>{
   const data=UI.data, T=tabeleKosztow(data), u=D.ustawienia;
   const ileZPlanu=T.G.filter(g=>g.zPlanu).length;
   return `<div class="woz-gora"><span class="dzien-tyt">Koszty żywienia</span>
-      <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
-      <span class="przel">${[['zadana','Dawka zadana'],['plan','Dawka obliczona']].map(([k,t])=>`<button class="${UI.podstawa===k?'akt':''}" onclick="UI.podstawa='${k}';render()">${t}</button>`).join('')}</span>
-      <span style="margin-left:auto"><button class="btn glowny" onclick="drukujKoszty()">Drukuj raport</button></span></div>
+      <div class="dzien-nav" data-zawsze><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
+      <span class="przel" data-zawsze>${[['zadana','Dawka zadana'],['plan','Dawka obliczona']].map(([k,t])=>`<button class="${UI.podstawa===k?'akt':''}" onclick="UI.podstawa='${k}';render()">${t}</button>`).join('')}</span>
+      <span style="margin-left:auto"><button class="btn glowny" data-zawsze onclick="drukujKoszty()">Drukuj raport</button></span></div>
     <div class="baner info">${esc(u.firma||'')} · nr obory ${esc(u.nrObory||'–')} · ${dataPL(data)} · zwierząt <b>${T.zw}</b> szt · krowy dojne <b>${T.dojne}</b> szt
       ${UI.podstawa==='zadana'&&ileZPlanu?` · <span class="cichy">${ileZPlanu} ${ileZPlanu===1?'grupa':'grup'} bez kursów – liczone wg planu (*)</span>`:''}</div>
     <div class="panel"><div class="ph"><h2>1. Dawki pasz i koszt surowcowy na sztukę/dzień</h2><span class="opis">kg świeżej masy/szt</span></div><div class="przewin">${T.s1}</div></div>
@@ -1395,7 +1441,7 @@ R.koszty=()=>{
     <div class="panel"><div class="ph"><h2>Uwagi i źródła</h2></div><div class="pb">
       <ul style="margin:0 0 10px;padding-left:18px">${T.uw.map(x=>`<li>${x}</li>`).join('')}</ul>
       <div class="wiersz"><div><label class="et">Uwagi do tego dnia</label><textarea class="pole" rows="2" data-fid="uw_dnia_k" onchange="ustawUwagiDnia(this.value);render()">${esc(T.A.d?.uwagi||DNI[data]?.uwagi||'')}</textarea></div>
-      <div><label class="et">Źródła (stałe dla raportu)</label><textarea class="pole" rows="2" data-fid="zrodla" onchange="ustawUst('zrodla',this.value)">${esc(u.zrodla||'')}</textarea></div></div></div></div>`;
+      <div><label class="et">Źródła (stałe dla raportu)</label><textarea class="pole" rows="2" data-fid="zrodla" ${poziom('ustawienia')<3?'disabled':''} onchange="ustawUst('zrodla',this.value)">${esc(u.zrodla||'')}</textarea></div></div></div></div>`;
 };
 function drukujKoszty(){
   const data=UI.data, T=tabeleKosztow(data), u=D.ustawienia;
@@ -1446,13 +1492,13 @@ R.raporty=()=>{
   const p=`<span class="przel">${[['dawki','Realizacja dawek'],['zuzycie','Zużycie surowców']].map(([k,t])=>`<button class="${UI.rapTyp===k?'akt':''}" onclick="UI.rapTyp='${k}';render()">${t}</button>`).join('')}</span>`;
   if(UI.rapTyp==='zuzycie'){
     const Z=tabelaZuzycia(UI.rapOd,UI.rapDo);
-    return `<div class="woz-gora"><span class="dzien-tyt">Raporty</span>${p}
+    return `<div class="woz-gora" data-zawsze><span class="dzien-tyt">Raporty</span>${p}
       <label class="cichy">od <input type="date" class="pole" value="${UI.rapOd}" onchange="UI.rapOd=this.value;render()"></label><label class="cichy">do <input type="date" class="pole" value="${UI.rapDo}" onchange="UI.rapDo=this.value;render()"></label>
       <span style="margin-left:auto"><button class="btn glowny" onclick="drukujZuzycie()">Drukuj</button></span></div>
       ${UI.rapOd>UI.rapDo?'<div class="baner uwaga">Data „od” jest późniejsza niż „do”.</div>':''}
       <div class="panel"><div class="ph"><h2>Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}</h2><span class="opis">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu · tylko świeże surowce (bez niedojadów)</span></div><div class="przewin">${Z.h}</div></div>`;
   }
-  return `<div class="woz-gora"><span class="dzien-tyt">Raporty</span>${p}
+  return `<div class="woz-gora" data-zawsze><span class="dzien-tyt">Raporty</span>${p}
       <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${UI.data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
       <span style="margin-left:auto"><button class="btn glowny" onclick="drukujRealizacje()">Drukuj</button></span></div>
     <div class="panel"><div class="ph"><h2>Realizacja dawek — ${dataPL(UI.data)}</h2><span class="opis">obliczona = receptura · zadana = kursy + domieszane niedojady · pobrana = zadana − niedojady zebrane następnego dnia</span></div>
@@ -1486,8 +1532,8 @@ R.ustawienia=()=>{
       ${D.wozy.map(w=>`<tr><td class="l"><input class="pole" data-fid="wn_${w.id}" value="${esc(w.nazwa)}" onchange="ustawWoz('${w.id}','nazwa',this.value)"></td><td><input class="pole num" inputmode="numeric" data-fid="wp_${w.id}" value="${w.pojemnoscKg||0}" onchange="ustawWoz('${w.id}','pojemnoscKg',this.value)"></td>
         <td><button class="btn ikona usun" onclick="usunWoz('${w.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>
     <div class="panel"><div class="ph"><h2>Synchronizacja</h2></div><div class="pb cichy">
-      Firebase: <b>${FIREBASE_CONFIG?'skonfigurowany':'brak konfiguracji – dane tylko na tym urządzeniu'}</b> · urządzenie <code>${DEV}</code> · wersja danych ${WERSJA_DANYCH}
-      <div style="margin-top:10px"><button class="btn" onclick="eksport()">Pobierz kopię danych (JSON)</button></div></div></div>`;
+      Firebase: <b>${FB_CONFIG?'skonfigurowany':'brak konfiguracji – dane tylko na tym urządzeniu'}</b> · urządzenie <code>${DEV}</code> · wersja danych ${WERSJA_DANYCH}
+      <div style="margin-top:10px"><button class="btn" data-zawsze onclick="eksport()">Pobierz kopię danych (JSON)</button></div></div></div>`;
 };
 function ustawUst(pole,v){ D.ustawienia[pole]=v.trim(); saveModule('ustawienia'); if(UI.tab==='ustawienia') render(); else $('#firmaNag').textContent=D.ustawienia.firma||''; }
 function ustawWoz(id,pole,v){ const w=woz(id); if(!w) return; if(pole==='pojemnoscKg') w.pojemnoscKg=Math.max(0,Math.round(liczba(v))); else { v=v.trim(); if(!v){ render(); return; } w.nazwa=v; } saveModule('wozy'); render(); }
@@ -1498,13 +1544,299 @@ function eksport(){
 }
 
 /* =====================================================================
+   17a. ROLE I UPRAWNIENIA
+   Poziomy: 0 brak (zakładka ukryta) · 1 podgląd · 2 wpis · 3 pełny.
+   Macierz siedzi w Firestore (weibloem_admin/uprawnienia) i czytają ją też reguły
+   bezpieczeństwa – to, czego rola nie może zapisać, odrzuci serwer, nie tylko interfejs.
+   ===================================================================== */
+const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
+const POZIOMY=['brak','podgląd','wpis','pełny'];
+// które poziomy mają sens w danej zakładce
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ kursów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik'};
+const DOMYSLNE_UPR={
+  szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,cielaki:3,ustawienia:3,uzytkownicy:3},
+  zootechnik:{woz:3,dawki:3,surowce:3,koszty:1,raporty:1,cielaki:3,ustawienia:1,uzytkownicy:0},
+  pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,cielaki:1,ustawienia:0,uzytkownicy:0}
+};
+let PROFIL=null;     // {uid, login, imie, rola, aktywny}
+let UPR=lsCzytaj('uprawnienia')||klon(DOMYSLNE_UPR);
+let UZYT=[];         // lista kont (panel)
+let auth=null;
+
+function poziom(tab){
+  if(!PROFIL) return 0;
+  if(PROFIL.rola==='tworca') return 3;
+  const v=UPR?.[PROFIL.rola]?.[tab];
+  return typeof v==='number'?v:(DOMYSLNE_UPR[PROFIL.rola]?.[tab]??0);
+}
+function banerPoziomu(tab){
+  const p=poziom(tab);
+  if(p===1 && tab!=='raporty') return `<div class="baner tryb">Podgląd – w tej zakładce nie możesz nic zmieniać.</div>`;
+  if(p===2 && OPIS_WPISU[tab]) return `<div class="baner tryb">Tryb wpisu: ${OPIS_WPISU[tab]}.</div>`;
+  return '';
+}
+// Po narysowaniu zakładki blokuje to, czego rola nie może. data-zawsze = nawigacja/druk, data-wpis = dozwolone od poziomu „wpis”.
+function zastosujPoziom(w,tab){
+  const p=poziom(tab); if(p>=3) return;
+  const wolno=el=>el.closest('[data-zawsze]') || (p===2 && el.closest('[data-wpis]'));
+  $$('input,select,textarea,button',w).forEach(el=>{
+    if(wolno(el)) return;
+    el.disabled=true;
+    if(el.tagName==='BUTTON') el.classList.add('ukryj-ro');
+    if(el.tagName!=='BUTTON' && !el.value) el.placeholder='';
+  });
+  $$('[data-drag]',w).forEach(el=>{ if(!wolno(el)) el.removeAttribute('data-drag'); });
+  $$('[onclick]',w).forEach(el=>{ if(el.tagName==='BUTTON'||wolno(el)) return; el.removeAttribute('onclick'); el.style.cursor='default'; });
+  $$('.uchwyt',w).forEach(el=>{ if(!wolno(el)) el.style.visibility='hidden'; });
+  if(tab==='woz') $$('.opis-boczny',w).slice(0,1).forEach(el=>el.style.display='none');
+  $$('.upusc,.nowy-kurs',w).forEach(el=>{ if(!(p===2&&tab==='woz'&&el.classList.contains('upusc'))) el.style.display='none'; });
+}
+
+/* =====================================================================
+   17b. LOGOWANIE (Firebase Authentication – hasła trzyma Firebase, aplikacja ich nie widzi)
+   Login bez @ zamieniamy na adres techniczny login@weibloem.app; można też podać prawdziwy e-mail.
+   ===================================================================== */
+const DOMENA_LOGINU='weibloem.app';
+const emailZLoginu=l=>{ l=l.trim().toLowerCase(); return l.includes('@')?l:l+'@'+DOMENA_LOGINU; };
+const loginZEmaila=e=>(e||'').endsWith('@'+DOMENA_LOGINU)?e.slice(0,-(DOMENA_LOGINU.length+1)):e;
+const jestEmail=l=>(l||'').includes('@') && !(l||'').endsWith('@'+DOMENA_LOGINU);
+function bladAuth(e){
+  const k=e&&e.code||'';
+  return ({'auth/invalid-credential':'Nieprawidłowy login lub hasło.','auth/wrong-password':'Nieprawidłowy login lub hasło.','auth/user-not-found':'Nieprawidłowy login lub hasło.',
+    'auth/invalid-login-credentials':'Nieprawidłowy login lub hasło.','auth/too-many-requests':'Za dużo prób. Odczekaj kilka minut i spróbuj ponownie.',
+    'auth/network-request-failed':'Brak połączenia z internetem. Pierwsze logowanie na urządzeniu wymaga sieci.','auth/email-already-in-use':'Ten login jest już zajęty.',
+    'auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.','auth/invalid-email':'Login może zawierać litery, cyfry, kropkę, myślnik i podkreślenie.',
+    'auth/operation-not-allowed':'Logowanie hasłem jest wyłączone. W konsoli Firebase włącz: Authentication → Sign-in method → Email/Password.',
+    'auth/requires-recent-login':'Zaloguj się ponownie i powtórz zmianę hasła.'})[k]||('Błąd: '+(e&&e.message||k));
+}
+function pokazEkranLogowania(tryb,komunikat){
+  $('header').hidden=true; $('#widok').hidden=true; const L=$('#logowanie'); L.hidden=false;
+  const blad=komunikat?`<div class="login-blad">${esc(komunikat)}</div>`:'';
+  let f='';
+  if(tryb==='ladowanie') f=`<p class="cichy" style="text-align:center">Łączenie…</p>`;
+  else if(tryb==='start') f=`<form onsubmit="event.preventDefault();utworzTworce()">
+      <p class="cichy" style="margin:0">Pierwsze uruchomienie. Utwórz konto twórcy – będzie zarządzać pozostałymi kontami.</p>${blad}
+      <div><label class="et">Imię i nazwisko</label><input class="pole szer" id="lg-i" autocomplete="name" required></div>
+      <div><label class="et">Login</label><input class="pole szer" id="lg-l" autocomplete="username" autocapitalize="none" required></div>
+      <div><label class="et">Hasło (min. 6 znaków)</label><input class="pole szer" id="lg-h" type="password" autocomplete="new-password" required></div>
+      <div><label class="et">Powtórz hasło</label><input class="pole szer" id="lg-h2" type="password" autocomplete="new-password" required></div>
+      <button class="btn glowny" id="lg-b">Utwórz konto twórcy</button></form>`;
+  else f=`<form onsubmit="event.preventDefault();zaloguj()">${blad}
+      <div><label class="et">Login</label><input class="pole szer" id="lg-l" autocomplete="username" autocapitalize="none" required></div>
+      <div><label class="et">Hasło</label><input class="pole szer" id="lg-h" type="password" autocomplete="current-password" required></div>
+      <button class="btn glowny" id="lg-b">Zaloguj</button>
+      <p class="cichy" style="margin:0;text-align:center;font-size:13px">Nie pamiętasz hasła? Poproś szefa lub twórcę o nowe konto.</p></form>`;
+  L.innerHTML=`<div class="login-karta"><img src="icon-192.png" alt=""><h1>Weibloem</h1><div class="pod-tyt">żywienie stada</div>${f}</div>`;
+  setTimeout(()=>{ const i=$('#lg-l')||$('#lg-i'); if(i) i.focus(); },50);
+}
+async function zaloguj(){
+  const l=mv('lg-l'), h=mv('lg-h'), b=$('#lg-b'); b.disabled=true; b.textContent='Logowanie…';
+  try{ await auth.signInWithEmailAndPassword(emailZLoginu(l),h); }
+  catch(e){ pokazEkranLogowania('logowanie',bladAuth(e)); const i=$('#lg-l'); if(i) i.value=l; }
+}
+let tworzeTworce=false;
+async function utworzTworce(){
+  const i=mv('lg-i').trim(), l=mv('lg-l').trim(), h=mv('lg-h');
+  if(h!==mv('lg-h2')) return pokazEkranLogowania('start','Hasła się różnią.');
+  if(!jestEmail(l) && !/^[a-z0-9._-]{3,}$/i.test(l)) return pokazEkranLogowania('start','Login: min. 3 znaki – litery bez polskich znaków, cyfry, kropka, myślnik.');
+  const b=$('#lg-b'); b.disabled=true; b.textContent='Tworzenie…';
+  tworzeTworce=true;
+  try{
+    const c=await auth.createUserWithEmailAndPassword(emailZLoginu(l),h), uid=c.user.uid, t=Date.now();
+    const bt=fs.batch();
+    bt.set(fs.collection(KOL_UZYT).doc(uid),{login:l.toLowerCase(),imie:i,rola:'tworca',aktywny:true,utworzono:t,utworzyl:uid,ostatnio:t});
+    bt.set(fs.collection(KOL_ADMIN).doc('init'),{ts:t,uid});
+    await bt.commit();
+    await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:t});
+  }catch(e){ tworzeTworce=false; console.warn(e); try{ if(auth.currentUser) await auth.currentUser.delete(); }catch(x){} pokazEkranLogowania('start',bladAuth(e)); return; }
+  tworzeTworce=false;
+}
+
+let aplikacjaWidoczna=false, profilNasluch=null, uzytNasluch=null;
+function pokazAplikacje(){
+  $('#logowanie').hidden=true; $('header').hidden=false; $('#widok').hidden=false;
+  const k=$('#konto');
+  if(PROFIL && !PROFIL.lokalny){ k.hidden=false; k.textContent=(PROFIL.imie||PROFIL.login)+' · '+ROLE[PROFIL.rola].n; } else k.hidden=true;
+  rysujZakladki(); render(); pokazSync();
+  aplikacjaWidoczna=true;
+}
+function startAplikacji(){
+  if(!FB_CONFIG || typeof firebase==='undefined' || !firebase.auth){
+    PROFIL={rola:'tworca',imie:'',lokalny:true}; pokazAplikacje(); return;   // tryb lokalny – bez logowania
+  }
+  try{ if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG); fs=firebase.firestore(); auth=firebase.auth(); }
+  catch(e){ console.warn('Firebase',e); syncBlad=true; PROFIL={rola:'tworca',lokalny:true}; pokazAplikacje(); return; }
+  const zap=lsCzytaj('profil');
+  if(!zap) pokazEkranLogowania('ladowanie');
+  auth.onAuthStateChanged(async u=>{
+    if(!u){
+      PROFIL=null; localStorage.removeItem(LS+'profil');
+      if(komunikatWylog){ pokazEkranLogowania('logowanie',komunikatWylog); komunikatWylog=null; return; }
+      if(aplikacjaWidoczna){ location.reload(); return; }
+      let init=true;
+      try{ init=(await fs.collection(KOL_ADMIN).doc('init').get()).exists; }catch(e){ console.warn('init',e); }
+      pokazEkranLogowania(init?'logowanie':'start'); return;
+    }
+    // Konto z pamięci (np. offline) – pokazujemy dane od razu, rola potwierdzi się z chmury
+    if(zap && zap.uid===u.uid && zap.aktywny){ PROFIL=zap; pokazAplikacje(); startSync(); nasluchAdmin(); }
+    if(profilNasluch) profilNasluch();
+    let pierwszy=true;
+    profilNasluch=fs.collection(KOL_UZYT).doc(u.uid).onSnapshot(s=>{
+      if(!s.exists){ if(tworzeTworce) return; zablokujSesje('To konto nie ma przypisanej roli. Skontaktuj się z twórcą aplikacji.'); return; }
+      const d=s.data();
+      if(!d.aktywny){ zablokujSesje('Konto zostało zablokowane.'); return; }
+      const zmianaRoli=PROFIL && PROFIL.rola!==d.rola;
+      PROFIL={uid:u.uid,login:d.login||loginZEmaila(u.email),imie:d.imie||'',rola:d.rola,aktywny:true};
+      lsZapisz('profil',PROFIL);
+      if(!aplikacjaWidoczna){ pokazAplikacje(); startSync(); nasluchAdmin(); }
+      else if(zmianaRoli){ toast('Twoja rola: '+ROLE[d.rola].n); pokazAplikacje(); nasluchAdmin(); }
+      else { const k=$('#konto'); k.textContent=(PROFIL.imie||PROFIL.login)+' · '+ROLE[PROFIL.rola].n; }
+      if(pierwszy && !s.metadata.hasPendingWrites){ pierwszy=false; fs.collection(KOL_UZYT).doc(u.uid).update({ostatnio:Date.now()}).catch(()=>{}); }
+    },e=>{ console.warn('profil',e); });
+  });
+}
+let komunikatWylog=null;
+async function zablokujSesje(tekst){
+  komunikatWylog=tekst; aplikacjaWidoczna=false; PROFIL=null;
+  localStorage.removeItem(LS+'profil');
+  try{ await auth.signOut(); }catch(e){ pokazEkranLogowania('logowanie',tekst); }
+}
+let adminNasluch=false;
+function nasluchAdmin(){
+  if(!adminNasluch){
+    adminNasluch=true;
+    fs.collection(KOL_ADMIN).doc('uprawnienia').onSnapshot(s=>{
+      if(s.exists){ UPR=s.data().m||klon(DOMYSLNE_UPR); lsZapisz('uprawnienia',UPR); }
+      else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now()}).catch(()=>{});
+      rysujZakladki(); odswiezZdalnie();
+    },e=>console.warn('uprawnienia',e));
+  }
+  if(!uzytNasluch && poziom('uzytkownicy')>=1){
+    uzytNasluch=fs.collection(KOL_UZYT).onSnapshot(q=>{ UZYT=q.docs.map(d=>({uid:d.id,...d.data()})); if(UI.tab==='uzytkownicy') odswiezZdalnie(); },e=>console.warn('uzytkownicy',e));
+  }
+}
+async function wyloguj(){
+  wypchnijOczekujace();
+  await new Promise(r=>setTimeout(r,500));
+  localStorage.removeItem(LS+'profil');
+  await auth.signOut();   // onAuthStateChanged przeładuje stronę
+}
+
+/* --- moje konto: zmiana hasła, wylogowanie --- */
+function modalKonto(){
+  if(!PROFIL||PROFIL.lokalny) return;
+  modal('Moje konto',`<div class="osoba"><span class="avatar" style="background:${ROLE[PROFIL.rola].kol}">${esc(inicjaly(PROFIL.imie||PROFIL.login))}</span>
+      <div><b>${esc(PROFIL.imie||'')}</b><small>login: ${esc(PROFIL.login)} · ${ROLE[PROFIL.rola].n}</small></div></div>
+    <div style="border-top:1px solid var(--linia);padding-top:12px"><label class="et">Zmiana hasła</label>
+      <div class="wiersz"><div><input class="pole szer" id="mk-s" type="password" placeholder="obecne hasło" autocomplete="current-password"></div>
+      <div><input class="pole szer" id="mk-n" type="password" placeholder="nowe hasło (min. 6)" autocomplete="new-password"></div></div></div>`,
+  [{t:'Wyloguj',k:'usun',f:()=>{ wyloguj(); }},{t:'Zamknij'},{t:'Zmień hasło',k:'glowny',f:()=>{ zmienHaslo(); return false; }}]);
+}
+async function zmienHaslo(){
+  const s=mv('mk-s'), n=mv('mk-n');
+  if(n.length<6){ toast('Nowe hasło musi mieć co najmniej 6 znaków','zly'); return; }
+  try{
+    const u=auth.currentUser;
+    await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,s));
+    await u.updatePassword(n);
+    zamknijModal(); toast('Hasło zmienione');
+  }catch(e){ toast(bladAuth(e),'zly'); }
+}
+const inicjaly=t=>String(t||'?').trim().split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
+
+/* =====================================================================
+   17c. ZAKŁADKA: UŻYTKOWNICY
+   ===================================================================== */
+function mogeZarzadzac(u){
+  if(!PROFIL||PROFIL.lokalny||!u||u.uid===PROFIL.uid||u.rola==='tworca') return false;
+  if(PROFIL.rola==='tworca') return true;
+  return poziom('uzytkownicy')>=3 && ['zootechnik','pracownik'].includes(u.rola);
+}
+function roleDoNadania(){ return PROFIL?.rola==='tworca'?['szef','zootechnik','pracownik']:['zootechnik','pracownik']; }
+R.uzytkownicy=()=>{
+  if(!PROFIL||PROFIL.lokalny) return `<div class="panel"><div class="pusto"><b>Konta działają po podłączeniu Firebase</b>Wpisz konfigurację w pliku firebase-config.js i włącz logowanie e-mail/hasło w konsoli Firebase.</div></div>`;
+  const kol=['tworca','szef','zootechnik','pracownik'];
+  const lista=[...UZYT].sort((a,b)=>kol.indexOf(a.rola)-kol.indexOf(b.rola)||(a.imie||'').localeCompare(b.imie||'','pl'));
+  const wiersze=lista.map(u=>{
+    const moge=mogeZarzadzac(u), r=ROLE[u.rola]||{n:u.rola,kol:'#888'};
+    const rola=moge?`<select class="pole" onchange="ustawKonto('${u.uid}','rola',this.value)">${roleDoNadania().map(x=>`<option value="${x}" ${u.rola===x?'selected':''}>${ROLE[x].n}</option>`).join('')}</select>`
+                   :`<span class="rola-zn" style="background:${r.kol}">${r.n}</span>`;
+    return `<tr${u.aktywny?'':' style="opacity:.6"'}><td class="l"><div class="osoba"><span class="avatar" style="background:${r.kol}">${esc(inicjaly(u.imie||u.login))}</span>
+        <div><b>${esc(u.imie||'—')}</b>${u.uid===PROFIL.uid?' <span class="znacznik">to Ty</span>':''}<small>login: ${esc(u.login||'')}</small></div></div></td>
+      <td class="l">${rola}</td>
+      <td class="l"><span class="status ${u.aktywny?'on':'off'}">${u.aktywny?'aktywne':'zablokowane'}</span></td>
+      <td class="l cichy">${u.ostatnio?new Date(u.ostatnio).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'jeszcze nie logował(a) się'}</td>
+      <td class="l">${moge?`<button class="btn maly ${u.aktywny?'usun':''}" onclick="ustawKonto('${u.uid}','aktywny',${!u.aktywny})">${u.aktywny?'Zablokuj':'Odblokuj'}</button>
+        ${jestEmail(u.login)?` <button class="btn maly" onclick="wyslijReset('${esc(u.login)}')">Wyślij link do zmiany hasła</button>`:''}`:''}</td></tr>`;
+  }).join('');
+  const twor=PROFIL.rola==='tworca';
+  const macierz=ZAKLADKI.map(([k,t])=>`<tr><td class="l"><b>${t}</b></td><td><span class="lv lv3" style="display:inline-block;border-radius:14px;padding:4px 10px;font-weight:700;font-size:13px">pełny</span></td>
+    ${['szef','zootechnik','pracownik'].map(r=>{ const v=UPR?.[r]?.[k]??0;
+      return `<td><select class="lv lv${v}" ${twor?'':'disabled'} onchange="ustawUpr('${r}','${k}',this.value)">${POZ_ZAKL[k].map(x=>`<option value="${x}" ${x===v?'selected':''}>${POZIOMY[x]}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('');
+  return `<div class="panel"><div class="ph"><h2>Konta</h2><span class="opis">${UZYT.filter(u=>u.aktywny).length} aktywnych</span>
+      <div class="prawo"><button class="btn glowny" onclick="modalNoweKonto()">+ Dodaj osobę</button></div></div>
+    <div class="przewin"><table class="t"><thead><tr><th class="l">Osoba</th><th class="l">Rola</th><th class="l">Status</th><th class="l">Ostatnie logowanie</th><th></th></tr></thead><tbody>${wiersze||'<tr><td colspan="5"><div class="pusto">Ładowanie listy kont…</div></td></tr>'}</tbody></table></div>
+    <div class="pb cichy" style="border-top:1px solid var(--linia)">Hasła przechowuje Firebase – nikt ich tu nie widzi, także twórca. Każdy zmienia swoje hasło w „Moje konto” (przycisk z imieniem u góry).
+      Gdy ktoś zapomni hasła: zablokuj jego konto i załóż nowe z innym loginem. Jeśli login jest adresem e-mail, wystarczy wysłać link do zmiany hasła.</div></div>
+  <div class="panel"><div class="ph"><h2>Co może każda rola</h2><span class="opis">${twor?'zmiana działa od razu na wszystkich urządzeniach':'zmieniać może tylko twórca'}</span></div>
+    <div class="przewin"><table class="t upr" style="max-width:820px"><thead><tr><th class="l">Zakładka</th>${['tworca','szef','zootechnik','pracownik'].map(r=>`<th><span class="rola-zn" style="background:${ROLE[r].kol}">${ROLE[r].n}</span></th>`).join('')}</tr></thead><tbody>${macierz}</tbody></table></div>
+    <div class="pb cichy" style="border-top:1px solid var(--linia)"><b>brak</b> – zakładka ukryta · <b>podgląd</b> – tylko odczyt · <b>wpis</b> – Wóz: kilogramy i niedojady, Surowce: dostawy i spis · <b>pełny</b> – wszystko.
+      Twórca ma zawsze pełny dostęp, żeby nie dało się zablokować aplikacji.</div></div>`;
+};
+async function ustawKonto(uid,pole,v){
+  const u=UZYT.find(x=>x.uid===uid); if(!mogeZarzadzac(u)) return;
+  if(pole==='aktywny' && !v && !confirm(`Zablokować konto ${u.imie||u.login}? Ta osoba zostanie wylogowana na wszystkich urządzeniach.`)) return;
+  try{ await fs.collection(KOL_UZYT).doc(uid).update({[pole]:v,zmienil:PROFIL.uid,zmieniono:Date.now()}); toast(pole==='rola'?'Zmieniono rolę na: '+ROLE[v].n:(v?'Konto odblokowane':'Konto zablokowane')); }
+  catch(e){ toast('Nie udało się zapisać: '+(e.code==='permission-denied'?'brak uprawnień':e.message),'zly'); render(); }
+}
+async function ustawUpr(rola,tab,v){
+  if(PROFIL?.rola!=='tworca') return;
+  UPR=klon(UPR); UPR[rola]=UPR[rola]||{}; UPR[rola][tab]=+v;
+  try{ await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:UPR,ts:Date.now()}); toast(`${ROLE[rola].n} – ${ZAKLADKI.find(z=>z[0]===tab)[1]}: ${POZIOMY[+v]}`); }
+  catch(e){ toast('Nie udało się zapisać uprawnień','zly'); }
+  render();
+}
+function losujHaslo(){ const z='abcdefghjkmnpqrstuvwxyz23456789'; let s=''; const a=new Uint32Array(8); crypto.getRandomValues(a); a.forEach(x=>s+=z[x%z.length]); return s; }
+function modalNoweKonto(){
+  modal('Nowa osoba',`<div><label class="et">Imię i nazwisko</label><input class="pole szer" id="nk-i"></div>
+    <div class="wiersz"><div><label class="et">Login</label><input class="pole szer" id="nk-l" autocapitalize="none" placeholder="np. jkowalski"></div>
+      <div><label class="et">Rola</label><select class="pole szer" id="nk-r">${roleDoNadania().map(r=>`<option value="${r}" ${r==='pracownik'?'selected':''}>${ROLE[r].n}</option>`).join('')}</select></div></div>
+    <div><label class="et">Hasło startowe</label><div style="display:flex;gap:6px"><input class="pole szer" id="nk-h" value="${losujHaslo()}"><button class="btn" onclick="$('#nk-h').value=losujHaslo()">Losuj</button></div></div>
+    <p class="cichy" style="margin:0;font-size:13px">Login: litery bez polskich znaków, cyfry, kropka lub myślnik. Możesz też wpisać adres e-mail – wtedy zadziała wysyłanie linku do zmiany hasła.</p>`,
+  [{t:'Anuluj'},{t:'Utwórz konto',k:'glowny',f:()=>{ utworzKonto(); return false; }}]);
+}
+async function utworzKonto(){
+  const imie=mv('nk-i').trim(), login=mv('nk-l').trim().toLowerCase(), rola=mv('nk-r'), haslo=mv('nk-h');
+  if(!imie){ toast('Podaj imię i nazwisko','zly'); return; }
+  if(!jestEmail(login) && !/^[a-z0-9._-]{3,}$/.test(login)){ toast('Login: min. 3 znaki – litery bez polskich znaków, cyfry, kropka, myślnik','zly'); return; }
+  if(haslo.length<6){ toast('Hasło musi mieć co najmniej 6 znaków','zly'); return; }
+  if(!roleDoNadania().includes(rola)) return;
+  const btn=$$('#modal .m-stopka .btn').pop(); if(btn){ btn.disabled=true; btn.textContent='Tworzenie…'; }
+  try{
+    // drugie wystąpienie Firebase – utworzenie konta nie wylogowuje osoby, która je zakłada
+    const app2=firebase.apps.find(a=>a.name==='tworzenie')||firebase.initializeApp(FB_CONFIG,'tworzenie');
+    const a2=app2.auth(); await a2.setPersistence(firebase.auth.Auth.Persistence.NONE);
+    const c=await a2.createUserWithEmailAndPassword(emailZLoginu(login),haslo);
+    const uid=c.user.uid; await a2.signOut();
+    await fs.collection(KOL_UZYT).doc(uid).set({login,imie,rola,aktywny:true,utworzono:Date.now(),utworzyl:PROFIL.uid,ostatnio:null});
+    window._noweHaslo=haslo;
+    modal('Konto utworzone',`<p style="margin:0">Przekaż te dane osobie <b>${esc(imie)}</b> (${ROLE[rola].n}). Hasła nie da się później odczytać – zapisz je teraz.</p>
+      <div class="haslo-pokaz">login: ${esc(login)}<br>hasło: ${esc(haslo)}</div><p class="cichy" style="margin:0;font-size:13px">Po pierwszym logowaniu warto zmienić hasło w „Moje konto”.</p>`,
+      [{t:'Kopiuj dane',f:()=>{ navigator.clipboard?.writeText(`Weibloem\nadres: ${location.href.split('#')[0]}\nlogin: ${login}\nhasło: ${window._noweHaslo}`).then(()=>toast('Skopiowano')); return false; }},{t:'Gotowe',k:'glowny'}]);
+  }catch(e){ console.warn(e); toast(e.code==='permission-denied'?'Brak uprawnień do zakładania kont tej roli':bladAuth(e),'zly'); if(btn){ btn.disabled=false; btn.textContent='Utwórz konto'; } }
+}
+async function wyslijReset(email){
+  try{ await auth.sendPasswordResetEmail(email); toast('Wysłano link do zmiany hasła na '+email); }
+  catch(e){ toast(bladAuth(e),'zly'); }
+}
+
+
+/* =====================================================================
    18. START: najpierw localStorage, potem Firestore
    ===================================================================== */
-inicjujDane();
-rysujZakladki();
-render();
-pokazSync();
-startSync();
+inicjujDane();                 // 1. dane z localStorage – szybki start, działa offline
+startAplikacji();              // 2. logowanie (jeśli jest Firebase) → widok → nasłuch Firestore
 if('serviceWorker' in navigator && location.protocol!=='file:') navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));
 </script>
 </body>

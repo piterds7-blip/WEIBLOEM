@@ -1,6 +1,6 @@
 /* Service worker Weibloem – podbij WERSJA przy każdym wdrożeniu, jeśli zmieniasz ikony lub manifest */
-const WERSJA='weibloem-v2';
-const PLIKI=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
+const WERSJA='weibloem-v3';
+const PLIKI=['./','./index.html','./firebase-config.js','./manifest.json','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{ e.waitUntil(caches.open(WERSJA).then(c=>c.addAll(PLIKI)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==WERSJA).map(x=>caches.delete(x)))).then(()=>self.clients.claim())); });
 self.addEventListener('fetch',e=>{
