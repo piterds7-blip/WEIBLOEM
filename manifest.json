@@ -26,5 +26,12 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "./",
+  "description": "Dawki, surowce, wóz paszowy i koszty żywienia stada",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "orientation": "any"
 }

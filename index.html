@@ -265,6 +265,25 @@ select.lv{border-radius:14px;padding:4px 8px;font-weight:700;font-size:13px;bord
 select.lv:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-align:center;text-align-last:center}
 .lv0{background:#ECEEEC;color:#7A8580}.lv1{background:#DFE8F3;color:#2F5B8C}.lv2{background:#FBEFD2;color:#8A6410}.lv3{background:#D9ECDF;color:#24603C}
 .haslo-pokaz{font:600 20px/1.3 var(--font-w);letter-spacing:.5px;background:var(--pow2);border:1px dashed var(--linia);border-radius:8px;padding:10px 12px;user-select:all}
+/* ===== INSTALACJA + NAGŁÓWEK NA TELEFONIE ===== */
+#instal{background:#FFF3E3;border-bottom:1px solid #EBCFA5}
+.instal-w{max-width:1560px;margin:0 auto;padding:9px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.instal-w img{width:40px;height:40px;border-radius:10px;flex:0 0 auto}
+.instal-t{display:flex;flex-direction:column;flex:1 1 200px;min-width:0;line-height:1.25}
+.instal-t span{font-size:13px;color:var(--tusz2)}
+.k-imie{font-weight:700}
+@media(max-width:600px){
+  .gora{gap:8px;padding:8px 10px 2px;flex-wrap:wrap}
+  .marka span{display:none}
+  .marka b{font-size:22px}
+  #sync{margin-left:auto;font-size:0;padding:8px 11px;cursor:pointer}   /* na telefonie sama kropka stanu; stuknięcie pokazuje opis */
+  #sync::before,#sync.ok::before{content:'';display:inline-block;width:11px;height:11px;border-radius:50%;background:#C9D2CC;margin:0}
+  #sync.ok::before{background:#7FD69B}#sync.zapis::before{background:#E8BE5A}#sync.offline::before,#sync.blad::before{background:#E5776B}
+  #konto{padding:4px 10px;font-size:12.5px;max-width:46vw;overflow:hidden;text-overflow:ellipsis}
+  .k-rola{display:none}
+  .instal-w{padding:8px 10px}
+  .instal-w .btn{flex:1 1 auto}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:600px){main{padding:12px 10px 60px}.gora{padding:8px 12px 2px}.firma-nag{display:none}}
 </style>
@@ -274,11 +293,12 @@ select.lv:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-a
   <div class="gora">
     <div class="marka"><b>Weibloem</b><span>żywienie stada</span></div>
     <div class="firma-nag" id="firmaNag"></div>
-    <div id="sync" title="Stan synchronizacji">…</div>
+    <div id="sync" title="Stan synchronizacji" onclick="toast(this.textContent)">…</div>
     <button id="konto" hidden onclick="modalKonto()"></button>
   </div>
   <nav id="zakladki"></nav>
 </header>
+<div id="instal" hidden></div>
 <main id="widok"></main>
 <div id="logowanie" hidden></div>
 <div id="modal" role="dialog" aria-modal="true"></div>
@@ -1531,6 +1551,7 @@ R.ustawienia=()=>{
       <table class="t" style="max-width:560px"><thead><tr><th class="l">Nazwa</th><th>Pojemność kg</th><th></th></tr></thead><tbody>
       ${D.wozy.map(w=>`<tr><td class="l"><input class="pole" data-fid="wn_${w.id}" value="${esc(w.nazwa)}" onchange="ustawWoz('${w.id}','nazwa',this.value)"></td><td><input class="pole num" inputmode="numeric" data-fid="wp_${w.id}" value="${w.pojemnoscKg||0}" onchange="ustawWoz('${w.id}','pojemnoscKg',this.value)"></td>
         <td><button class="btn ikona usun" onclick="usunWoz('${w.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>
+    ${panelInstalacji()}
     <div class="panel"><div class="ph"><h2>Synchronizacja</h2></div><div class="pb cichy">
       Firebase: <b>${FB_CONFIG?'skonfigurowany':'brak konfiguracji – dane tylko na tym urządzeniu'}</b> · urządzenie <code>${DEV}</code> · wersja danych ${WERSJA_DANYCH}
       <div style="margin-top:10px"><button class="btn" data-zawsze onclick="eksport()">Pobierz kopię danych (JSON)</button></div></div></div>`;
@@ -1627,7 +1648,8 @@ function pokazEkranLogowania(tryb,komunikat){
       <div><label class="et">Hasło</label><input class="pole szer" id="lg-h" type="password" autocomplete="current-password" required></div>
       <button class="btn glowny" id="lg-b">Zaloguj</button>
       <p class="cichy" style="margin:0;text-align:center;font-size:13px">Nie pamiętasz hasła? Poproś szefa lub twórcę o nowe konto.</p></form>`;
-  L.innerHTML=`<div class="login-karta"><img src="icon-192.png" alt=""><h1>Weibloem</h1><div class="pod-tyt">żywienie stada</div>${f}</div>`;
+  const lnk=(tryb==='logowanie'&&mozeInstalowac())?`<p style="margin:14px 0 0;text-align:center"><a href="#" onclick="instaluj();return false" style="color:var(--gl2);font-weight:600">Zainstaluj aplikację na telefonie</a></p>`:'';
+  L.innerHTML=`<div class="login-karta"><img src="icon-192.png" alt=""><h1>Weibloem</h1><div class="pod-tyt">żywienie stada</div>${f}${lnk}</div>`;
   setTimeout(()=>{ const i=$('#lg-l')||$('#lg-i'); if(i) i.focus(); },50);
 }
 async function zaloguj(){
@@ -1656,10 +1678,10 @@ async function utworzTworce(){
 let aplikacjaWidoczna=false, profilNasluch=null, uzytNasluch=null;
 function pokazAplikacje(){
   $('#logowanie').hidden=true; $('header').hidden=false; $('#widok').hidden=false;
-  const k=$('#konto');
-  if(PROFIL && !PROFIL.lokalny){ k.hidden=false; k.textContent=(PROFIL.imie||PROFIL.login)+' · '+ROLE[PROFIL.rola].n; } else k.hidden=true;
+  odswiezPrzyciskKonta();
   rysujZakladki(); render(); pokazSync();
   aplikacjaWidoczna=true;
+  odswiezInstalacje();
 }
 function startAplikacji(){
   if(!FB_CONFIG || typeof firebase==='undefined' || !firebase.auth){
@@ -1691,7 +1713,7 @@ function startAplikacji(){
       lsZapisz('profil',PROFIL);
       if(!aplikacjaWidoczna){ pokazAplikacje(); startSync(); nasluchAdmin(); }
       else if(zmianaRoli){ toast('Twoja rola: '+ROLE[d.rola].n); pokazAplikacje(); nasluchAdmin(); }
-      else { const k=$('#konto'); k.textContent=(PROFIL.imie||PROFIL.login)+' · '+ROLE[PROFIL.rola].n; }
+      else odswiezPrzyciskKonta();
       if(pierwszy && !s.metadata.hasPendingWrites){ pierwszy=false; fs.collection(KOL_UZYT).doc(u.uid).update({ostatnio:Date.now()}).catch(()=>{}); }
     },e=>{ console.warn('profil',e); });
   });
@@ -1728,6 +1750,7 @@ function modalKonto(){
   if(!PROFIL||PROFIL.lokalny) return;
   modal('Moje konto',`<div class="osoba"><span class="avatar" style="background:${ROLE[PROFIL.rola].kol}">${esc(inicjaly(PROFIL.imie||PROFIL.login))}</span>
       <div><b>${esc(PROFIL.imie||'')}</b><small>login: ${esc(PROFIL.login)} · ${ROLE[PROFIL.rola].n}</small></div></div>
+    ${jestZainstalowana()?'':`<div><button class="btn" onclick="zamknijModal();instaluj()">Zainstaluj aplikację na telefonie</button></div>`}
     <div style="border-top:1px solid var(--linia);padding-top:12px"><label class="et">Zmiana hasła</label>
       <div class="wiersz"><div><input class="pole szer" id="mk-s" type="password" placeholder="obecne hasło" autocomplete="current-password"></div>
       <div><input class="pole szer" id="mk-n" type="password" placeholder="nowe hasło (min. 6)" autocomplete="new-password"></div></div></div>`,
@@ -1831,6 +1854,61 @@ async function wyslijReset(email){
   catch(e){ toast(bladAuth(e),'zly'); }
 }
 
+
+/* =====================================================================
+   17d. INSTALACJA JAKO APLIKACJA (PWA) – przycisk, baner, instrukcje
+   ===================================================================== */
+let zdarzenieInstalacji=null;
+const jestZainstalowana=()=>matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+const jestIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const jestTelefonem=()=>matchMedia('(pointer: coarse)').matches && Math.min(screen.width,screen.height)<900;
+function mozeInstalowac(){ return !jestZainstalowana() && (!!zdarzenieInstalacji || jestIOS() || jestTelefonem()); }
+addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); zdarzenieInstalacji=e; odswiezInstalacje(); });
+addEventListener('appinstalled',()=>{ zdarzenieInstalacji=null; localStorage.setItem('wb_instal_ukryty','1'); odswiezInstalacje(); toast('Aplikacja zainstalowana – znajdziesz ją na ekranie głównym'); });
+function odswiezInstalacje(){
+  const b=$('#instal'); if(!b) return;
+  const pokaz=mozeInstalowac() && !localStorage.getItem('wb_instal_ukryty') && !$('#widok').hidden;
+  b.hidden=!pokaz;
+  if(pokaz) b.innerHTML=`<div class="instal-w"><img src="icon-192.png" alt=""><div class="instal-t"><b>Zainstaluj Weibloem na telefonie</b><span>Ikona na ekranie głównym, pełny ekran, szybszy start.</span></div>
+    <button class="btn glowny" onclick="instaluj()">Zainstaluj</button><button class="btn" onclick="ukryjBaner()" aria-label="Nie teraz">Nie teraz</button></div>`;
+  if(UI.tab==='ustawienia' && typeof render==='function' && !$('#modal').classList.contains('otw')) render();
+}
+function ukryjBaner(){ localStorage.setItem('wb_instal_ukryty','1'); $('#instal').hidden=true; }
+function instaluj(){
+  if(jestZainstalowana()){ toast('Aplikacja jest już zainstalowana na tym urządzeniu'); return; }
+  if(zdarzenieInstalacji){
+    const z=zdarzenieInstalacji; z.prompt();
+    Promise.resolve(z.userChoice).then(w=>{ if(w&&w.outcome==='accepted') localStorage.setItem('wb_instal_ukryty','1'); }).finally(()=>{ zdarzenieInstalacji=null; odswiezInstalacje(); });
+    return;
+  }
+  modalInstalacja();
+}
+function modalInstalacja(){
+  const ios=jestIOS();
+  const kroki={
+    ios:['Otwórz tę stronę w przeglądarce <b>Safari</b> (nie w Chrome).','Stuknij przycisk <b>Udostępnij</b> (kwadrat ze strzałką w górę, na dole ekranu).','Przewiń listę i wybierz <b>Do ekranu początkowego</b>.','Stuknij <b>Dodaj</b>. Ikona Weibloem pojawi się na ekranie głównym.'],
+    android:['Stuknij menu przeglądarki <b>⋮</b> (trzy kropki, prawy górny róg).','Wybierz <b>Zainstaluj aplikację</b> albo <b>Dodaj do ekranu głównego</b>.','Potwierdź przyciskiem <b>Zainstaluj</b>. Ikona Weibloem pojawi się na ekranie głównym.'],
+    pc:['W pasku adresu Chrome lub Edge kliknij ikonę <b>instalacji</b> (monitor ze strzałką, po prawej).','Albo menu <b>⋮</b> → <b>Zapisz i udostępnij</b> → <b>Zainstaluj stronę jako aplikację</b>.']};
+  const lista=k=>`<ol style="margin:6px 0 0;padding-left:20px;display:grid;gap:5px">${kroki[k].map(x=>`<li>${x}</li>`).join('')}</ol>`;
+  const glowny=ios?'ios':(jestTelefonem()?'android':'pc');
+  const inne=['ios','android','pc'].filter(x=>x!==glowny).map(x=>`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">${{ios:'iPhone / iPad (Safari)',android:'Telefon z Androidem (Chrome)',pc:'Komputer (Chrome, Edge)'}[x]}</summary>${lista(x)}</details>`).join('');
+  modal('Instalacja aplikacji',`<p style="margin:0">Aplikacja zainstaluje się bez sklepu – jak zwykła apka, z własną ikoną i bez paska przeglądarki.</p>
+    <div><b>${{ios:'iPhone / iPad (Safari)',android:'Telefon z Androidem (Chrome)',pc:'Komputer (Chrome, Edge)'}[glowny]}</b>${lista(glowny)}</div>${inne}
+    <p class="cichy" style="margin:0;font-size:13px">Dane synchronizują się z chmurą, więc po instalacji logujesz się tym samym loginem i hasłem.</p>`,[{t:'Zamknij',k:'glowny'}]);
+}
+function panelInstalacji(){
+  const stan=jestZainstalowana()?'<span class="status on">zainstalowana na tym urządzeniu</span>':(zdarzenieInstalacji?'<span class="status on">gotowa do instalacji</span>':'<span class="znacznik">instalacja ręczna</span>');
+  return `<div class="panel"><div class="ph"><h2>Aplikacja na telefonie</h2>${stan}</div><div class="pb">
+    <p style="margin:0 0 10px">Zainstaluj Weibloem na ekranie głównym telefonu lub komputera – otwiera się na pełnym ekranie, jak zwykła aplikacja.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn glowny" data-zawsze onclick="instaluj()">${jestZainstalowana()?'Jak zainstalować na innym urządzeniu':'Zainstaluj aplikację'}</button>
+    <button class="btn" data-zawsze onclick="modalInstalacja()">Instrukcja krok po kroku</button>
+    ${localStorage.getItem('wb_instal_ukryty')?'<button class="btn" data-zawsze onclick="localStorage.removeItem(\'wb_instal_ukryty\');odswiezInstalacje()">Pokaż baner instalacji</button>':''}</div></div></div>`;
+}
+function odswiezPrzyciskKonta(){
+  const k=$('#konto'); if(!k) return;
+  if(!PROFIL||PROFIL.lokalny){ k.hidden=true; return; }
+  k.hidden=false; k.innerHTML=`<span class="k-imie">${esc(PROFIL.imie||PROFIL.login)}</span><span class="k-rola"> · ${ROLE[PROFIL.rola].n}</span>`;
+}
 
 /* =====================================================================
    18. START: najpierw localStorage, potem Firestore
