@@ -284,6 +284,31 @@ select.lv:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-a
   .instal-w{padding:8px 10px}
   .instal-w .btn{flex:1 1 auto}
 }
+/* ===== KOLEJNOŚĆ KOLUMN / GRUP ===== */
+.uchwyt{cursor:grab;touch-action:none;color:var(--tusz2);letter-spacing:-2px;user-select:none;-webkit-user-select:none}
+.rk-gora{display:flex;justify-content:center;align-items:center;gap:4px;margin-bottom:3px}
+.rk-gora .uchwyt{padding:2px 8px;font-size:15px;border-radius:4px}
+.rk-gora .uchwyt:hover,.g-gora .uchwyt:hover{background:var(--gl3)}
+.g-gora .uchwyt{padding:4px 4px;font-size:16px;border-radius:4px}
+th.rk.cel-ok,.grupa.cel-ok{outline:3px dashed var(--gl2)!important;outline-offset:-3px}
+.duch.duch-maly{display:inline-block;width:auto;padding:8px 14px;font-weight:700;border-left-width:6px;border-left-color:var(--gl2)}
+.pole.wirt{border-style:dashed}
+.pole.wirt:not(:placeholder-shown){border-style:solid;border-color:var(--zolty);background:#FFFBEF}
+/* ===== SUCHY TMR ===== */
+.kafle{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kafel{background:var(--pow);border:1px solid var(--linia);border-left:5px solid var(--tres);border-radius:8px;padding:8px 14px;min-width:150px;flex:1 1 150px}
+.kafel span{display:block;font-size:12.5px;color:var(--tusz2)}
+.kafel b{display:block;font:700 24px/1.15 var(--font-w);margin:2px 0}
+.stmr-uklad{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:1050px){.stmr-uklad{grid-template-columns:minmax(0,1fr)}}
+.prod-kg{display:flex;align-items:center;gap:8px;font-weight:600}
+.pole.duze{font:700 28px/1.1 var(--font-w);width:150px;text-align:right;padding:6px 10px}
+.szybkie{display:flex;gap:6px;flex-wrap:wrap}
+.szybkie .btn{padding:9px 12px}
+.btn.duzy{padding:10px 18px;font-size:16px}
+.nr-z{font-weight:700;color:var(--gl2);text-align:center!important;width:38px}
+.stan-ok{color:var(--ok);font-weight:600}.stan-brak{color:var(--zly);font-weight:700}
+@media(max-width:600px){.ukr-tel{display:none}.kafel{min-width:0;flex-basis:40%}.kafel b{font-size:21px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:600px){main{padding:12px 10px 60px}.gora{padding:8px 12px 2px}.firma-nag{display:none}}
 </style>
@@ -320,7 +345,7 @@ const DEBOUNCE_MS = 800;
 const DNI_WSTECZ = 60;                 // ile dni wstecz nasłuchujemy na żywo
 const DNI_STANY_MAX = 180;             // najdalej wstecz liczymy zużycie do stanów
 const MIESIAC_DNI = 30;
-const MODULY = ['surowce','receptury','grupy','wozy','ustawienia'];
+const MODULY = ['surowce','receptury','grupy','wozy','ustawienia','suchytmr'];
 
 /* =====================================================================
    2. NARZĘDZIA
@@ -443,7 +468,7 @@ function wypchnij(klucz){
       syncBlad=true; pokazSync();
     });
 }
-function saveModule(nazwa){ oznaczZmiane('m:'+nazwa); }
+function saveModule(nazwa){ oznaczZmiane('m:'+nazwa); if(nazwa==='receptury'||nazwa==='grupy'||nazwa==='surowce') przeliczDniPoDawkach(); }
 function saveDzien(data){ jednostkaDnia(data); oznaczZmiane('d:'+data); }
 
 function przyjmijSnapshot(klucz,snap){
@@ -577,17 +602,20 @@ const SEED={
   ].map(([id,nazwa,opis,recepturaId,sztuki,zadania,dojna,uwagi],i)=>({id,nazwa,opis,recepturaId,zadania,dojna,uwagi,kolor:KOLORY_GRUP[i%KOLORY_GRUP.length],
      sektory:[{id:'s'+id.slice(1),nazwa:'Sektor '+nazwa.replace(/^(Grupa|Gr\.|GR|gr\.)\s*/,''),sztuki}]})),
   wozy:[{id:'w1',nazwa:'Wóz 1',pojemnoscKg:0}],
-  ustawienia:{firma:'Dochowo Dairy „Weibloem” Sp. z o.o.',nrObory:'77-27001',zrodla:'arkusz dawek DAWKI_I_ILOŚCI_WEIBLOEM.ods, karty wozów, raporty RW-1/RW-11 PFHB'}
+  ustawienia:{firma:'Dochowo Dairy „Weibloem” Sp. z o.o.',nrObory:'77-27001',zrodla:'arkusz dawek DAWKI_I_ILOŚCI_WEIBLOEM.ods, karty wozów, raporty RW-1/RW-11 PFHB'},
+  // Suchy TMR dla cieląt – receptura z arkusza suchy_tmr_dochowo.ods (% na tonę, w kolejności wsypywania)
+  suchytmr:{receptura:[{s:'sloma',proc:13},{s:'melas',proc:13},{s:'zboz',proc:48},{s:'soja',proc:11},{s:'rzep',proc:10},{s:'witj',proc:5}],partie:[],domyslnieKg:3500}
 };
 
 /* =====================================================================
    6. STAN APLIKACJI
    ===================================================================== */
-const D={surowce:[],receptury:[],grupy:[],wozy:[],ustawienia:{}};
+const D={surowce:[],receptury:[],grupy:[],wozy:[],ustawienia:{},suchytmr:{receptura:[],partie:[],domyslnieKg:3500}};
 const DNI={};   // data → dokument dnia
 
 function normalizujModul(m,d){
   if(m==='ustawienia') return (d&&typeof d==='object'&&!Array.isArray(d))?d:{};
+  if(m==='suchytmr'){ const o=(d&&typeof d==='object'&&!Array.isArray(d))?d:{}; o.receptura=Array.isArray(o.receptura)?o.receptura:[]; o.partie=Array.isArray(o.partie)?o.partie:[]; o.partie.forEach(p=>{ p.sklad=Array.isArray(p.sklad)?p.sklad:[]; }); o.domyslnieKg=o.domyslnieKg||3500; return o; }
   const a=Array.isArray(d)?d:[];
   if(m==='surowce') a.forEach(s=>{ s.dostawy=s.dostawy||[]; s.kat=s.kat||'obj'; });
   if(m==='receptury') a.forEach(r=>{ r.sk=r.sk||[]; r.kolejnosc=r.kolejnosc||[]; });
@@ -631,13 +659,16 @@ function kontekstBiezacy(){
   D.receptury.forEach(r=>{ receptury[r.id]={nazwa:r.nazwa,sk:r.sk.filter(x=>x.kg>0).map(x=>({s:x.s,kg:x.kg}))}; });  // kolejność załadunku nie jest zamrażana – zawsze aktualna
   D.grupy.forEach((g,i)=>{
     grupy[g.id]={nazwa:g.nazwa,opis:g.opis||'',recepturaId:g.recepturaId||'',zadania:g.zadania||1,kolor:g.kolor||'#888',dojna:!!g.dojna,kolejnosc:i};
-    (g.sektory||[]).forEach((s,j)=>{ sektory[s.id]={nazwa:s.nazwa,sztuki:s.sztuki||0,grupaId:g.id,kolejnosc:j}; });
+    (g.sektory||[]).forEach((s,j)=>{ sektory[s.id]={nazwa:s.nazwa,sztuki:s.sztuki||0,grupaId:g.id,kolejnosc:j}; if(s.wirt!=null&&s.wirt!=='') sektory[s.id].wirt=+s.wirt; });
   });
   _kb={ceny,sur,receptury,grupy,sektory}; _kbW=wersja;
   return _kb;
 }
-function kontekst(data){ const d=DNI[data]; return (d&&d.snap)?d.snap:kontekstBiezacy(); }
-function snapRozni(data){ const d=DNI[data]; if(!d||!d.snap) return false; const {ts,...s}=d.snap; return stabilny(s)!==stabilny(kontekstBiezacy()); }
+// Dziś i dni przyszłe liczą się zawsze z bieżących Dawek; dni minione – z kopii zamrożonej w dokumencie dnia.
+function kontekst(data){ const d=DNI[data]; return (data<dzis() && d && d.snap)?d.snap:kontekstBiezacy(); }
+// Wirtualne sztuki: na tyle sztuk liczy się dawkę sektora (puste = tyle co realnych)
+function efSzt(s){ return s?((s.wirt!=null&&s.wirt!=='')?+s.wirt:(s.sztuki||0)):0; }
+function snapRozni(data){ if(data>=dzis()) return false; const d=DNI[data]; if(!d||!d.snap) return false; const {ts,...s}=d.snap; return stabilny(s)!==stabilny(kontekstBiezacy()); }
 function grupyC(C){ return Object.entries(C.grupy).map(([id,g])=>({id,...g})).sort((a,b)=>a.kolejnosc-b.kolejnosc); }
 function sektoryGrupyC(C,gid){ return Object.entries(C.sektory).filter(([,s])=>s.grupaId===gid).map(([id,s])=>({id,...s})).sort((a,b)=>a.kolejnosc-b.kolejnosc); }
 function surowceKolejnosc(C){ return Object.keys(C.sur).sort((a,b)=>{ const ia=D.surowce.findIndex(s=>s.id===a), ib=D.surowce.findIndex(s=>s.id===b); return (ia<0?999:ia)-(ib<0?999:ib); }); }
@@ -649,7 +680,7 @@ function statRec(C,rid){
   const koszt=r.sk.reduce((a,x)=>a+x.kg*(C.ceny[x.s]||0)/1000,0);
   return {kg,koszt,kosztKg:kg>0?koszt/kg:0,sk:r.sk};
 }
-function planSek(C,sid){ const s=C.sektory[sid]; if(!s) return 0; const g=C.grupy[s.grupaId]; return statRec(C,g?.recepturaId).kg*s.sztuki; }
+function planSek(C,sid){ const s=C.sektory[sid]; if(!s) return 0; const g=C.grupy[s.grupaId]; return statRec(C,g?.recepturaId).kg*efSzt(s); }
 
 // Kolejność załadunku: najpierw ponumerowane, potem pozostałe w kolejności bazy
 function kolejnoscZaladunku(C,rid){
@@ -671,7 +702,7 @@ function analizaDnia(data,opc={}){
   const sek={}, zuz={};
   Object.entries(C.sektory).forEach(([id,s])=>{
     const g=C.grupy[s.grupaId]; const st=statRec(C,g?.recepturaId);
-    sek[id]={id,...s,grupa:g,obl:st.kg,planKg:st.kg*s.sztuki,swiezeKg:0,ndKg:0,maKurs:false,zPlanu:false,zebraneJutro:null,zuz:{},koszt:0};
+    sek[id]={id,...s,grupa:g,obl:s.sztuki>0?st.kg*efSzt(s)/s.sztuki:st.kg,planKg:st.kg*efSzt(s),swiezeKg:0,ndKg:0,maKurs:false,zPlanu:false,zebraneJutro:null,zuz:{},koszt:0};
   });
   const dodajZuz=(s,sid,kg)=>{ zuz[sid]=(zuz[sid]||0)+kg; if(s) s.zuz[sid]=(s.zuz[sid]||0)+kg; };
   (d?.kursy||[]).forEach(k=>{
@@ -687,7 +718,7 @@ function analizaDnia(data,opc={}){
     if(!s.maKurs){
       s.zPlanu=true; s.swiezeKg=s.planKg;
       const st=statRec(C,s.grupa?.recepturaId); s.koszt=s.planKg*st.kosztKg;
-      st.sk.forEach(x=>dodajZuz(s,x.s,s.sztuki*x.kg));
+      st.sk.forEach(x=>dodajZuz(s,x.s,efSzt(s)*x.kg));
     }
     s.zadanaKg=s.swiezeKg+s.ndKg;
     s.zadana=s.sztuki>0?s.zadanaKg/s.sztuki:0;
@@ -702,14 +733,14 @@ function analizaDnia(data,opc={}){
 function grupyDnia(A){
   return grupyC(A.C).map(g=>{
     const ss=sektoryGrupyC(A.C,g.id).map(s=>A.sek[s.id]).filter(Boolean);
-    const o={...g,sektory:ss,sztuki:0,planKg:0,swiezeKg:0,ndKg:0,zadanaKg:0,koszt:0,zuz:{},zPlanu:0,zebrane:0,pobranaOk:ss.length>0};
+    const o={...g,sektory:ss,sztuki:0,efSzt:0,maWirt:false,planKg:0,swiezeKg:0,ndKg:0,zadanaKg:0,koszt:0,zuz:{},zPlanu:0,zebrane:0,pobranaOk:ss.length>0};
     ss.forEach(s=>{
-      o.sztuki+=s.sztuki; o.planKg+=s.planKg; o.swiezeKg+=s.swiezeKg; o.ndKg+=s.ndKg; o.zadanaKg+=s.zadanaKg; o.koszt+=s.koszt;
+      o.sztuki+=s.sztuki; o.efSzt+=efSzt(s); if(s.wirt!=null) o.maWirt=true; o.planKg+=s.planKg; o.swiezeKg+=s.swiezeKg; o.ndKg+=s.ndKg; o.zadanaKg+=s.zadanaKg; o.koszt+=s.koszt;
       if(s.zPlanu) o.zPlanu++;
       if(s.pobrana==null) o.pobranaOk=false; else o.zebrane+=s.zebraneJutro||0;
       Object.entries(s.zuz).forEach(([k,v])=>o.zuz[k]=(o.zuz[k]||0)+v);
     });
-    o.obl=statRec(A.C,g.recepturaId).kg;
+    o.obl=o.sztuki>0?o.planKg/o.sztuki:statRec(A.C,g.recepturaId).kg;   // obliczona skorygowana o wirt. sztuki
     o.pobrana=(o.pobranaOk&&o.sztuki>0)?(o.zadanaKg-o.zebrane)/o.sztuki:null;
     return o;
   });
@@ -720,6 +751,8 @@ function kosztKatGrupy(C,zuz){ const o={obj:0,tres:0,dod:0}; Object.entries(zuz)
 function stanSurowca(s,doDnia=dzis()){
   let t=s.stanBazT||0; const od=s.stanData||doDnia;
   (s.dostawy||[]).forEach(x=>{ if(x.data>od && x.data<=doDnia) t+=x.t||0; });
+  // produkcja Suchego TMR: składniki schodzą, produkt przybywa (partie po dniu spisu)
+  (D.suchytmr?.partie||[]).forEach(p=>{ if(p.data>od && p.data<=doDnia){ if(s.produkt==='stmr') t+=(p.kg||0)/1000; (p.sklad||[]).forEach(x=>{ if(x.s===s.id) t-=(x.kg||0)/1000; }); } });
   let d=dataPlus(od,1), n=0;
   while(d<=doDnia && n<DNI_STANY_MAX+5){ t-=(analizaDnia(d).zuz[s.id]||0)/1000; d=dataPlus(d,1); n++; }
   return t;
@@ -729,8 +762,8 @@ function procKlasa(p){ if(p==null||!Number.isFinite(p)) return ''; const r=Math.
 /* =====================================================================
    8. POWŁOKA INTERFEJSU
    ===================================================================== */
-const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
-const UI={tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
+const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['suchytmr','Suchy TMR'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
+const UI={stmrKg:null,stmrData:null,tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
 const R={};   // renderery zakładek
 let odroczonyRender=false;
 
@@ -794,8 +827,8 @@ const mv=id=>$('#'+id)?.value??'';
 R.surowce=()=>{
   const plan=analizaDnia(dzis(),{plan:true}).zuz;
   const wiersze=D.surowce.map((s,i)=>{
-    const stan=stanSurowca(s), du=plan[s.id]||0;
-    let wyst='<span class="cichy">nie w dawkach</span>';
+    const stan=stanSurowca(s), prod=zuzycieProdukcjiDzienne(s.id), du=(plan[s.id]||0)+prod, jestProd=s.produkt==='stmr';
+    let wyst=jestProd?'<span class="cichy">rozchód – zakładka Cielaki (wkrótce)</span>':'<span class="cichy">nie w dawkach</span>';
     if(du>0){
       const dni=Math.floor(stan*1000/du);
       wyst=stan<=0?'<span class="ostrz">brak na stanie</span>':`<span class="${dni<14?'ostrz':'dobry'}">${dataPL(dataPlus(dzis(),dni))}</span> <span class="cichy">(${dni} d)</span>`;
@@ -805,12 +838,12 @@ R.surowce=()=>{
       <td class="l"><div class="nazwa-sur"><span class="strz"><button ${i===0?'disabled':''} onclick="przesunSur('${s.id}',-1)" aria-label="W górę">▲</button><button ${i===D.surowce.length-1?'disabled':''} onclick="przesunSur('${s.id}',1)" aria-label="W dół">▼</button></span>
         <input class="pole" style="width:210px" data-fid="sn_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSur('${s.id}','nazwa',this.value)"></div></td>
       <td class="l"><span class="kat-kropka" style="background:${KAT_KOL[s.kat]}"></span><select class="pole" onchange="ustawSur('${s.id}','kat',this.value)">${Object.entries(KAT_KR).map(([k,t])=>`<option value="${k}" ${s.kat===k?'selected':''}>${t}</option>`).join('')}</select></td>
-      <td><input class="pole num" inputmode="decimal" data-fid="sc_${s.id}" value="${fmtIn(s.cenaT,2)}" onchange="ustawSur('${s.id}','cenaT',this.value)"></td>
+      <td>${jestProd?`<span title="Liczona automatycznie z najnowszej partii w zakładce Suchy TMR">${fmt(s.cenaT,2)} <span class="znacznik">z partii</span></span>`:`<input class="pole num" inputmode="decimal" data-fid="sc_${s.id}" value="${fmtIn(s.cenaT,2)}" onchange="ustawSur('${s.id}','cenaT',this.value)">`}</td>
       <td>${cenaKg(s.cenaT)}</td>
       <td><b class="${stan<0?'ostrz':''}">${fmt(stan,2)}</b><div class="cichy" style="font-size:11.5px">spis ${dataPL(s.stanData)}</div></td>
       <td data-wpis><button class="btn maly" onclick="modalSpis('${s.id}')">Spis</button></td>
-      <td data-wpis><button class="btn maly glowny" onclick="modalDostawa('${s.id}')">+ Dostawa</button> ${nDost?`<button class="btn maly" data-zawsze onclick="UI.rozwDost['${s.id}']=!UI.rozwDost['${s.id}'];render()">${rozw?'▾':'▸'} ${nDost}</button>`:''}</td>
-      <td>${fmt(du,0)}</td>
+      <td data-wpis>${jestProd?`<button class="btn maly" data-zawsze onclick="pokazZakladke('suchytmr')">Produkcja ›</button>`:`<button class="btn maly glowny" onclick="modalDostawa('${s.id}')">+ Dostawa</button>`} ${nDost?`<button class="btn maly" data-zawsze onclick="UI.rozwDost['${s.id}']=!UI.rozwDost['${s.id}'];render()">${rozw?'▾':'▸'} ${nDost}</button>`:''}</td>
+      <td>${fmt(du,0)}${prod>0.5?`<div class="cichy" style="font-size:11.5px" title="średnio z produkcji Suchego TMR z ostatnich 30 dni">w tym suchy TMR ${fmt(prod,0)}</div>`:''}</td>
       <td class="l">${wyst}</td>
       <td><button class="btn ikona usun" onclick="usunSur('${s.id}')" aria-label="Usuń">✕</button></td></tr>`;
     if(rozw && nDost){
@@ -822,7 +855,7 @@ R.surowce=()=>{
     return h;
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Surowce i stany magazynowe</h2>
-      <span class="opis">Stan = spis + dostawy po spisie − zużycie z dawek zadanych (dni bez kursów liczone wg planu)</span>
+      <span class="opis">Stan = spis + dostawy po spisie − zużycie z dawek zadanych (dni bez kursów wg planu) ± produkcja Suchego TMR</span>
       <div class="prawo"><button class="btn" data-zawsze onclick="drukujSurowce()">Drukuj</button><button class="btn glowny" onclick="modalNowySur()">+ Surowiec</button></div></div>
     <div class="przewin"><table class="t"><thead><tr><th class="l">Surowiec</th><th class="l">Kategoria</th><th>Cena zł/t</th><th>zł/kg</th><th>Stan (t)</th><th></th><th class="l">Dostawy</th><th>Zużycie<br>kg/dzień</th><th class="l">Wystarczy do</th><th></th></tr></thead>
     <tbody>${wiersze||'<tr><td colspan="10"><div class="pusto"><b>Brak surowców</b>Dodaj pierwszy surowiec przyciskiem „+ Surowiec”.</div></td></tr>'}</tbody></table></div></div>`;
@@ -836,6 +869,8 @@ function przesunSur(id,dir){ const i=D.surowce.findIndex(s=>s.id===id), j=i+dir;
 function usunSur(id){
   const s=surowiec(id); const uzyte=D.receptury.filter(r=>r.sk.some(x=>x.s===id&&x.kg>0));
   if(uzyte.length){ toast(`„${s.nazwa}” jest w recepturach: ${uzyte.map(r=>r.nazwa).join(', ')}. Najpierw usuń go z dawek.`,'zly'); return; }
+  if(D.suchytmr.receptura.some(x=>x.s===id)){ toast(`„${s.nazwa}” jest w recepturze Suchego TMR. Najpierw usuń go z tej receptury.`,'zly'); return; }
+  if(s.produkt==='stmr' && D.suchytmr.partie.length){ toast('Suchy TMR ma historię produkcji – nie można go usunąć z bazy.','zly'); return; }
   if(!confirm(`Usunąć surowiec „${s.nazwa}” wraz z historią dostaw?`)) return;
   D.surowce=D.surowce.filter(x=>x.id!==id);
   let rz=false; D.receptury.forEach(r=>{ const n=r.sk.length; r.sk=r.sk.filter(x=>x.s!==id); r.kolejnosc=r.kolejnosc.filter(x=>x!==id); if(r.sk.length!==n) rz=true; });
@@ -860,7 +895,7 @@ function modalSpis(id){
   [{t:'Anuluj'},{t:'Zapisz spis',k:'glowny',f:()=>{
     const d=mv('sp-d')||dzis();
     if(d<dataPlus(dzis(),-DNI_STANY_MAX)){ toast('Spis może mieć najwyżej '+DNI_STANY_MAX+' dni','zly'); return false; }
-    s.stanBazT=liczba(mv('sp-t')); s.stanData=d; saveModule('surowce'); render(); toast('Zapisano spis: '+fmt(s.stanBazT,2)+' t');
+    s.stanBazT=liczba(mv('sp-t')); s.stanData=d; if(s.produkt) s.spisRecznie=true; saveModule('surowce'); render(); toast('Zapisano spis: '+fmt(s.stanBazT,2)+' t');
   }}]);
 }
 function modalDostawa(id){
@@ -888,9 +923,11 @@ R.dawki=()=>{
   const wiersze=D.surowce.filter(s=>wRec.has(s.id));
   const nr=UI.numerRec;
   const grupyRec=rid=>D.grupy.filter(g=>g.recepturaId===rid);
-  const nag=D.receptury.map(r=>{
+  const nag=D.receptury.map((r,i)=>{
     const st=statRec(C,r.id), kol=kolejnoscZaladunku(C,r.id), ileNr=kol.filter(x=>x.nr).length;
-    return `<th class="rk ${nr===r.id?'numerowanie':''}"><div class="rk-nazwa" onclick="modalRec('${r.id}')" title="Zmień nazwę i uwagi">${esc(r.nazwa)}</div>
+    return `<th class="rk ${nr===r.id?'numerowanie':''}" data-drop="rec" data-accept="rec" data-id="${r.id}">
+      <div class="rk-gora"><button class="btn ikona" title="Przesuń kolumnę w lewo" ${i===0?'disabled':''} onclick="przesunRec('${r.id}',-1)">◀</button><span class="uchwyt" data-drag="rec" data-id="${r.id}" data-duch-tekst="${esc(r.nazwa)}" title="Przeciągnij, żeby przestawić kolumnę">⋮⋮</span><button class="btn ikona" title="Przesuń kolumnę w prawo" ${i===D.receptury.length-1?'disabled':''} onclick="przesunRec('${r.id}',1)">▶</button></div>
+      <div class="rk-nazwa" onclick="if(!_poDrag)modalRec('${r.id}')" title="Zmień nazwę i uwagi">${esc(r.nazwa)}</div>
       <div class="rk-grupy">${grupyRec(r.id).map(g=>`<span style="background:${g.kolor}">${esc(g.nazwa)}</span>`).join('')||'<span style="background:#9aa39d">bez grupy</span>'}</div>
       <div class="rk-akcje"><button class="btn ikona" title="Kolejność załadunku" onclick="numeruj('${r.id}')">🔢 ${ileNr}/${kol.length}</button><button class="btn ikona" title="Duplikuj" onclick="duplikujRec('${r.id}')">⧉</button><button class="btn ikona usun" title="Usuń" onclick="usunRec('${r.id}')">✕</button></div></th>`;
   }).join('');
@@ -916,7 +953,7 @@ R.dawki=()=>{
       <select class="pole" onchange="if(this.value)kopiujKolejnosc('${r.id}',this.value)"><option value="">Kopiuj z receptury…</option>${D.receptury.filter(x=>x.id!==r.id).map(x=>`<option value="${x.id}">${esc(x.nazwa)}</option>`).join('')}</select>
       <button class="btn maly" onclick="wyczyscKolejnosc('${r.id}')">Wyczyść</button><button class="btn maly" style="background:#fff;color:var(--gl)" onclick="UI.numerRec=null;render()">Gotowe</button></span></div>`;
   }
-  return pasek+`<div class="panel"><div class="ph"><h2>Receptury</h2><span class="opis">kg świeżej masy na sztukę na dobę · liczba w rogu pola = kolejność załadunku</span>
+  return pasek+`<div class="panel"><div class="ph"><h2>Receptury</h2><span class="opis">kg świeżej masy na sztukę na dobę · liczba w rogu pola = kolejność załadunku · ◀ ▶ lub ⋮⋮ = kolejność kolumn</span>
       <div class="prawo"><button class="btn" onclick="modalWierszRec()">+ Surowiec do receptur</button><button class="btn glowny" onclick="nowaRec()">+ Receptura</button></div></div>
     <div class="przewin">${D.receptury.length?`<table class="t rec"><thead><tr><th class="l" style="min-width:260px;vertical-align:bottom">Surowiec</th>${nag}</tr></thead>
       <tbody>${body||`<tr><td colspan="${D.receptury.length+1}"><div class="pusto"><b>Receptury są puste</b>Dodaj surowce przyciskiem „+ Surowiec do receptur”.</div></td></tr>`}</tbody>
@@ -928,23 +965,25 @@ R.dawki=()=>{
 };
 R._grupy=C=>{
   const lista=D.grupy.map((g,i)=>{
-    const st=statRec(C,g.recepturaId), szt=g.sektory.reduce((a,s)=>a+(s.sztuki||0),0);
-    return `<div class="grupa"><div class="kol" style="background:${g.kolor}" title="Zmień kolor" onclick="kolorGrupy('${g.id}')"></div><div class="tresc">
-      <div><div class="g-gora"><span class="strz"><button ${i===0?'disabled':''} onclick="przesunGrupe('${g.id}',-1)">▲</button><button ${i===D.grupy.length-1?'disabled':''} onclick="przesunGrupe('${g.id}',1)">▼</button></span>
+    const st=statRec(C,g.recepturaId), szt=g.sektory.reduce((a,s)=>a+(s.sztuki||0),0), ef=g.sektory.reduce((a,s)=>a+efSzt(s),0);
+    return `<div class="grupa" data-drop="grp" data-accept="grp" data-id="${g.id}"><div class="kol" style="background:${g.kolor}" title="Zmień kolor" onclick="kolorGrupy('${g.id}')"></div><div class="tresc">
+      <div><div class="g-gora"><span class="uchwyt" data-drag="grp" data-id="${g.id}" data-duch-tekst="${esc(g.nazwa)}" title="Przeciągnij, żeby przestawić grupę">⋮⋮</span><span class="strz"><button ${i===0?'disabled':''} onclick="przesunGrupe('${g.id}',-1)">▲</button><button ${i===D.grupy.length-1?'disabled':''} onclick="przesunGrupe('${g.id}',1)">▼</button></span>
         <input class="pole nazwa" data-fid="gn_${g.id}" value="${esc(g.nazwa)}" onchange="ustawGrupe('${g.id}','nazwa',this.value)">
         <input class="pole" style="width:110px" data-fid="go_${g.id}" value="${esc(g.opis||'')}" placeholder="opis" onchange="ustawGrupe('${g.id}','opis',this.value)">
         <button class="btn ikona usun" style="margin-left:auto" onclick="usunGrupe('${g.id}')">✕</button></div>
         <div class="g-gora" style="margin-top:8px"><select class="pole" style="flex:1" onchange="ustawGrupe('${g.id}','recepturaId',this.value)"><option value="">— receptura —</option>${D.receptury.map(r=>`<option value="${r.id}" ${g.recepturaId===r.id?'selected':''}>${esc(r.nazwa)}</option>`).join('')}</select></div>
         <div class="g-gora" style="margin-top:8px"><span class="przel" title="Ile razy dziennie zadawana – dawka dobowa dzieli się na tyle kursów">${[1,2].map(z=>`<button class="${(g.zadania||1)===z?'akt':''}" onclick="ustawGrupe('${g.id}','zadania',${z})">${z}× dziennie</button>`).join('')}</span>
           <label class="cichy" style="display:flex;gap:5px;align-items:center"><input type="checkbox" ${g.dojna?'checked':''} onchange="ustawGrupe('${g.id}','dojna',this.checked)"> krowy dojne</label></div></div>
-      <div><label class="et">Sektory i sztuki</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
+      <div><label class="et">Sektory · sztuki realne · wirt. = na ile sztuk liczyć dawkę (puste = jak realne)</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
           <input class="pole krotkie num" inputmode="numeric" data-fid="ss_${s.id}" value="${s.sztuki}" onchange="ustawSektor('${g.id}','${s.id}','sztuki',this.value)"> szt
+          <input class="pole krotkie num wirt" inputmode="numeric" data-fid="sw_${s.id}" value="${s.wirt??''}" placeholder="${s.sztuki}" title="Wirtualne sztuki – na ile sztuk liczyć dawkę tego sektora. Puste = tyle co realnych." onchange="ustawSektor('${g.id}','${s.id}','wirt',this.value)"> wirt.${s.wirt!=null&&s.sztuki>0?` <span class="znacznik" title="sektor dostaje ${fmt(s.wirt/s.sztuki*100,0)}% dawki liczonej na realne sztuki">${fmt(s.wirt/s.sztuki*100,0)}%</span>`:''}
           <button class="btn ikona usun" onclick="usunSektor('${g.id}','${s.id}')">✕</button></span>`).join('')}
           <button class="btn maly" onclick="dodajSektor('${g.id}')">+ Sektor</button></div>
         <label class="et" style="margin-top:8px">Uwagi do grupy (trafiają do raportu kosztów)</label><textarea class="pole" rows="1" data-fid="gu_${g.id}" onchange="ustawGrupe('${g.id}','uwagi',this.value)">${esc(g.uwagi||'')}</textarea></div>
-      <div class="liczby-g"><span>Sztuk razem</span><b>${szt}</b><span>Dawka obliczona</span><b>${fmt(st.kg,1,2)} kg/szt</b>
-        <span>Plan na dobę</span><b>${fmt(st.kg*szt,0)} kg</b><span>Na jeden kurs</span><b>${fmt(st.kg*szt/(g.zadania||1),0)} kg</b>
-        <span>Koszt</span><b>${fmt(st.koszt,2)} zł/szt/d</b><span>Koszt grupy</span><b>${fmt(st.koszt*szt,0)} zł/d</b></div>
+      <div class="liczby-g"><span>Sztuk razem</span><b>${szt}${ef!==szt?` <span class="cichy" style="font-weight:600">· wirt. ${fmt(ef,0)}</span>`:''}</b><span>Dawka obliczona</span><b>${fmt(st.kg,1,2)} kg/szt</b>
+        ${ef!==szt&&szt>0?`<span>Skorygowana</span><b>${fmt(st.kg*ef/szt,1,2)} kg/szt</b>`:''}
+        <span>Plan na dobę</span><b>${fmt(st.kg*ef,0)} kg</b><span>Na jeden kurs</span><b>${fmt(st.kg*ef/(g.zadania||1),0)} kg</b>
+        <span>Koszt</span><b>${fmt(szt>0?st.koszt*ef/szt:st.koszt,2)} zł/szt/d</b><span>Koszt grupy</span><b>${fmt(st.koszt*ef,0)} zł/d</b></div>
     </div></div>`;
   }).join('');
   const szt=D.grupy.reduce((a,g)=>a+g.sektory.reduce((b,s)=>b+(s.sztuki||0),0),0);
@@ -982,6 +1021,11 @@ function modalRec(rid){
     <div><label class="et">Uwagi (trafiają do raportu kosztów)</label><textarea class="pole" id="mr-u" rows="3">${esc(r.uwagi||'')}</textarea></div>`,
   [{t:'Anuluj'},{t:'Zapisz',k:'glowny',f:()=>{ const n=mv('mr-n').trim(); if(!n){ toast('Podaj nazwę','zly'); return false; } r.nazwa=n; r.uwagi=mv('mr-u').trim(); saveModule('receptury'); render(); }}]);
 }
+function przesunRec(rid,dir){ const i=D.receptury.findIndex(r=>r.id===rid), j=i+dir; if(i<0||j<0||j>=D.receptury.length) return; [D.receptury[i],D.receptury[j]]=[D.receptury[j],D.receptury[i]]; saveModule('receptury'); render(); }
+// przeniesienie elementu na miejsce innego (przeciąganie): w prawo/w dół – za cel, w lewo/w górę – przed cel
+function przeniesWLiscie(lista,id,celId){ const i=lista.findIndex(x=>x.id===id), j=lista.findIndex(x=>x.id===celId); if(i<0||j<0||i===j) return false; const [el]=lista.splice(i,1); lista.splice(j,0,el); return true; }
+function przeniesRec(rid,celId){ if(przeniesWLiscie(D.receptury,rid,celId)){ saveModule('receptury'); render(); } }
+function przeniesGrupe(gid,celId){ if(przeniesWLiscie(D.grupy,gid,celId)){ saveModule('grupy'); render(); } }
 function duplikujRec(rid){ const r=receptura(rid); const k=klon(r); k.id=uid('r'); k.nazwa=r.nazwa+' (kopia)'; D.receptury.splice(D.receptury.indexOf(r)+1,0,k); saveModule('receptury'); render(); toast('Utworzono kopię receptury'); }
 function usunRec(rid){
   const r=receptura(rid); const g=D.grupy.filter(x=>x.recepturaId===rid);
@@ -1020,7 +1064,14 @@ function usunGrupe(gid){ const g=grupa(gid); if(!confirm(`Usunąć grupę „${g
 function dodajSektor(gid){ const g=grupa(gid); g.sektory.push({id:uid('s'),nazwa:'Sektor '+(g.sektory.length+1),sztuki:0}); saveModule('grupy'); render(); }
 function ustawSektor(gid,sid,pole,v){
   const s=grupa(gid).sektory.find(x=>x.id===sid); if(!s) return;
-  if(pole==='sztuki') s.sztuki=Math.max(0,Math.round(liczba(v))); else { v=v.trim(); if(!v){ render(); return; } s.nazwa=v; }
+  if(pole==='sztuki'){ s.sztuki=Math.max(0,Math.round(liczba(v))); if(s.wirt!=null && s.wirt===s.sztuki) delete s.wirt; }
+  else if(pole==='wirt'){
+    const t=String(v).trim();
+    if(t==='') delete s.wirt;
+    else { const n=parseFloatPL(t); if(!Number.isFinite(n)||n<0){ toast('Wirtualne sztuki: wpisz liczbę albo zostaw puste','zly'); render(); return; }
+      const r=Math.round(n); if(r===s.sztuki) delete s.wirt; else s.wirt=r; }
+  }
+  else { v=v.trim(); if(!v){ render(); return; } s.nazwa=v; }
   saveModule('grupy'); render();
 }
 function usunSektor(gid,sid){ const g=grupa(gid); if(g.sektory.length===1){ toast('Grupa musi mieć co najmniej jeden sektor','zly'); return; } if(!confirm('Usunąć sektor?')) return; g.sektory=g.sektory.filter(x=>x.id!==sid); saveModule('grupy'); render(); }
@@ -1031,7 +1082,8 @@ function usunSektor(gid,sid){ const g=grupa(gid); if(g.sektory.length===1){ toas
 function dzienDoEdycji(data){
   if(!DNI[data]) DNI[data]=normalizujDzien({},data);
   jednostkaDnia(data);
-  if(!DNI[data].snap) DNI[data].snap={...klon(kontekstBiezacy()),ts:Date.now()};
+  // dziś i dni przyszłe: kopia zawsze aktualna – „zamarza” dopiero, gdy dzień minie
+  if(!DNI[data].snap || data>=dzis()) DNI[data].snap={...klon(kontekstBiezacy()),ts:Date.now()};
   return DNI[data];
 }
 function kursyDnia(d,z){ return (d?.kursy||[]).filter(k=>k.zadanie===z); }
@@ -1053,7 +1105,7 @@ R.woz=()=>{
       ss.map(s=>{
         const plan=planSek(C,s.id), przyp=przypisaneSektora(d,s.id), p=plan>0?Math.min(100,przyp/plan*100):0;
         return `<div class="chip ${p>=97?'pelny':''}" style="border-left-color:${g.kolor}" data-drag="sek" data-id="${s.id}" onclick="tapSektor('${s.id}')">
-          <span class="uchwyt" aria-hidden="true">⋮⋮</span><span class="n">${esc(s.nazwa)}</span><span class="s">${s.sztuki} szt</span>
+          <span class="uchwyt" aria-hidden="true">⋮⋮</span><span class="n">${esc(s.nazwa)}</span><span class="s">${s.sztuki} szt${s.wirt!=null?`<br><span title="dawka liczona na ${s.wirt} wirtualnych sztuk">wirt. ${s.wirt}</span>`:''}</span>
           <span class="post"><span class="post-bar"><i style="width:${p}%"></i></span>${fmt(przyp,0)} / ${fmt(plan,0)} kg</span></div>`;
       }).join('');
   }).join('');
@@ -1077,7 +1129,7 @@ R.woz=()=>{
       <div class="nowy-kurs" data-drop="nowy" data-accept="sek kurs" data-zad="${z}">Upuść tu sektor, aby utworzyć nowy kurs<br><button class="btn maly" onclick="nowyKurs(${z})">+ Pusty kurs</button></div></div>`;
   };
   let baner='';
-  if(!d||!d.snap) baner=`<div class="baner info">Ten dzień nie ma jeszcze wpisów – sektory pokazują plan wg aktualnych dawek. Pierwsza zmiana zamrozi dawki i ceny dla tego dnia.</div>`;
+  if(!d||!d.snap) baner=`<div class="baner info">Ten dzień nie ma jeszcze wpisów – sektory pokazują plan wg aktualnych dawek.</div>`;
   else if(snapRozni(data)) baner=`<div class="baner uwaga">Dawki, ceny lub sektory zmieniły się od ${new Date(d.snap.ts).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}, gdy ten dzień został zamrożony. <button class="btn maly" onclick="zastosujAktualne()">Przelicz wg aktualnych</button></div>`;
   const kat=`<div class="legenda"><span><i style="background:${KAT_KOL.obj}"></i>objętościowe</span><span><i style="background:${KAT_KOL.tres}"></i>treściwe</span><span><i style="background:${KAT_KOL.dod}"></i>dodatki</span><span><i style="background:repeating-linear-gradient(45deg,#8A6A3E 0 3px,#AD8B5A 3px 6px)"></i>niedojady</span><span>· liczby w wozie = kolejność załadunku</span></div>`;
   return `<div class="woz-gora"><span class="dzien-tyt">${dzienTyg(data)[0].toUpperCase()+dzienTyg(data).slice(1)}</span>
@@ -1138,6 +1190,39 @@ function kursHTML(d,C,A,k){
     <div class="kurs-wiersze">${(wiersze||ndW)?`<div class="kw nag"><span></span><span style="text-align:left">Sektor</span><span class="ukr">szt</span><span class="ukr">plan kg</span><span>zadane kg</span><span>kg/szt</span><span>% planu</span><span></span></div>`:''}${wiersze}${ndW}</div>
     <div class="upusc">Upuść sektor lub niedojady</div></div>`;
 }
+/* Zmiana w Dawkach (sztuki, wirt. sztuki, receptura, sektory) przechodzi od razu na dziś i dni przyszłe:
+   kg w kursach przeliczają się z zachowaniem % planu, a sektor usunięty albo z inną recepturą schodzi z kursu.
+   Dni minione zostają zamrożone. r.plan = plan kg na kurs w chwili wpisu – punkt odniesienia proporcji. */
+function przeliczDniPoDawkach(){
+  const C=kontekstBiezacy(), dz=dzis(), zdjete=[]; let przeliczone=0;
+  Object.keys(DNI).filter(x=>x>=dz).forEach(data=>{
+    const d=DNI[data]; if(!d) return;
+    const S=d.snap; let zm=false;
+    d.kursy.forEach(k=>{
+      const bylo=k.rozdzial.length;
+      k.rozdzial=k.rozdzial.filter(r=>{
+        const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null;
+        if(!s || (k.recepturaId && g?.recepturaId!==k.recepturaId)){
+          zm=true; zdjete.push(s?s.nazwa:(S?.sektory?.[r.sektorId]?.nazwa||'usunięty sektor'));
+          d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>!(a.kursId===k.id&&a.sektorId===r.sektorId)));
+          return false;
+        }
+        const nowy=planSek(C,r.sektorId)/(g.zadania||1);
+        let stary=r.plan;
+        if(stary==null && S && S.sektory?.[r.sektorId]){ const gg=S.grupy?.[S.sektory[r.sektorId].grupaId]; stary=planSek(S,r.sektorId)/(gg?.zadania||1); }
+        if(stary>0 && Math.abs(nowy-stary)>=0.5){ r.kg=Math.max(0,Math.round((r.kg||0)*nowy/stary)); zm=true; przeliczone++; }
+        const pr=Math.round(nowy*100)/100; if(r.plan!==pr){ r.plan=pr; zm=true; }
+        return true;
+      });
+      if(bylo && !k.rozdzial.length && k.recepturaId){ k.recepturaId=''; zm=true; }
+    });
+    const nowySnap=klon(C), stary=S?(({ts,...x})=>x)(S):null;
+    if(!stary || stabilny(stary)!==stabilny(nowySnap)){ d.snap={...nowySnap,ts:Date.now()}; zm=true; }
+    if(zm) saveDzien(data);
+  });
+  if(zdjete.length) setTimeout(()=>toast(`Zdjęto z kursów: ${[...new Set(zdjete)].join(', ')} (inna receptura albo usunięty sektor)`,'zly'),50);
+  else if(przeliczone) setTimeout(()=>toast(`Przeliczono kg w kursach (${przeliczone}) – zachowany % planu`),50);
+}
 function zmienDate(n){ UI.data=dataPlus(UI.data,n); render(); }
 function zastosujAktualne(){ const d=DNI[UI.data]; if(!d) return; d.snap={...klon(kontekstBiezacy()),ts:Date.now()}; saveDzien(UI.data); render(); toast('Dzień przeliczony wg aktualnych dawek i cen'); }
 function ustawUwagiDnia(v){ const d=dzienDoEdycji(UI.data); d.uwagi=v; saveDzien(UI.data); }
@@ -1162,7 +1247,7 @@ function dodajSektorDoKursu(kid,sid,bezZapisu){
   if(k.rozdzial.some(r=>r.sektorId===sid)){ odrzuc(kid); toast(`${s.nazwa} jest już w tym kursie`); return false; }
   k.recepturaId=g.recepturaId;
   const planK=planSek(C,sid)/(g.zadania||1), juz=przypisaneSektora(d,sid,k.zadanie), kg=Math.max(0,Math.round(planK-juz));
-  k.rozdzial.push({sektorId:sid,kg});
+  k.rozdzial.push({sektorId:sid,kg,plan:Math.round(planK*100)/100});
   UI.swiezy=kid+'_'+sid;
   if(kg===0) toast(`${s.nazwa} ma już rozwiezioną dawkę w tym zadaniu – wpisz kg ręcznie`);
   if(!bezZapisu){ saveDzien(UI.data); render(); }
@@ -1213,9 +1298,9 @@ function ulozKursy(){
       if((g.zadania||1)<z) return;
       if(!g.recepturaId){ if(z===1) brakRec.push(g.nazwa); return; }
       sektoryGrupyC(C,g.id).forEach(s=>{
-        const kg=Math.round(planSek(C,s.id)/(g.zadania||1)); if(kg<=0) return;
+        const pk=planSek(C,s.id)/(g.zadania||1), kg=Math.round(pk); if(kg<=0) return;
         if(!per[g.recepturaId]){ per[g.recepturaId]=[]; kolej.push(g.recepturaId); }
-        per[g.recepturaId].push({sektorId:s.id,kg});
+        per[g.recepturaId].push({sektorId:s.id,kg,plan:Math.round(pk*100)/100});
       });
     });
     kolej.forEach(rid=>{
@@ -1305,8 +1390,11 @@ document.addEventListener('pointermove',e=>{
   if(!drag.start){
     if(Math.hypot(e.clientX-drag.x0,e.clientY-drag.y0)<6) return;
     drag.start=true;
-    const zrodlo=drag.typ==='kurs'?drag.el.closest('.kurs'):drag.el;
-    const duch=zrodlo.cloneNode(true); duch.classList.add('duch'); duch.style.width=Math.min(zrodlo.offsetWidth,320)+'px';
+    const zrodlo=drag.typ==='kurs'?drag.el.closest('.kurs'):drag.typ==='rec'?drag.el.closest('th'):drag.typ==='grp'?drag.el.closest('.grupa'):drag.el;
+    let duch;
+    if(drag.el.dataset.duchTekst){ duch=document.createElement('div'); duch.className='chip duch-maly'; duch.textContent='⇄ '+drag.el.dataset.duchTekst; }
+    else { duch=zrodlo.cloneNode(true); duch.style.width=Math.min(zrodlo.offsetWidth,320)+'px'; }
+    duch.classList.add('duch');
     $$('input,select',duch).forEach(x=>x.disabled=true);
     document.body.appendChild(duch); drag.duch=duch; zrodlo.classList.add('przeciagany'); drag.zrodlo=zrodlo;
     document.body.style.userSelect='none';
@@ -1314,7 +1402,7 @@ document.addEventListener('pointermove',e=>{
   e.preventDefault();
   drag.duch.style.left=(e.clientX-24)+'px'; drag.duch.style.top=(e.clientY-18)+'px';
   let t=document.elementFromPoint(e.clientX,e.clientY), cel=null;
-  while(t && t!==document.body){ t=t.closest('[data-drop]'); if(!t) break; if(t.dataset.accept.split(' ').includes(drag.typ) && !(drag.typ==='kurs'&&t.dataset.id===drag.id)){ cel=t; break; } t=t.parentElement; }
+  while(t && t!==document.body){ t=t.closest('[data-drop]'); if(!t) break; if(t.dataset.accept.split(' ').includes(drag.typ) && !(['kurs','rec','grp'].includes(drag.typ)&&t.dataset.id===drag.id)){ cel=t; break; } t=t.parentElement; }
   if(drag.cel!==cel){ drag.cel?.classList.remove('cel-ok'); cel?.classList.add('cel-ok'); drag.cel=cel; }
   const m=60; if(e.clientY<m) scrollBy(0,-14); else if(e.clientY>innerHeight-m) scrollBy(0,14);
 },{passive:false});
@@ -1347,7 +1435,8 @@ function upusc(typ,id,cel){
   } else if(typ==='kurs'){
     if(rodzaj==='kurs') przeniesKurs(id,cel.dataset.id);
     else if(rodzaj==='nowy') przeniesKurs(id,null,+cel.dataset.zad);
-  }
+  } else if(typ==='rec' && rodzaj==='rec') przeniesRec(id,cel.dataset.id);
+  else if(typ==='grp' && rodzaj==='grp') przeniesGrupe(id,cel.dataset.id);
 }
 
 /* =====================================================================
@@ -1397,7 +1486,7 @@ function tabeleKosztow(data){
   const surs=surowceKolejnosc(C).filter(s=>(A.zuz[s]||0)>0.0001);
   const katy=['obj','tres','dod'];
   const plan=g=>g.zPlanu?' *':'';
-  const opisG=g=>`${esc(g.nazwa)}${g.opis?`<br><span style="font-weight:400">(${esc(g.opis)})</span>`:''}<br><span style="font-weight:400">${g.sztuki} szt${plan(g)}</span>`;
+  const opisG=g=>`${esc(g.nazwa)}${g.opis?`<br><span style="font-weight:400">(${esc(g.opis)})</span>`:''}<br><span style="font-weight:400">${g.sztuki} szt${g.maWirt?` (wirt. ${fmt(g.efSzt,0)})`:''}${plan(g)}</span>`;
   // Sekcja 1
   let s1=`<table class="t"><thead><tr><th class="l">Surowiec (cena zł/kg)</th>${G.map(g=>`<th>${opisG(g)}</th>`).join('')}</tr></thead><tbody>`;
   katy.forEach(k=>{
@@ -1438,6 +1527,7 @@ function tabeleKosztow(data){
   // Uwagi
   const uw=[];
   if(G.some(g=>g.zPlanu)) uw.push('* Sektory bez kursów w tym dniu liczone wg dawki obliczonej (plan).');
+  G.filter(g=>g.maWirt).forEach(g=>uw.push(`${esc(g.nazwa)}: dawka obliczona liczona na ${fmt(g.efSzt,0)} wirtualnych sztuk (${g.sztuki} realnych); koszt na sztukę liczony na realne sztuki.`));
   D.grupy.forEach(g=>{ if(g.uwagi&&G.some(x=>x.id===g.id)) uw.push(esc(g.nazwa)+': '+esc(g.uwagi)); });
   D.receptury.forEach(r=>{ if(r.uwagi&&G.some(g=>g.recepturaId===r.id)) uw.push(esc(r.nazwa)+': '+esc(r.uwagi)); });
   if(maNd) uw.push('Niedojady domieszane wliczone do kg TMR grupy docelowej; ich koszt poniosła grupa, z której pochodzą.');
@@ -1484,8 +1574,8 @@ function tabelaRealizacji(data){
     <td>${o.ndKg>0?fmt(o.ndKg,0):'–'}</td><td>${o.zebr!=null?fmt(o.zebr,0):'–'}</td><td>${o.pobrana!=null?fmt(o.pobrana,1,2):'–'}</td>${kom(pc(o.pobrana,o.obl))}<td class="l">${o.zrodlo}</td></tr>`;
   const body=G.map(g=>{
     const go={sztuki:g.sztuki,obl:g.obl,zadana:g.zadanaKg/g.sztuki,ndKg:g.ndKg,zebr:g.pobranaOk?g.zebrane:null,pobrana:g.pobrana,zrodlo:g.zPlanu===g.sektory.length?'plan':g.zPlanu?'kursy + plan':'kursy'};
-    return wiersz(go,'pod',`<span class="kat-kropka" style="background:${g.kolor}"></span><b>${esc(g.nazwa)}</b>`)+
-      (g.sektory.length>1?g.sektory.map(s=>wiersz({...s,zebr:s.pobrana!=null?(s.zebraneJutro||0):null,zrodlo:s.zPlanu?'plan':'kursy'},'','&nbsp;&nbsp;&nbsp;'+esc(s.nazwa))).join(''):'');
+    return wiersz(go,'pod',`<span class="kat-kropka" style="background:${g.kolor}"></span><b>${esc(g.nazwa)}</b>${g.maWirt?` <span class="cichy">(wirt. ${fmt(g.efSzt,0)})</span>`:''}`)+
+      (g.sektory.length>1?g.sektory.map(s=>wiersz({...s,zebr:s.pobrana!=null?(s.zebraneJutro||0):null,zrodlo:s.zPlanu?'plan':'kursy'},'','&nbsp;&nbsp;&nbsp;'+esc(s.nazwa)+(s.wirt!=null?` <span class="cichy">(wirt. ${s.wirt})</span>`:''))).join(''):'');
   }).join('');
   return `<table class="t"><thead><tr><th class="l">Grupa / sektor</th><th>Szt</th><th>Obliczona<br>kg/szt</th><th>Zadana<br>kg/szt</th><th>Zadana /<br>obliczona</th><th>♻ domieszane<br>kg</th><th>Niedojady<br>nast. dnia kg</th><th>Pobrana<br>kg/szt</th><th>Pobrana /<br>obliczona</th><th class="l">Źródło</th></tr></thead><tbody>${body}</tbody></table>`;
 }
@@ -1496,6 +1586,9 @@ function tabelaZuzycia(od,doD){
     if(A.d && A.d.kursy.length) dniK++; else dniP++;
     Object.entries(A.zuz).forEach(([s,kg])=>{ sum[s]=(sum[s]||0)+kg; zl[s]=(zl[s]||0)+kg*(C.ceny[s]||0)/1000; });
   }
+  // produkcja Suchego TMR w okresie – składniki wliczone do zużycia
+  let prodN=0, prodKg=0;
+  (D.suchytmr?.partie||[]).forEach(p=>{ if(p.data>=od&&p.data<=doD){ prodN++; prodKg+=p.kg||0; (p.sklad||[]).forEach(x=>{ sum[x.s]=(sum[x.s]||0)+(x.kg||0); zl[x.s]=(zl[x.s]||0)+(x.kg||0)*(x.cenaT||0)/1000; }); } });
   const C=kontekstBiezacy(); let razem=0, rKg=0;
   const ss=surowceKolejnosc(C).filter(s=>sum[s]>0.001);
   let h=`<table class="t"><thead><tr><th class="l">Surowiec</th><th>kg</th><th>t</th><th>śr. kg/dzień</th><th>zł</th></tr></thead><tbody>`;
@@ -1506,7 +1599,7 @@ function tabelaZuzycia(od,doD){
     h+=`<tr class="pod"><td class="l">Razem</td><td>${fmt(kk,0)}</td><td>${fmt(kk/1000,2)}</td><td>${fmt(kk/n,0)}</td><td>${fmt(zz,2)}</td></tr>`; razem+=zz; rKg+=kk;
   });
   h+=`</tbody><tfoot><tr class="suma"><td class="l">RAZEM</td><td>${fmt(rKg,0)}</td><td>${fmt(rKg/1000,2)}</td><td>${fmt(rKg/Math.max(n,1),0)}</td><td>${fmt(razem,2)}</td></tr></tfoot></table>`;
-  return {h,dniK,dniP,n};
+  return {h,dniK,dniP,n,prodN,prodKg};
 }
 R.raporty=()=>{
   const p=`<span class="przel">${[['dawki','Realizacja dawek'],['zuzycie','Zużycie surowców']].map(([k,t])=>`<button class="${UI.rapTyp===k?'akt':''}" onclick="UI.rapTyp='${k}';render()">${t}</button>`).join('')}</span>`;
@@ -1516,27 +1609,163 @@ R.raporty=()=>{
       <label class="cichy">od <input type="date" class="pole" value="${UI.rapOd}" onchange="UI.rapOd=this.value;render()"></label><label class="cichy">do <input type="date" class="pole" value="${UI.rapDo}" onchange="UI.rapDo=this.value;render()"></label>
       <span style="margin-left:auto"><button class="btn glowny" onclick="drukujZuzycie()">Drukuj</button></span></div>
       ${UI.rapOd>UI.rapDo?'<div class="baner uwaga">Data „od” jest późniejsza niż „do”.</div>':''}
-      <div class="panel"><div class="ph"><h2>Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}</h2><span class="opis">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu · tylko świeże surowce (bez niedojadów)</span></div><div class="przewin">${Z.h}</div></div>`;
+      <div class="panel"><div class="ph"><h2>Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}</h2><span class="opis">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu · tylko świeże surowce (bez niedojadów)${Z.prodN?` · w tym produkcja Suchego TMR: ${Z.prodN} ${odm(Z.prodN,'partia','partie','partii')}, ${fmt(Z.prodKg,0)} kg`:''}</span></div><div class="przewin">${Z.h}</div></div>`;
   }
   return `<div class="woz-gora" data-zawsze><span class="dzien-tyt">Raporty</span>${p}
       <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${UI.data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
       <span style="margin-left:auto"><button class="btn glowny" onclick="drukujRealizacje()">Drukuj</button></span></div>
-    <div class="panel"><div class="ph"><h2>Realizacja dawek — ${dataPL(UI.data)}</h2><span class="opis">obliczona = receptura · zadana = kursy + domieszane niedojady · pobrana = zadana − niedojady zebrane następnego dnia</span></div>
+    <div class="panel"><div class="ph"><h2>Realizacja dawek — ${dataPL(UI.data)}</h2><span class="opis">obliczona = receptura, skorygowana o wirt. sztuki · zadana = kursy + domieszane niedojady · pobrana = zadana − niedojady zebrane następnego dnia</span></div>
       <div class="przewin">${tabelaRealizacji(UI.data)}</div></div>`;
 };
 function drukujRealizacje(){ drukuj('Realizacja dawek '+UI.data,naglowekDruku('Realizacja dawek – obliczona, zadana, pobrana',UI.data)+tabelaRealizacji(UI.data).replace(/<span class="(kat-kropka|proc)[^"]*"[^>]*>(.*?)<\/span>/g,'$2'),true); }
 function drukujZuzycie(){ const Z=tabelaZuzycia(UI.rapOd,UI.rapDo); drukuj('Zużycie surowców',naglowekDruku(`Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}`)+`<div class="meta">${Z.n} dni: ${Z.dniK} z kursów, ${Z.dniP} wg planu</div>`+Z.h); }
 function drukujSurowce(){
   const plan=analizaDnia(dzis(),{plan:true}).zuz;
-  const w=D.surowce.map(s=>{ const st=stanSurowca(s), du=plan[s.id]||0, dni=du>0?Math.floor(st*1000/du):null;
+  const w=D.surowce.map(s=>{ const st=stanSurowca(s), du=(plan[s.id]||0)+zuzycieProdukcjiDzienne(s.id), dni=du>0?Math.floor(st*1000/du):null;
     return `<tr><td class="l">${esc(s.nazwa)}</td><td class="l">${KAT_KR[s.kat]}</td><td>${fmt(s.cenaT,0)}</td><td>${fmt(st,2)}</td><td>${fmt(du,0)}</td><td>${dni==null?'–':st<=0?'brak':dataPL(dataPlus(dzis(),dni))+' ('+dni+' d)'}</td></tr>`; }).join('');
   drukuj('Stany magazynowe',naglowekDruku('Stany magazynowe surowców',dzis())+`<table><thead><tr><th class="l">Surowiec</th><th class="l">Kategoria</th><th>Cena zł/t</th><th>Stan t</th><th>Zużycie kg/d</th><th>Wystarczy do</th></tr></thead><tbody>${w}</tbody></table>`);
 }
 
 /* =====================================================================
+   15a. ZAKŁADKA: SUCHY TMR (produkcja na fermie dla cieląt)
+   Partia = zdarzenie z datą: zużywa składniki (zmniejsza ich stany) i dodaje Suchy TMR do stanu.
+   Stany są wyliczane, więc usunięcie partii samo oddaje składniki na stan.
+   ===================================================================== */
+const ST=()=>D.suchytmr;
+const produktStmr=()=>D.surowce.find(s=>s.produkt==='stmr');
+function odm(n,a,b,c){ n=Math.abs(Math.round(n)); if(n===1) return a; const d=n%10, s=n%100; return (d>=2&&d<=4&&!(s>=12&&s<=14))?b:c; }
+function sumaProcStmr(){ return ST().receptura.reduce((a,x)=>a+(+x.proc||0),0); }
+function skladPartii(kg){ return ST().receptura.filter(x=>x.proc>0).map(x=>({s:x.s,proc:+x.proc,kg:Math.round(kg*x.proc/100*10)/10,cenaT:surowiec(x.s)?.cenaT||0})); }
+function kosztSkladu(sklad){ return sklad.reduce((a,x)=>a+(x.kg||0)*(x.cenaT||0)/1000,0); }
+function partieOdNajnowszej(){ return [...ST().partie].sort((a,b)=>b.data.localeCompare(a.data)||(b.ts||0)-(a.ts||0)); }
+// średnie dzienne zużycie składnika na produkcję Suchego TMR z ostatnich dni – do „Zużycie kg/dzień” i „Wystarczy do”
+function zuzycieProdukcjiDzienne(sid,dni=30){ const od=dataPlus(dzis(),-dni), dz=dzis(); let kg=0; (D.suchytmr?.partie||[]).forEach(p=>{ if(p.data>od&&p.data<=dz) (p.sklad||[]).forEach(x=>{ if(x.s===sid) kg+=x.kg||0; }); }); return kg/dni; }
+function kgPartiiUI(){ return UI.stmrKg ?? ST().domyslnieKg ?? 3500; }
+
+R.suchytmr=()=>{
+  const S=ST(), kg=kgPartiiUI(), data=UI.stmrData||dzis(), suma=sumaProcStmr(), sumaOk=Math.abs(suma-100)<0.01;
+  const P=produktStmr(), stanP=P?stanSurowca(P):0;
+  const sklad=skladPartii(kg), koszt=kosztSkladu(sklad), kosztT=kosztSkladu(skladPartii(1000));
+  const ostatnia=partieOdNajnowszej()[0];
+  const od30=dataPlus(dzis(),-30), p30=S.partie.filter(p=>p.data>od30&&p.data<=dzis()), kg30=p30.reduce((a,p)=>a+(p.kg||0),0);
+  const kafle=`<div class="kafle">
+    <div class="kafel"><span>Na stanie</span><b>${P?fmt(stanP,2)+' t':'–'}</b><span>${P?'Suchy TMR':'pojawi się w Surowcach po 1. partii'}</span></div>
+    <div class="kafel"><span>Ostatnia partia</span><b>${ostatnia?fmt(ostatnia.kg,0)+' kg':'–'}</b><span>${ostatnia?dataPL(ostatnia.data):'brak produkcji'}</span></div>
+    <div class="kafel"><span>Ostatnie 30 dni</span><b>${fmt(kg30,0)} kg</b><span>${p30.length} ${odm(p30.length,'partia','partie','partii')}</span></div>
+    <div class="kafel"><span>Koszt wg receptury</span><b>${fmt(kosztT,0)} zł/t</b><span>${cenaKg(kosztT)} zł/kg</span></div></div>`;
+  // mieszalnik: warstwy w kolejności wsypywania
+  const licz={obj:0,tres:0,dod:0};
+  const wanna=suma>0?`<div class="wanna" style="height:34px">${S.receptura.filter(x=>x.proc>0).map((x,i)=>{ const s=surowiec(x.s), kat=s?.kat||'obj', kol=KAT_ODC[kat][licz[kat]++%3], pr=x.proc/Math.max(suma,100)*100;
+      return `<div class="seg" style="width:${pr}%;background:${kol}" title="${i+1}. ${esc(s?.nazwa||'?')} – ${fmt(x.proc,1)}%">${pr>5?(i+1):''}</div>`; }).join('')}</div>`:'';
+  // produkcja
+  let nar=0;
+  const wierszeP=sklad.map((x,i)=>{ const s=surowiec(x.s); nar+=x.kg; const st=s?stanSurowca(s,data):null; const brak=st!=null && st*1000<x.kg;
+    return `<tr><td class="nr-z">${i+1}</td><td class="l">${s?esc(s.nazwa):'<span class="ostrz">brak w bazie</span>'}</td><td><b>${fmt(x.kg,0)}</b></td><td class="ukr-tel">${fmt(nar,0)}</td><td>${st==null?'–':fmt(st,2)}</td>
+      <td class="l">${st==null?'':brak?`<span class="stan-brak">⚠ <span class="ukr-tel">brakuje </span>${fmt(x.kg-Math.max(0,st*1000),0)} kg</span>`:'<span class="stan-ok">✓<span class="ukr-tel"> jest</span></span>'}</td></tr>`; }).join('');
+  const prod=`<div class="panel" data-wpis><div class="ph"><h2>Produkcja partii</h2><span class="opis">po zatwierdzeniu składniki schodzą ze stanu, a Suchy TMR przybywa</span></div><div class="pb">
+    <div class="wiersz" style="align-items:flex-end">
+      <div style="flex:0 0 auto"><label class="et">Ile kg wyprodukować?</label><div class="prod-kg"><input class="pole duze" inputmode="decimal" data-fid="stmr_kg" value="${fmtIn(kg,0)}" onchange="UI.stmrKg=Math.max(0,liczba(this.value));render()"> kg</div></div>
+      <div style="flex:0 0 auto"><label class="et">Szybki wybór</label><div class="szybkie">${[1000,2000,3500].map(v=>`<button class="btn ${kg===v?'glowny':''}" onclick="UI.stmrKg=${v};render()">${fmt(v,0)}</button>`).join('')}</div></div>
+      <div style="flex:0 0 auto"><label class="et">Data produkcji</label><input type="date" class="pole" data-fid="stmr_data" value="${data}" max="${dzis()}" onchange="UI.stmrData=this.value||dzis();render()"></div>
+    </div>
+    ${sumaOk?'':`<div class="baner uwaga" style="margin:12px 0 0">Receptura sumuje się do ${fmt(suma,1)}% – popraw ją do 100%, żeby wyprodukować partię.</div>`}
+    <div class="przewin" style="margin-top:12px"><table class="t"><thead><tr><th style="text-align:center">Kol.</th><th class="l">Składnik</th><th>Odważyć kg</th><th class="ukr-tel">Narastająco kg</th><th>Stan ${data===dzis()?'teraz':dataPL(data).slice(0,5)} t</th><th class="l"></th></tr></thead>
+      <tbody>${wierszeP||'<tr><td colspan="6"><div class="pusto">Receptura jest pusta.</div></td></tr>'}</tbody>
+      <tfoot><tr class="suma"><td></td><td class="l">RAZEM</td><td>${fmt(nar,0)}</td><td class="ukr-tel"></td><td></td><td></td></tr></tfoot></table></div>
+    <div class="cichy" style="margin-top:6px">Koszt surowcowy partii: <b>${fmt(koszt,2)} zł</b> · ${fmt(kg>0?koszt/kg*1000:0,0)} zł/t</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn glowny duzy" ${sumaOk&&kg>0?'':'disabled'} onclick="wyprodukujStmr()">Wyprodukuj i rozlicz ${fmt(kg,0)} kg</button>
+      <button class="btn duzy" data-zawsze onclick="drukujKarteStmr()">🖨 Karta produkcji</button></div>
+  </div></div>`;
+  // receptura
+  const rec=S.receptura.map((x,i)=>{ const s=surowiec(x.s);
+    return `<tr><td class="nr-z">${i+1}</td>
+      <td class="l"><select class="pole" style="max-width:220px" onchange="ustawSkladnik(${i},'s',this.value)">${!s?`<option value="${esc(x.s)}" selected>— brak w bazie —</option>`:''}${D.surowce.filter(y=>y.produkt!=='stmr').map(y=>`<option value="${y.id}" ${y.id===x.s?'selected':''}>${esc(y.nazwa)}</option>`).join('')}</select></td>
+      <td style="white-space:nowrap"><input class="pole num krotkie" inputmode="decimal" data-fid="stp_${i}" value="${fmtIn(x.proc,2)}" onchange="ustawSkladnik(${i},'proc',this.value)"> %</td>
+      <td class="ukr-tel">${fmt((+x.proc||0)*10,0)}</td><td class="ukr-tel">${cenaKg(s?.cenaT)}</td>
+      <td style="white-space:nowrap"><span class="strz"><button ${i===0?'disabled':''} onclick="przesunSkladnik(${i},-1)" aria-label="Wyżej">▲</button><button ${i===S.receptura.length-1?'disabled':''} onclick="przesunSkladnik(${i},1)" aria-label="Niżej">▼</button></span><button class="btn ikona usun" onclick="usunSkladnik(${i})" aria-label="Usuń">✕</button></td></tr>`; }).join('');
+  const recPanel=`<div class="panel"><div class="ph"><h2>Receptura na 1 tonę</h2><span class="opis">kolejność wierszy = kolejność wsypywania</span><div class="prawo"><button class="btn" onclick="dodajSkladnik()">+ Składnik</button></div></div>
+    ${wanna?`<div class="pb" style="padding-bottom:2px">${wanna}</div>`:''}
+    <div class="przewin"><table class="t"><thead><tr><th style="text-align:center">Kol.</th><th class="l">Surowiec</th><th>%</th><th class="ukr-tel">kg / 1 t</th><th class="ukr-tel">zł/kg</th><th></th></tr></thead>
+      <tbody>${rec||'<tr><td colspan="6"><div class="pusto">Brak składników – dodaj je przyciskiem „+ Składnik”.</div></td></tr>'}</tbody>
+      <tfoot><tr class="suma"><td></td><td class="l">SUMA</td><td class="${sumaOk?'dobry':'ostrz'}">${fmt(suma,1)} %</td><td class="ukr-tel">${fmt(suma*10,0)}</td><td class="ukr-tel"></td><td></td></tr></tfoot></table></div>
+    <div class="pb cichy" style="font-size:13px">💡 Najpierw słoma, potem melasa (klejenie), potem reszta. Zmiana receptury nie zmienia partii już wyprodukowanych.</div></div>`;
+  // historia
+  const hist=partieOdNajnowszej().map(p=>`<tr><td class="l">${dataPL(p.data)}</td><td><b>${fmt(p.kg,0)}</b></td><td>${fmt(p.kg>0?kosztSkladu(p.sklad||[])/p.kg*1000:0,0)}</td>
+      <td class="l cichy" style="font-size:12.5px">${(p.sklad||[]).map(x=>esc(surowiec(x.s)?.nazwa||x.s)+' '+fmt(x.kg,0)).join(' · ')}</td><td class="l cichy">${esc(p.kto||'')}</td>
+      <td data-wpis><button class="btn ikona usun" title="Usuń partię – składniki wrócą na stan" onclick="usunPartie('${p.id}')">✕</button></td></tr>`).join('');
+  const histPanel=`<div class="panel"><div class="ph"><h2>Historia produkcji</h2><span class="opis">${S.partie.length} ${odm(S.partie.length,'partia','partie','partii')} · usunięcie partii oddaje składniki na stan</span></div>
+    <div class="przewin"><table class="t"><thead><tr><th class="l">Data</th><th>kg</th><th>zł/t</th><th class="l">Składniki (kg)</th><th class="l">Kto</th><th></th></tr></thead>
+      <tbody>${hist||'<tr><td colspan="6"><div class="pusto"><b>Brak produkcji</b>Pierwsza partia pojawi się tu po kliknięciu „Wyprodukuj i rozlicz”.</div></td></tr>'}</tbody></table></div></div>`;
+  return kafle+`<div class="stmr-uklad"><div>${prod}</div><div>${recPanel}</div></div>`+histPanel;
+};
+function ustawSkladnik(i,pole,v){
+  const x=ST().receptura[i]; if(!x) return;
+  if(pole==='proc'){ const n=parseFloatPL(v); if(!Number.isFinite(n)||n<0){ toast('Wpisz procent, np. 13 albo 12,5','zly'); render(); return; } x.proc=Math.round(n*100)/100; }
+  else { if(ST().receptura.some((y,j)=>j!==i&&y.s===v)){ toast('Ten surowiec już jest w recepturze','zly'); render(); return; } x.s=v; }
+  saveModule('suchytmr'); render();
+}
+function dodajSkladnik(){
+  const juz=new Set(ST().receptura.map(x=>x.s)), w=D.surowce.find(s=>!juz.has(s.id)&&s.produkt!=='stmr');
+  if(!w){ toast('Wszystkie surowce z bazy są już w recepturze','zly'); return; }
+  ST().receptura.push({s:w.id,proc:0}); saveModule('suchytmr'); render(); toast('Dodano wiersz – wybierz surowiec i wpisz %');
+}
+function usunSkladnik(i){ const x=ST().receptura[i]; if(!x) return; if(x.proc>0 && !confirm(`Usunąć „${surowiec(x.s)?.nazwa||'składnik'}” z receptury?`)) return; ST().receptura.splice(i,1); saveModule('suchytmr'); render(); }
+function przesunSkladnik(i,dir){ const a=ST().receptura, j=i+dir; if(j<0||j>=a.length) return; [a[i],a[j]]=[a[j],a[i]]; saveModule('suchytmr'); render(); }
+// Suchy TMR jako surowiec w bazie – tworzony przy pierwszej partii
+function zapewnijProduktStmr(odDnia){
+  let p=produktStmr(); if(p) return p;
+  if(poziom('surowce')<2) return null;
+  p={id:surowiec('stmr')?uid('s'):'stmr',nazwa:'Suchy TMR',kat:'tres',cenaT:0,stanBazT:0,stanData:dataPlus(odDnia,-1),dostawy:[],produkt:'stmr'};
+  D.surowce.push(p); return p;
+}
+// cena Suchego TMR w bazie = koszt surowcowy najnowszej partii (zł/t)
+function aktualizujCeneStmr(){
+  const P=produktStmr(); if(!P||poziom('surowce')<2) return false;
+  const o=partieOdNajnowszej()[0]; if(!o||!(o.kg>0)) return false;
+  const c=Math.round(kosztSkladu(o.sklad||[])/o.kg*1000);
+  if(c===P.cenaT) return false; P.cenaT=c; return true;
+}
+function wyprodukujStmr(){
+  const kg=kgPartiiUI(), data=UI.stmrData||dzis();
+  if(!(kg>0)){ toast('Wpisz ilość większą od zera','zly'); return; }
+  if(data>dzis()){ toast('Nie można zapisać produkcji z przyszłą datą','zly'); return; }
+  if(Math.abs(sumaProcStmr()-100)>=0.01){ toast('Receptura musi sumować się do 100%','zly'); return; }
+  const sklad=skladPartii(kg);
+  if(!sklad.length || sklad.some(x=>!surowiec(x.s))){ toast('W recepturze jest surowiec, którego nie ma w bazie – wybierz go z listy','zly'); return; }
+  const braki=sklad.filter(x=>stanSurowca(surowiec(x.s),data)*1000<x.kg).map(x=>surowiec(x.s).nazwa);
+  if(!confirm(`Wyprodukować ${fmt(kg,0)} kg Suchego TMR (${dataPL(data)})?\n\nSkładniki zejdą ze stanu, Suchy TMR przybędzie.`+(braki.length?`\n\nUwaga – na stanie brakuje: ${braki.join(', ')}. Ich stan spadnie poniżej zera.`:''))) return;
+  ST().partie.push({id:uid('p'),data,kg,sklad,ts:Date.now(),kto:PROFIL?.imie||PROFIL?.login||''});
+  ST().domyslnieKg=kg;
+  saveModule('suchytmr');
+  const nowy=!produktStmr(), P=zapewnijProduktStmr(data); let zm=aktualizujCeneStmr();
+  // bez ręcznego spisu Suchego TMR punkt startowy jego stanu cofa się do najwcześniejszej partii
+  if(P && !P.spisRecznie && data<=P.stanData && poziom('surowce')>=2){ P.stanData=dataPlus(data,-1); zm=true; }
+  if(P&&(nowy||zm)) saveModule('surowce');
+  render();
+  toast(P&&data<=P.stanData?`Zapisano partię ${fmt(kg,0)} kg – data sprzed spisu Suchego TMR, jego stan bez zmian`:`Wyprodukowano ${fmt(kg,0)} kg Suchego TMR – stany przeliczone`);
+}
+function usunPartie(pid){
+  const p=ST().partie.find(x=>x.id===pid); if(!p) return;
+  if(!confirm(`Usunąć partię z ${dataPL(p.data)} (${fmt(p.kg,0)} kg)?\nSkładniki wrócą na stan, a Suchy TMR zejdzie ze stanu.`)) return;
+  ST().partie=ST().partie.filter(x=>x.id!==pid); saveModule('suchytmr');
+  if(aktualizujCeneStmr()) saveModule('surowce');
+  render(); toast('Usunięto partię – stany przeliczone');
+}
+function drukujKarteStmr(){
+  const kg=kgPartiiUI(), data=UI.stmrData||dzis(), sklad=skladPartii(kg); let nar=0;
+  if(!sklad.length){ toast('Receptura jest pusta','zly'); return; }
+  const w=sklad.map((x,i)=>{ nar+=x.kg; return `<tr><td class="nr">${i+1}</td><td class="l">${esc(surowiec(x.s)?.nazwa||x.s)}</td><td>${fmt(x.proc,1)}%</td><td><b>${fmt(x.kg,0)}</b></td><td>${fmt(nar,0)}</td><td style="width:60px"></td></tr>`; }).join('');
+  drukuj('Suchy TMR '+data,naglowekDruku('Karta produkcji – Suchy TMR',data)+
+    `<table class="duze"><thead><tr><th>Kolejność</th><th class="l">Składnik</th><th>%</th><th>Odważyć kg</th><th>Narastająco kg</th><th>✓</th></tr></thead><tbody>${w}
+     <tr class="suma"><td></td><td class="l">RAZEM PARTIA</td><td>${fmt(sumaProcStmr(),1)}%</td><td class="razem">${fmt(nar,0)}</td><td></td><td></td></tr></tbody></table>
+     <div class="uw">Najpierw słoma, potem melasa (klejenie), potem reszta. Koszt surowcowy partii: ${fmt(kosztSkladu(sklad),2)} zł (${fmt(kg>0?kosztSkladu(sklad)/kg*1000:0,0)} zł/t).</div>
+     <div class="uw" style="margin-top:24px">Wyprodukował(a): ______________________ &nbsp;&nbsp; Data: ______________</div>`);
+}
+
+/* =====================================================================
    16. ZAKŁADKA: CIELAKI (miejsce na później)
    ===================================================================== */
-R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div class="pusto"><b>Moduł w przygotowaniu</b>Żywienie cieląt (suchy TMR z partii, preparat mlekozastępczy) dodamy w kolejnym etapie.</div></div>`;
+R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div class="pusto"><b>Moduł w przygotowaniu</b>Żywienie cieląt (rozchód Suchego TMR z zakładki Suchy TMR, preparat mlekozastępczy) dodamy w kolejnym etapie.</div></div>`;
 
 /* =====================================================================
    17. ZAKŁADKA: USTAWIENIA
@@ -1573,12 +1802,12 @@ function eksport(){
 const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
 const POZIOMY=['brak','podgląd','wpis','pełny'];
 // które poziomy mają sens w danej zakładce
-const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
-const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ kursów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik'};
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ kursów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',suchytmr:'wpisujesz produkcję Suchego TMR; recepturę zmienia zootechnik'};
 const DOMYSLNE_UPR={
-  szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,cielaki:3,ustawienia:3,uzytkownicy:3},
-  zootechnik:{woz:3,dawki:3,surowce:3,koszty:1,raporty:1,cielaki:3,ustawienia:1,uzytkownicy:0},
-  pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,cielaki:1,ustawienia:0,uzytkownicy:0}
+  szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,suchytmr:3,cielaki:3,ustawienia:3,uzytkownicy:3},
+  zootechnik:{woz:3,dawki:3,surowce:3,koszty:1,raporty:1,suchytmr:3,cielaki:3,ustawienia:1,uzytkownicy:0},
+  pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,suchytmr:1,cielaki:1,ustawienia:0,uzytkownicy:0}
 };
 let PROFIL=null;     // {uid, login, imie, rola, aktywny}
 let UPR=lsCzytaj('uprawnienia')||klon(DOMYSLNE_UPR);
@@ -1729,7 +1958,12 @@ function nasluchAdmin(){
   if(!adminNasluch){
     adminNasluch=true;
     fs.collection(KOL_ADMIN).doc('uprawnienia').onSnapshot(s=>{
-      if(s.exists){ UPR=s.data().m||klon(DOMYSLNE_UPR); lsZapisz('uprawnienia',UPR); }
+      if(s.exists){
+        UPR=s.data().m||klon(DOMYSLNE_UPR); lsZapisz('uprawnienia',UPR);
+        // nowa zakładka (np. Suchy TMR) – twórca dopisuje domyślne poziomy do macierzy w chmurze, żeby czytały je reguły
+        const brak=Object.keys(DOMYSLNE_UPR).some(r=>Object.keys(DOMYSLNE_UPR[r]).some(k=>typeof UPR?.[r]?.[k]!=='number'));
+        if(brak && PROFIL?.rola==='tworca'){ const m=klon(UPR)||{}; Object.keys(DOMYSLNE_UPR).forEach(r=>{ m[r]={...DOMYSLNE_UPR[r],...(m[r]||{})}; }); fs.collection(KOL_ADMIN).doc('uprawnienia').set({m,ts:Date.now()}).catch(e=>console.warn('uprawnienia',e)); }
+      }
       else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now()}).catch(()=>{});
       rysujZakladki(); odswiezZdalnie();
     },e=>console.warn('uprawnienia',e));
@@ -1795,7 +2029,7 @@ R.uzytkownicy=()=>{
   }).join('');
   const twor=PROFIL.rola==='tworca';
   const macierz=ZAKLADKI.map(([k,t])=>`<tr><td class="l"><b>${t}</b></td><td><span class="lv lv3" style="display:inline-block;border-radius:14px;padding:4px 10px;font-weight:700;font-size:13px">pełny</span></td>
-    ${['szef','zootechnik','pracownik'].map(r=>{ const v=UPR?.[r]?.[k]??0;
+    ${['szef','zootechnik','pracownik'].map(r=>{ const v=UPR?.[r]?.[k]??DOMYSLNE_UPR[r]?.[k]??0;
       return `<td><select class="lv lv${v}" ${twor?'':'disabled'} onchange="ustawUpr('${r}','${k}',this.value)">${POZ_ZAKL[k].map(x=>`<option value="${x}" ${x===v?'selected':''}>${POZIOMY[x]}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('');
   return `<div class="panel"><div class="ph"><h2>Konta</h2><span class="opis">${UZYT.filter(u=>u.aktywny).length} aktywnych</span>
       <div class="prawo"><button class="btn glowny" onclick="modalNoweKonto()">+ Dodaj osobę</button></div></div>
