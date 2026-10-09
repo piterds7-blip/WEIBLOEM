@@ -311,6 +311,43 @@ th.rk.cel-ok,.grupa.cel-ok{outline:3px dashed var(--gl2)!important;outline-offse
 .wybor-woz label{display:flex;gap:9px;align-items:center;border:1px solid var(--linia);border-radius:6px;padding:7px 9px;cursor:pointer;background:#fff}
 .wybor-woz label:hover{background:var(--gl3)}
 .wybor-woz input{width:18px;height:18px;flex:0 0 auto}
+/* ===== ANALIZA DANYCH ===== */
+.wyk-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(520px,100%),1fr));gap:14px;margin-bottom:14px}
+.wyk-box{background:var(--pow);border:1px solid var(--linia);border-radius:10px;padding:12px 14px 8px;min-width:0}
+.wyk-box h3{font:600 18px var(--font-w);margin:0 0 2px}
+.wyk-box>.cichy{font-size:12.5px}
+svg.wyk{width:100%;height:auto;display:block;margin-top:4px}
+.wyk-leg{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--tusz2);margin:6px 0 0}
+.wyk-leg span{display:inline-flex;align-items:center;gap:5px}
+.wyk-leg .lk{display:inline-block;width:16px;height:3px;border-radius:2px}
+.wyk-leg .kw{display:inline-block;width:11px;height:11px;border-radius:3px}
+table.mat{font-size:12.5px;margin-top:6px}
+table.mat td{padding:3px 6px}
+.an-filtr{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.an-chip{border:1px solid var(--linia);background:#fff;border-radius:16px;padding:4px 11px;font-weight:600;font-size:13px;cursor:pointer}
+.an-chip.akt{background:var(--gl);border-color:var(--gl);color:#fff}
+.an-chip b{font-weight:800;margin-left:2px}
+.an-wn{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.an-wn li{padding:7px 10px 7px 34px;border-radius:7px;position:relative;line-height:1.4;font-size:14px}
+.an-wn li::before{position:absolute;left:10px;top:7px;font-weight:800}
+.an-wn li.zle{background:#FBEDEA}.an-wn li.zle::before{content:'!';color:#fff;background:#d03b3b;border-radius:50%;width:17px;height:17px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.an-wn li.sr{background:#FFF6E2}.an-wn li.sr::before{content:'▲';color:#B37800;font-size:12px}
+.an-wn li.ok{background:#EAF5EC}.an-wn li.ok::before{content:'✓';color:#0a7d0a}
+td.an-zle{color:#B42A2A;font-weight:700}
+td.an-sr{color:#8A5D00;font-weight:600}
+table.an-t th{white-space:normal;line-height:1.15}
+table.an-krowy td,table.an-krowy th{padding:4px 7px;font-size:13px}
+.an-fl{display:inline-block;font-size:11px;font-weight:700;border-radius:9px;padding:0 7px;margin:1px 3px 1px 0;background:#ECEFEC;color:#3E4A44;white-space:nowrap}
+.an-fl.fl-ket{background:#F9DEDB;color:#9E2323}.an-fl.fl-sara{background:#FBE7DC;color:#94451F}.an-fl.fl-moczW,.an-fl.fl-moczN{background:#FFF1CC;color:#7A5600}
+.an-fl.fl-bi{background:#E3ECF8;color:#1C5CAB}.an-fl.fl-zmiana{background:#E6E2F6;color:#4A3AA7}.an-fl.fl-rozrod{background:#E2F3EC;color:#126B4A}
+.an-h3{font:600 16px var(--font-w);margin:14px 0 6px}
+.an-lista{display:flex;flex-wrap:wrap;gap:5px}
+.an-kr{background:var(--pow2);border:1px solid var(--linia);border-radius:6px;padding:2px 8px;font-size:13px;cursor:pointer}
+.an-kr:hover{background:var(--gl3)}
+.an-kr small{color:var(--tusz2)}
+.an-ust{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 12px}
+.kafel.k-zle{border-left-color:#d03b3b;background:#FDF3F1}
+#tip{position:fixed;z-index:1200;background:#1F2A24;color:#fff;font-size:12.5px;line-height:1.35;padding:6px 9px;border-radius:6px;pointer-events:none;white-space:pre-line;max-width:320px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 /* ===== SUCHY TMR ===== */
 .kafle{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .kafel{background:var(--pow);border:1px solid var(--linia);border-left:5px solid var(--tres);border-radius:8px;padding:8px 14px;min-width:150px;flex:1 1 150px}
@@ -357,6 +394,7 @@ const KOL_UZYT  = 'weibloem_uzytkownicy'; // jeden dokument = jedno konto (id = 
 const KOL_ADMIN = 'weibloem_admin';       // 'init' (pierwszy twórca utworzony), 'uprawnienia' (macierz ról)
 const KOL_MODULY = 'weibloem_moduly';  // kolekcja: jeden dokument = jeden moduł
 const KOL_DNI    = 'weibloem_dni';     // kolekcja: jeden dokument = jeden dzień żywienia (id RRRR-MM-DD)
+const KOL_ANALIZY= 'weibloem_analizy'; // kolekcja: jeden dokument = jeden próbny dój (id RRRR-MM-DD) + 'ustawienia' – tylko Twórca
 const WERSJA_DANYCH = 1;               // sufiks kluczy localStorage; zmiana struktury = +1 i wpis w MIGRACJE
 const DEBOUNCE_MS = 800;
 const DNI_WSTECZ = 60;                 // ile dni wstecz nasłuchujemy na żywo
@@ -523,6 +561,28 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 addEventListener('pagehide',wypchnijOczekujace);
 addEventListener('offline',()=>pokazSync());
 
+/* --- analizy (tylko Twórca): jeden nasłuch kolekcji, jednostka = próbny dój albo 'ustawienia' --- */
+let analizyNasluch=false, analizyGotowe=false;
+function jednostkaAnalizy(id){
+  const k='a:'+id; if(J[k]) return J[k];
+  const u=jednostka(k,{ref:()=>fs.collection(KOL_ANALIZY).doc(id),pobierz:()=>AN[id]??null,ustaw:d=>{ AN[id]=d; }});
+  if(fs && analizyGotowe) u.pierwszy=true;
+  return u;
+}
+function nasluchAnaliz(){
+  if(!fs || analizyNasluch || PROFIL?.rola!=='tworca') return;
+  analizyNasluch=true;
+  fs.collection(KOL_ANALIZY).onSnapshot(qs=>{
+    qs.docChanges().forEach(ch=>{
+      const id=ch.doc.id, k='a:'+id;
+      if(ch.type==='removed'){ if(J[k]&&!J[k].niezsync){ delete AN[id]; delete J[k]; try{ localStorage.removeItem(LS+k); }catch(e){} wersja++; odswiezZdalnie(); } return; }
+      jednostkaAnalizy(id); przyjmijSnapshot(k,ch.doc);
+    });
+    if(!analizyGotowe){ analizyGotowe=true; Object.values(J).forEach(u=>{ if(!u.klucz.startsWith('a:')||u.pierwszy) return; u.pierwszy=true; if(u.niezsync) wypchnij(u.klucz); }); }
+    pokazSync();
+  },e=>{ console.warn('analizy',e); });
+}
+
 /* --- dni: jeden nasłuch zakresu + pojedyncze dla starszych dat --- */
 let odDniaNasluch=null, dniGotowe=false;
 const nasluchPojedynczy={};
@@ -629,6 +689,7 @@ const SEED={
    ===================================================================== */
 const D={surowce:[],receptury:[],grupy:[],wozy:[],ustawienia:{},suchytmr:{receptura:[],partie:[],domyslnieKg:3500}};
 const DNI={};   // data → dokument dnia
+const AN={};    // analizy: data próbnego doju → dane krów, 'ustawienia' → progi i cena mleka
 
 function normalizujModul(m,d){
   if(m==='ustawienia') return (d&&typeof d==='object'&&!Array.isArray(d))?d:{};
@@ -658,6 +719,7 @@ function inicjujDane(){
     }
   });
   Object.keys(localStorage).filter(k=>k.startsWith(LS+'d:')).forEach(k=>jednostkaDnia(k.slice(LS.length+2)));
+  Object.keys(localStorage).filter(k=>k.startsWith(LS+'a:')).forEach(k=>jednostkaAnalizy(k.slice(LS.length+2)));
 }
 
 /* =====================================================================
@@ -834,7 +896,7 @@ function procKlasa(p){ if(p==null||!Number.isFinite(p)) return ''; const r=Math.
 /* =====================================================================
    8. POWŁOKA INTERFEJSU
    ===================================================================== */
-const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['suchytmr','Suchy TMR'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
+const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['analiza','Analiza danych'],['suchytmr','Suchy TMR'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
 const UI={stmrKg:null,stmrData:null,tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
 const R={};   // renderery zakładek
 let odroczonyRender=false;
@@ -1923,6 +1985,554 @@ function drukujKarteStmr(){
 }
 
 /* =====================================================================
+   15b. ZAKŁADKA: ANALIZA DANYCH – próbne doje z SOL + grupy technologiczne z DairyPlan (tylko Twórca)
+   Jeden dokument w kolekcji weibloem_analizy = jeden próbny dój (id = data próby) + dokument 'ustawienia'.
+   W dokumencie są surowe dane krów; wszystkie wskaźniki liczą się w przeglądarce, więc zmiana progów działa wstecz.
+   Numer DairyPlan → kolczyk: 4 cyfry = cyfry 5–2 od końca kolczyka, 5 cyfr = 5 ostatnich cyfr.
+   ===================================================================== */
+const AN_DOMYSLNE={cenaMleka:1.9,oop:60,dimKet:100,tbKet:1.4,tbSara:1.0,biNiskie:3.2,biWysokie:3.8,moczMin:150,moczMax:300,moczOptMin:200,moczOptMax:250,lks:200,produkcyjne:'1,3,4',mapa:{}};
+const AN_SERIE=['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];   // paleta wykresów (sprawdzona pod daltonizm)
+const AN_ST={dobry:'#0ca30c',uwaga:'#fab219',powazny:'#ec835a',krytyczny:'#d03b3b',neutral:'#A3AAA5'};
+const AN_REP=[['cielna','cielne'],['insem','inseminowane'],['oop','w okresie oczekiwania'],['gotowa','gotowe, nieinseminowane'],['problem','jałowe / nie inseminować / poronienie']];
+function anUst(){ const u=AN.ustawienia||{}; return {...AN_DOMYSLNE,...u,mapa:{...(u.mapa||{})}}; }
+function anProby(){ return Object.keys(AN).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&AN[k]&&Array.isArray(AN[k].krowy)).sort().reverse(); }
+function anUstaw(pole,v){
+  const u=anUst();
+  if(pole==='mapa') u.mapa=v;
+  else if(pole==='produkcyjne') u.produkcyjne=String(v).replace(/[^\d,; ]/g,'');
+  else { const n=parseFloatPL(String(v).trim()); if(!Number.isFinite(n)||n<0){ toast('Wpisz liczbę','zly'); render(); return; } u[pole]=n; }
+  AN.ustawienia=u; jednostkaAnalizy('ustawienia'); oznaczZmiane('a:ustawienia'); render();
+}
+
+/* --- czytanie plików --- */
+let _xlsx=null;
+function zaladujXLSX(){
+  if(window.XLSX) return Promise.resolve(window.XLSX);
+  if(_xlsx) return _xlsx;
+  const zrodla=['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'];
+  _xlsx=new Promise((ok,zle)=>{ let i=0;
+    const proba=()=>{ if(i>=zrodla.length){ _xlsx=null; zle(new Error('Nie udało się wczytać czytnika plików Excel – sprawdź połączenie z internetem')); return; }
+      const s=document.createElement('script'); s.src=zrodla[i++]; s.onload=()=>window.XLSX?ok(window.XLSX):proba(); s.onerror=()=>{ s.remove(); proba(); }; document.head.appendChild(s); };
+    proba(); });
+  return _xlsx;
+}
+async function czytajArkusze(plik){
+  const X=await zaladujXLSX(), wb=X.read(await plik.arrayBuffer(),{type:'array'});
+  return wb.SheetNames.map(n=>({nazwa:n,wiersze:X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null,blankrows:true})}));
+}
+function anData(v){
+  if(v==null||v==='') return null;
+  if(typeof v==='number'){ if(v>20000&&v<80000) return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10); return null; }
+  if(v instanceof Date && !isNaN(v)) return isoData(v);
+  const s=String(v).trim(); let m;
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  if((m=s.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2}|\d{4})$/))){ let y=+m[3]; if(y<100) y+=y>70?1900:2000; return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; }
+  return null;
+}
+function anNum(v){ if(v==null||v==='') return null; const n=parseFloatPL(v); return Number.isFinite(n)?n:null; }
+const anNorm=s=>String(s??'').toLowerCase().replace(/\s+/g,' ').trim();
+
+// SOL: arkusz „Report” – wiersz nagłówka z kolumną „Kolczyk”, kolumny szukane po nazwie
+function parsujSOL(arkusze){
+  for(const a of arkusze){
+    const w=a.wiersze, hi=w.findIndex(r=>Array.isArray(r)&&r.some(c=>anNorm(c)==='kolczyk'));
+    if(hi<0) continue;
+    const h=w[hi].map(anNorm), kol=(...n)=>h.findIndex(x=>n.some(y=>x.startsWith(y)));
+    const K={kol:kol('kolczyk'),naz:kol('nazwa'),lak:kol('nr laktacji'),wyc:kol('data ost. wycielenia'),dpd:kol('data ost. próbnego'),dim:kol('dni laktacji'),ml:kol('kg mleka'),
+      tl:kol('% tłuszczu'),bi:kol('% białka'),kaz:kol('% kazeiny'),lkt:kol('% laktozy'),sm:kol('sucha masa'),lks:kol('lks'),mocz:kol('mocznik'),tb:kol('tł/bi'),sket:kol('sket'),inf:kol('dodatkowe')};
+    if(K.ml<0||K.bi<0) throw new Error('W pliku z SOL brakuje kolumn „Kg mleka” lub „% białka”.');
+    const v=(r,k)=>K[k]>=0?r[K[k]]:null, krowy=[], daty={};
+    w.slice(hi+1).forEach(r=>{
+      if(!Array.isArray(r)) return;
+      const k=String(v(r,'kol')||'').trim(); if(!/^[A-Z]{2}\d{6,}/.test(k)) return;
+      const o={k,n:String(v(r,'naz')||'').trim(),lak:anNum(v(r,'lak')),wyc:anData(v(r,'wyc')),dim:anNum(v(r,'dim')),ml:anNum(v(r,'ml')),tl:anNum(v(r,'tl')),bi:anNum(v(r,'bi')),
+        kaz:anNum(v(r,'kaz')),lkt:anNum(v(r,'lkt')),sm:anNum(v(r,'sm')),lks:anNum(v(r,'lks')),mocz:anNum(v(r,'mocz')),tb:anNum(v(r,'tb')),sket:String(v(r,'sket')||'').trim(),inf:String(v(r,'inf')||'').trim()};
+      if(o.tb==null&&o.tl&&o.bi) o.tb=Math.round(o.tl/o.bi*100)/100;
+      const d=anData(v(r,'dpd')); if(d) daty[d]=(daty[d]||0)+1;
+      krowy.push(o);
+    });
+    if(!krowy.length) continue;
+    const data=Object.entries(daty).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+    return {data,krowy};
+  }
+  throw new Error('Nie znaleziono danych krów – oczekiwany eksport z SOL z kolumną „Kolczyk”.');
+}
+
+// DairyPlan: lista skopiowana jako tekst (albo arkusze Zeszytu). Nagłówek grupy „gr.1” / „grupa 22”,
+// wiersz kolumn mówi, jak czytać daty: A = La/Dat.wyć/D.La/il.i/dt.ins, B = Data ur./Ost.wyć/La/Dat.ins, C = Dat.ur./il.i/dt.ins (jałówki, gr. 4 i 25)
+const AN_STATUS=/^[A-ZĄĆĘŁŃÓŚŹŻ][A-ZĄĆĘŁŃÓŚŹŻ0-9.]{3,5}$/, AN_DT=/^\d{1,2}-\d{1,2}-\d{2}$/, AN_INT=/^-?\d+$/;
+function parsujDP(linie){
+  const zw=[], grupy={}; let gr=null, uklad='X', ilPrzed=true, poprz='';
+  linie.forEach(raw=>{
+    const l=String(raw??'').replace(/\|/g,' ').replace(/\s+/g,' ').trim();
+    if(!l) return;
+    const mg=l.length<45 && l.match(/(?:^|\s)(?:gr\.?|grupa)\s*(\d{1,2})$/i);
+    if(mg){ gr=+mg[1]; const reszta=l.slice(0,l.length-mg[0].length).trim(); grupy[gr]={nazwa:[poprz,reszta].filter(Boolean).join(' ')}; uklad='X'; poprz=''; return; }
+    if(/stat/i.test(l) && /\b(nr|numer)/i.test(l)){
+      uklad=/D\.La/i.test(l)?'A':/Ost\.wy/i.test(l)?'B':/il\.i/i.test(l)?'C':'X';
+      const a=l.toLowerCase().indexOf('il.i'), b=l.toLowerCase().indexOf('dt.ins'); ilPrzed=!(a>=0&&b>=0&&b<a); return;
+    }
+    const t=l.split(' ');
+    const si=t.findIndex((x,i)=>i<=3&&AN_STATUS.test(x));
+    const ni=si<0?-1:t.findIndex((x,i)=>i>si&&/^\d{3,5}$/.test(x));
+    if(gr==null||si<0||ni<0){ if(!/^\d/.test(l)&&l.length<70) poprz=l; return; }
+    const r=t.slice(ni+1), D=r.map((x,i)=>AN_DT.test(x)?i:-1).filter(i=>i>=0), o={nr:+t[ni],gr,st:t[si]};
+    if(uklad==='A' && D.length){
+      const d1=D[0]; o.wycDP=anData(r[d1]); if(AN_INT.test(r[d1-1]||'')) o.lakDP=+r[d1-1];
+      if(AN_INT.test(r[d1+2]||'') && AN_DT.test(r[d1+3]||'')){ o.il=+r[d1+2]; const di=anData(r[d1+3]); if(di!==o.wycDP) o.dins=di; }
+    } else if(uklad==='B' && D.length){
+      const ins=D.slice(1).find(i=>AN_INT.test(r[i-1]||''));
+      if(ins!=null) o.dins=anData(r[ins]);
+      const wy=D.slice(1).find(i=>(ins==null||i<ins)&&!AN_INT.test(r[i-1]||'')&&AN_INT.test(r[i+1]||''));
+      if(wy!=null){ o.wycDP=anData(r[wy]); o.lakDP=+r[wy+1]; }
+    } else if(uklad==='C' && D.length>1){
+      const ins=D[1]; o.dins=anData(r[ins]);
+      const c=ilPrzed?r[ins-1]:r[ins+1]; if(AN_INT.test(c||'')&&+c<=20) o.il=+c;
+    }
+    zw.push(o);
+  });
+  return {zw,grupy};
+}
+function wierszeDoLinii(arkusze){ const l=[]; arkusze.forEach(a=>a.wiersze.forEach(r=>l.push((r||[]).map(c=>c==null?'':String(c)).join(' ')))); return l; }
+function kluczDP(nr){ const s=String(nr); return s.length>=5?'5:'+s.slice(-5):'4:'+s.padStart(4,'0'); }
+function kluczeKolczyka(k){ const c=String(k).replace(/\D/g,''); return ['5:'+c.slice(-5),'4:'+c.slice(-5,-1)]; }
+
+// Łączenie: krowy z SOL dopasowane do numeru DP; zwierzęta tylko z DP zostają, jeśli ich grupa ma krowy z SOL
+function polaczDane(S,P,dpData){
+  const idx={}; S.krowy.forEach(s=>kluczeKolczyka(s.k).forEach(k=>{ (idx[k]=idx[k]||[]).push(s); }));
+  const uzyte=new Set(), krowy=[];
+  P.zw.forEach(z=>{
+    const kand=(idx[kluczDP(z.nr)]||[]).filter(s=>!uzyte.has(s)), s=kand.length===1?kand[0]:null;
+    if(s) uzyte.add(s);
+    krowy.push({...z,...(s||{}),nr:z.nr,gr:z.gr,st:z.st});
+  });
+  const grSOL=new Set(krowy.filter(k=>k.k).map(k=>k.gr));
+  const wynik=krowy.filter(k=>grSOL.has(k.gr)).map(k=>{ const o={}; Object.entries(k).forEach(([a,b])=>{ if(b!==null&&b!==undefined&&b!=='') o[a]=b; }); return o; });
+  const grupy={}; grSOL.forEach(g=>grupy[g]=P.grupy[g]||{nazwa:''});
+  return {data:S.data,dpData,ts:Date.now(),krowy:wynik,grupy,
+    stat:{sol:S.krowy.length,dp:P.zw.length,dopasowane:uzyte.size,bezGrupy:S.krowy.length-uzyte.size,zwierzatDP:wynik.filter(k=>!k.k).length}};
+}
+
+/* --- import (okno) --- */
+let _imp={};
+function modalImportu(){
+  _imp={};
+  modal('Wgraj próbny dój i grupy',`
+    <div><label class="et">1. Plik z SOL (dane poszczególnych sztuk, .xlsx)</label><input type="file" class="pole szer" id="an-sol" accept=".xlsx,.xls,.csv" onchange="importPlik('sol',this)"><div class="cichy" id="an-sol-i"></div></div>
+    <div><label class="et">2. Grupy z DairyPlan – wklej tekst list (Ctrl+A, Ctrl+C w DairyPlan)…</label><textarea class="pole" id="an-dp-t" rows="5" placeholder="Krowy dojne wysoko mleczne&#10;gr.1&#10; Gr Stat. Ć   Nr. Ojciec …" oninput="importTekst()"></textarea>
+      <div style="margin-top:6px"><label class="et">…albo wybierz Zeszyt Excela z listami (wszystkie arkusze)</label><input type="file" class="pole szer" id="an-dp" accept=".xlsx,.xls" onchange="importPlik('dp',this)"></div><div class="cichy" id="an-dp-i"></div></div>
+    <div style="max-width:220px"><label class="et">Data list z DairyPlan</label><input type="date" class="pole szer" id="an-dpd" value="${dzis()}"></div>
+    <div id="an-pod" class="baner info" hidden></div>`,
+  [{t:'Anuluj'},{t:'Zapisz analizę',k:'glowny',f:()=>{ zapiszImport(); return false; }}]);
+}
+async function importPlik(typ,el){
+  const f=el.files?.[0]; if(!f) return;
+  const info=$('#an-'+typ+'-i'); info.textContent='Czytam plik…';
+  try{
+    const ark=await czytajArkusze(f);
+    if(typ==='sol'){ _imp.sol=parsujSOL(ark); _imp.plikSol=f.name; info.textContent=`${_imp.sol.krowy.length} sztuk · próbny dój ${dataPL(_imp.sol.data)}`; }
+    else { _imp.dp=parsujDP(wierszeDoLinii(ark)); $('#an-dp-t').value=''; info.textContent=opisDP(_imp.dp); }
+  }catch(e){ console.warn(e); info.textContent=''; delete _imp[typ]; toast(e.message||'Nie udało się przeczytać pliku','zly'); }
+  podgladImportu();
+}
+function importTekst(){ const t=$('#an-dp-t').value; if(!t.trim()){ delete _imp.dp; $('#an-dp-i').textContent=''; podgladImportu(); return; } _imp.dp=parsujDP(t.split(/\r?\n/)); $('#an-dp-i').textContent=opisDP(_imp.dp); podgladImportu(); }
+function opisDP(P){ const gs=Object.keys(P.grupy).filter(x=>P.zw.some(z=>z.gr==x)).sort((a,b)=>a-b), g=gs.length; return `${P.zw.length} zwierząt w ${g} ${odm(g,'grupie','grupach','grupach')}: ${gs.map(x=>x+' ('+P.zw.filter(z=>z.gr==x).length+')').join(', ')}`; }
+function podgladImportu(){
+  const p=$('#an-pod'); if(!p) return;
+  if(!_imp.sol||!_imp.dp){ p.hidden=true; return; }
+  const W=polaczDane(_imp.sol,_imp.dp,$('#an-dpd').value||dzis());
+  p.hidden=false; p.innerHTML=`Dopasowano <b>${W.stat.dopasowane}</b> z ${W.stat.sol} krów z SOL do grup DairyPlan · bez grupy (pominięte): ${W.stat.bezGrupy} · sztuki tylko z DairyPlan (np. świeżo wycielone, jałówki w grupie): ${W.stat.zwierzatDP}${AN[W.data]?`<br><b>Próbny dój ${dataPL(W.data)} jest już zapisany – zostanie zastąpiony.</b>`:''}`;
+}
+function zapiszImport(){
+  if(!_imp.sol){ toast('Wybierz plik z SOL','zly'); return; }
+  if(!_imp.dp||!_imp.dp.zw.length){ toast('Wklej listy z DairyPlan albo wybierz Zeszyt – nie znaleziono w nich zwierząt','zly'); return; }
+  if(!_imp.sol.data){ toast('W pliku z SOL brak daty próbnego doju','zly'); return; }
+  const W=polaczDane(_imp.sol,_imp.dp,$('#an-dpd').value||dzis());
+  if(!W.stat.dopasowane){ toast('Żaden numer z DairyPlan nie pasuje do kolczyków z SOL – sprawdź, czy to to samo stado','zly'); return; }
+  W.plikSol=_imp.plikSol||'';
+  AN[W.data]=W; jednostkaAnalizy(W.data); oznaczZmiane('a:'+W.data);
+  UI.anId=W.data; UI.anFiltr=null; zamknijModal(); render();
+  toast(`Zapisano próbny dój ${dataPL(W.data)} – ${W.stat.dopasowane} krów w grupach`);
+}
+function usunAnalize(id){
+  if(!confirm(`Usunąć próbny dój ${dataPL(id)} z analiz? Tej operacji nie można cofnąć.`)) return;
+  const u=J['a:'+id]; if(u) clearTimeout(u.timer);
+  delete AN[id]; delete J['a:'+id]; try{ localStorage.removeItem(LS+'a:'+id); }catch(e){}
+  if(fs) fs.collection(KOL_ANALIZY).doc(id).delete().catch(e=>{ console.warn(e); toast('Nie udało się usunąć z chmury','zly'); });
+  UI.anId=null; wersja++; render();
+}
+
+/* --- obliczenia --- */
+const ecm=k=>(k.ml>0&&k.tl&&k.bi)?k.ml*(0.383*k.tl+0.242*k.bi+0.7832)/3.1138:null;
+const srednia=a=>{ a=a.filter(x=>x!=null&&Number.isFinite(x)); return a.length?a.reduce((s,x)=>s+x,0)/a.length:null; };
+function kwantyl(a,q){ a=a.filter(x=>x!=null&&Number.isFinite(x)).sort((x,y)=>x-y); if(!a.length) return null; const p=(a.length-1)*q, i=Math.floor(p); return a[i]+(a[Math.min(i+1,a.length-1)]-a[i])*(p-i); }
+function repKat(st){ st=String(st||''); if(/^CIĄŻ/.test(st)) return 'cielna'; if(st==='INSEM') return 'insem'; if(st==='WCZES'||st==='SIARA') return 'oop'; if(st==='GOTOW') return 'gotowa'; if(st==='ZASUS') return 'zasuszona'; if(/^(JAŁOW|N\.INS|PORON)$/.test(st)) return 'problem'; return 'inne'; }
+// grupa żywieniowa z Dawek dla grupy DairyPlan: ręczne przypisanie albo numer w nazwie („Gr. 21,25” → 21 i 25)
+function anGrupaApp(gr,U){
+  if(U.mapa[gr]!==undefined) return U.mapa[gr]||null;
+  const g=D.grupy.find(x=>(x.nazwa.match(/\d+/g)||[]).map(Number).includes(+gr));
+  return g?g.id:null;
+}
+// krzywa Wooda y = a·t^b·e^(−ct), dopasowana metodą najmniejszych kwadratów na logarytmach
+function dopasujWood(pk){
+  const P=pk.filter(p=>p.x>=4&&p.x<=420&&p.y>0); if(P.length<12) return null;
+  let S=[[0,0,0],[0,0,0],[0,0,0]], v=[0,0,0];
+  P.forEach(p=>{ const r=[1,Math.log(p.x),p.x], y=Math.log(p.y); for(let i=0;i<3;i++){ v[i]+=r[i]*y; for(let j=0;j<3;j++) S[i][j]+=r[i]*r[j]; } });
+  const det=m=>m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])-m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])+m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+  const d=det(S); if(Math.abs(d)<1e-9) return null;
+  const x=[0,1,2].map(k=>det(S.map((r,i)=>r.map((c,j)=>j===k?v[i]:c)))/d);
+  const a=Math.exp(x[0]), b=x[1], c=-x[2], f=t=>a*Math.pow(t,b)*Math.exp(-c*t);
+  const szczyt=(b>0&&c>0)?b/c:null;
+  return {f,szczyt,szczytKg:szczyt?f(szczyt):null,n:P.length};
+}
+let _anC={};
+function anLicz(id){
+  const P=AN[id]; if(!P) return null;
+  const klucz=id+'|'+wersja; if(_anC.k===klucz) return _anC.w;
+  const U=anUst(), Cb=kontekstBiezacy(), GD=grupyDnia(analizaDnia(dzis(),{plan:true}));
+  const kosztApp={}; GD.forEach(g=>{ if(g.sztuki>0) kosztApp[g.id]=g.koszt/g.sztuki; });
+  const cenaKgMleka=U.cenaMleka/1.03;   // cena za litr → za kg (1 l ≈ 1,03 kg)
+  const krowy=P.krowy.map(k0=>{
+    const k={...k0}; k.wynik=k.ml>0; k.ecm=ecm(k); k.pierw=k.lak===1;
+    const wyc=k.wycDP||k.wyc; k.dimDP=wyc?roznicaDni(wyc,P.dpData||P.data):null;
+    k.rep=repKat(k.st); k.gApp=anGrupaApp(k.gr,U);
+    k.f={};
+    if(k.wynik){
+      k.f.ket=(k.dim!=null&&k.dim<=U.dimKet&&k.tb>U.tbKet)||k.sket==='K!';
+      k.f.sara=k.tb!=null&&k.tb<U.tbSara;
+      k.f.bi=k.bi!=null&&k.bi<U.biNiskie;
+      k.f.moczW=k.mocz!=null&&k.mocz>U.moczMax; k.f.moczN=k.mocz!=null&&k.mocz<U.moczMin;
+      k.f.lks=k.lks!=null&&k.lks>U.lks;
+      k.koszt=k.gApp&&kosztApp[k.gApp]!=null?kosztApp[k.gApp]:null;
+      k.przychod=k.ml*cenaKgMleka; k.iofc=k.koszt!=null?k.przychod-k.koszt:null;
+    }
+    return k;
+  });
+  // grupy
+  const nry=[...new Set(krowy.map(k=>k.gr))].sort((a,b)=>a-b);
+  const grupy=nry.map((gr,i)=>{
+    const W=krowy.filter(k=>k.gr===gr), R=W.filter(k=>k.wynik), sr=f=>srednia(R.map(f)), ile=f=>R.filter(f).length;
+    const zas=W.filter(k=>k.rep==='zasuszona').length, wczesne=R.filter(k=>k.dim!=null&&k.dim<=U.dimKet);
+    const gApp=anGrupaApp(gr,U), ga=D.grupy.find(g=>g.id===gApp), rec=ga?receptura(ga.recepturaId):null;
+    return {gr,nazwa:P.grupy?.[gr]?.nazwa||'',n:W.length,nW:R.length,laktacyjna:R.length>0&&zas<W.length/2,gApp,gNazwa:ga?.nazwa||'',rec:rec?.nazwa||'',
+      pierw:R.length?ile(k=>k.pierw)/R.length:null,dim:sr(k=>k.dim),ml:sr(k=>k.ml),ecm:sr(k=>k.ecm),tl:sr(k=>k.tl),bi:sr(k=>k.bi),tb:sr(k=>k.tb),mocz:sr(k=>k.mocz),
+      lksMed:kwantyl(R.map(k=>k.lks),0.5),lksPr:R.length?ile(k=>k.f.lks)/R.length:null,lkt:sr(k=>k.lkt),
+      ket:ile(k=>k.f.ket),nWczesne:wczesne.length,sara:ile(k=>k.f.sara),biN:ile(k=>k.f.bi),moczW:ile(k=>k.f.moczW),moczN:ile(k=>k.f.moczN),lks:ile(k=>k.f.lks),
+      koszt:srednia(R.map(k=>k.koszt)),przychod:sr(k=>k.przychod),iofc:srednia(R.map(k=>k.iofc)),iofcSuma:R.reduce((a,k)=>a+(k.iofc||0),0),
+      ecmQ:[0,.25,.5,.75,1].map(q=>kwantyl(R.map(k=>k.ecm),q))};
+  });
+  const lakGr=new Set(grupy.filter(g=>g.laktacyjna).map(g=>g.gr));
+  const L=krowy.filter(k=>k.wynik&&lakGr.has(k.gr));
+  // rozród: krowy w laktacji (bez zasuszonych i jałówek), dni od wycielenia na dzień list DairyPlan
+  const R=krowy.filter(k=>lakGr.has(k.gr)&&k.rep!=='zasuszona'&&(k.lak>=1||k.lakDP>=1||k.wynik));
+  const poOOP=R.filter(k=>k.dimDP!=null&&k.dimDP>U.oop);
+  const ciel=poOOP.filter(k=>k.rep==='cielna');
+  const zIl=ciel.filter(k=>k.il>0), zOkr=ciel.filter(k=>k.dins&&(k.wycDP||k.wyc)).map(k=>roznicaDni(k.wycDP||k.wyc,k.dins)).filter(x=>x>0&&x<500);
+  const rozrod={n:R.length,nPo:poOOP.length,ciel:ciel.length,proc:poOOP.length?ciel.length/poOOP.length:null,
+    indeks:srednia(zIl.map(k=>k.il)),nIndeks:zIl.length,okres:srednia(zOkr),nOkres:zOkr.length,
+    bezIns:R.filter(k=>k.rep==='gotowa'&&k.dimDP!=null&&k.dimDP>U.oop+21).sort((a,b)=>b.dimDP-a.dimDP),
+    pozno:R.filter(k=>k.rep!=='cielna'&&k.dimDP!=null&&k.dimDP>150).sort((a,b)=>b.dimDP-a.dimDP),
+    powt:R.filter(k=>k.rep!=='cielna'&&k.il>=3).sort((a,b)=>b.il-a.il),
+    kat:{}};
+  R.forEach(k=>{ const c=k.rep==='inne'?'problem':k.rep; rozrod.kat[k.gr]=rozrod.kat[k.gr]||{}; rozrod.kat[k.gr][c]=(rozrod.kat[k.gr][c]||0)+1; });
+  const porownaj=(nazwa,f)=>{ const a=poOOP.filter(k=>k.wynik&&f(k)), b=poOOP.filter(k=>k.wynik&&!f(k)); const p=x=>x.length?x.filter(k=>k.rep==='cielna').length/x.length:null; return {nazwa,nA:a.length,pA:p(a),nB:b.length,pB:p(b),ilA:srednia(a.filter(k=>k.rep==='cielna'&&k.il>0).map(k=>k.il)),ilB:srednia(b.filter(k=>k.rep==='cielna'&&k.il>0).map(k=>k.il))}; };
+  rozrod.zyw=[porownaj(`Mocznik > ${fmt(U.moczMax,0)} mg/l`,k=>k.f.moczW),porownaj(`Białko < ${fmt(U.biNiskie,2)}%`,k=>k.f.bi),porownaj(`Tł/bi < ${fmt(U.tbSara,2)} (SARA)`,k=>k.f.sara),porownaj('Pierwiastki',k=>k.pierw)];
+  // krzywe laktacji
+  const wood={pierw:dopasujWood(L.filter(k=>k.pierw).map(k=>({x:k.dim,y:k.ml}))),wielo:dopasujWood(L.filter(k=>!k.pierw).map(k=>({x:k.dim,y:k.ml})))};
+  // propozycje zmiany grupy: grupy produkcyjne z ustawień, ECM bliżej mediany innej grupy o ≥ 3 kg
+  const prod=String(U.produkcyjne||'').split(/[,; ]+/).map(Number).filter(x=>lakGr.has(x));
+  const med={}; prod.forEach(g=>{ med[g]=grupy.find(x=>x.gr===g)?.ecmQ[2]; });
+  L.forEach(k=>{
+    if(!prod.includes(k.gr)||k.ecm==null||k.dim==null||k.dim<60||med[k.gr]==null) return;
+    const wlasna=Math.abs(k.ecm-med[k.gr]); let best=null;
+    prod.forEach(g=>{ if(g===k.gr||med[g]==null) return; const d=Math.abs(k.ecm-med[g]); if(d+3<=wlasna&&(!best||d<best.d)) best={g,d}; });
+    if(best){ k.f.zmiana=true; k.doGrupy=best.g; }
+  });
+  // białko a wydajność: przy jakiej wydajności średnie białko spada poniżej 3,40%
+  const kosze=[]; for(let a=10;a<60;a+=5){ const x=L.filter(k=>k.ml>=a&&k.ml<a+5); if(x.length>=4) kosze.push({od:a,do:a+5,n:x.length,bi:srednia(x.map(k=>k.bi))}); }
+  const prog34=kosze.find(b=>b.bi<3.395);
+  // pierwiastki vs wieloródki wg okresu laktacji
+  const okresy=[[0,30],[31,60],[61,100],[101,200],[201,300],[301,9999]].map(([a,b])=>{ const x=L.filter(k=>k.dim>=a&&k.dim<=b), w=f=>({n:x.filter(f).length,ml:srednia(x.filter(f).map(k=>k.ml)),bi:srednia(x.filter(f).map(k=>k.bi)),tb:srednia(x.filter(f).map(k=>k.tb)),mocz:srednia(x.filter(f).map(k=>k.mocz))}); return {a,b,p:w(k=>k.pierw),w:w(k=>!k.pierw)}; });
+  const stado={n:L.length,ml:srednia(L.map(k=>k.ml)),ecm:srednia(L.map(k=>k.ecm)),tl:srednia(L.map(k=>k.tl)),bi:srednia(L.map(k=>k.bi)),tb:srednia(L.map(k=>k.tb)),mocz:srednia(L.map(k=>k.mocz)),
+    lksMed:kwantyl(L.map(k=>k.lks),0.5),ket:L.filter(k=>k.f.ket).length,nWczesne:L.filter(k=>k.dim!=null&&k.dim<=U.dimKet).length,sara:L.filter(k=>k.f.sara).length,
+    iofc:srednia(L.map(k=>k.iofc)),iofcSuma:L.reduce((a,k)=>a+(k.iofc||0),0),dim:srednia(L.map(k=>k.dim)),pierw:L.filter(k=>k.pierw).length};
+  const w={P,U,krowy,grupy,L,lakGr,rozrod,wood,kosze,prog34,okresy,stado,med,prod};
+  w.wnioski=anWnioski(w);
+  _anC={k:klucz,w}; return w;
+}
+// Wnioski – kolejność wg schematu diagnostycznego: najpierw pobranie i struktura dawki, potem skład receptury
+function anWnioski(W){
+  const {U,grupy,stado,prog34,rozrod}=W, o=[], pr=(a,b)=>b?Math.round(a/b*100):0;
+  const lak=grupy.filter(g=>g.laktacyjna&&g.nW>=5);
+  const nz=g=>`gr. ${g.gr}${g.gNazwa&&g.gNazwa.replace(/\s+/g,'').toLowerCase()!==('grupa'+g.gr)?' → '+esc(g.gNazwa):''}${g.rec?' ('+esc(g.rec)+')':''}`;
+  const zbierz=(f,opis,tekst,p)=>{ const a=lak.filter(f); if(!a.length) return; o.push({p:typeof p==='function'?p(a):p,t:`<b>${opis}</b> – ${a.map(g=>`${nz(g)}: ${tekst(g)}`).join('; ')}.`}); };
+  zbierz(g=>g.tb!=null&&(g.tb<U.tbSara+0.05||g.sara/g.nW>=0.3),`Ryzyko kwasicy żwacza (SARA) / obniżenia tłuszczu, tł/bi < ${fmt(U.tbSara,1)}`,
+    g=>`średnio ${fmt(g.tb,2)}, ${g.sara} z ${g.nW} krów (${pr(g.sara,g.nW)}%)`,'zle');
+  if(o.length) o[o.length-1].t+=' Najpierw sprawdź strukturę fizyczną TMR (sito Penn State), sortowanie i NDF z pasz objętościowych; dopiero potem ilość skrobi i treściwych w recepturze.';
+  const n0=o.length;
+  zbierz(g=>g.nWczesne>=3&&g.ket/g.nWczesne>=0.15,`Ryzyko ketozy, tł/bi > ${fmt(U.tbKet,1)} do ${U.dimKet} DIM`,g=>`${g.ket} z ${g.nWczesne} krów (${pr(g.ket,g.nWczesne)}%)`,'zle');
+  if(o.length>n0) o[o.length-1].t+=' Sprawdź pobranie paszy w pierwszych tygodniach laktacji, żywienie grupy przedwycieleniowej i kondycję przy wycieleniu.';
+  const n1=o.length;
+  zbierz(g=>g.mocz!=null&&(g.mocz>U.moczMax||g.moczW/g.nW>=0.3),`Mocznik wysoki, > ${fmt(U.moczMax,0)} mg/l`,g=>`średnio ${fmt(g.mocz,0)}, ${g.moczW} krów (${pr(g.moczW,g.nW)}%) powyżej`,a=>a.some(g=>g.mocz>U.moczMax)?'zle':'sr');
+  if(o.length>n1) o[o.length-1].t+=' Nadmiar białka rozkładalnego względem energii fermentowalnej w żwaczu – zweryfikuj realne pobranie i sortowanie, potem bilans białka (śruty białkowe) i energii żwaczowej.';
+  const n2=o.length;
+  zbierz(g=>g.mocz!=null&&g.mocz<U.moczMin,`Mocznik niski, < ${fmt(U.moczMin,0)} mg/l`,g=>`średnio ${fmt(g.mocz,0)}`,'zle');
+  if(o.length>n2) o[o.length-1].t+=' Przy recepturze z białkiem w normie to najczęściej problem z pobraniem lub sortowaniem, nie niedobór białka – sprawdź resztki i zachowanie przy stole.';
+  const n3=o.length;
+  zbierz(g=>g.bi!=null&&g.dim!=null&&g.dim<200&&(g.bi<U.biNiskie||g.biN/g.nW>=0.3),`Niskie białko, < ${fmt(U.biNiskie,2)}%`,g=>`średnio ${fmt(g.bi,2)}%, ${g.biN} krów`,'sr');
+  if(o.length>n3) o[o.length-1].t+=' Sygnał niedoboru energii (synteza białka mikroorganizmów w żwaczu).';
+  const n4=o.length;
+  zbierz(g=>g.lksPr!=null&&g.lksPr>=0.25,`LKS > ${fmt(U.lks,0)} tys./ml`,g=>`${g.lks} krów (${pr(g.lks,g.nW)}%)`,'sr');
+  if(o.length>n4) o[o.length-1].t+=' Zdrowie wymienia obniża wydajność i białko grupy.';
+  if(prog34) o.push({p:'sr',t:`<b>Próg energetyczny</b> – białko mleka spada poniżej 3,40% przy wydajności ${prog34.od}–${prog34.do} kg (średnio ${fmt(prog34.bi,2)}%, ${prog34.n} krów): od tego poziomu krowy nie pokrywają potrzeb energetycznych.`});
+  else if(stado.n) o.push({p:'ok',t:'<b>Próg energetyczny</b> – średnie białko mleka utrzymuje się na poziomie ≥ 3,40% w każdym przedziale wydajności.'});
+  if(stado.mocz!=null&&stado.mocz>=U.moczOptMin&&stado.mocz<=U.moczOptMax) o.push({p:'ok',t:`<b>Mocznik stada</b> ${fmt(stado.mocz,0)} mg/l – w zakresie optymalnym (${fmt(U.moczOptMin,0)}–${fmt(U.moczOptMax,0)}).`});
+  if(rozrod.proc!=null) o.push({p:rozrod.proc<0.45?'zle':rozrod.proc<0.55?'sr':'ok',t:`<b>Rozród</b> – ${fmt(rozrod.proc*100,0)}% krów po okresie oczekiwania (${U.oop} dni) jest cielnych${rozrod.indeks?`, indeks inseminacyjny ${fmt(rozrod.indeks,1)}`:''}${rozrod.okres?`, okres usługowy średnio ${fmt(rozrod.okres,0)} dni`:''}. Bez inseminacji po ${U.oop+21} dniach: ${rozrod.bezIns.length}, niecielne powyżej 150 dni: ${rozrod.pozno.length}.`});
+  const komentarz={Mocznik:'nadmiar białka obciąża wątrobę i może obniżać zacielenia',Białko:'niedobór energii po wycieleniu opóźnia powrót rui i obniża skuteczność inseminacji',Tł:'zaburzenia żwacza obniżają pobranie i bilans energii'};
+  rozrod.zyw.filter(z=>!/^Pierwiastki/.test(z.nazwa)&&z.nA>=8&&z.pA!=null&&z.pB!=null&&z.pB-z.pA>=0.1).forEach(z=>{ const kl=Object.keys(komentarz).find(k=>z.nazwa.startsWith(k));
+    o.push({p:'sr',t:`<b>Rozród a żywienie: ${esc(z.nazwa)}</b> – ${fmt(z.pA*100,0)}% cielnych wobec ${fmt(z.pB*100,0)}% u pozostałych krów po OOP (n = ${z.nA} / ${z.nB}); ${komentarz[kl]||''}. Jedna próba pokazuje zależność, nie przyczynę.`}); });
+  return o;
+}
+/* --- wykresy (SVG budowane ręcznie, działają też w wydruku) --- */
+function osTicks(min,max,n){ const r=max-min, k=Math.pow(10,Math.floor(Math.log10(r/n))), s=[1,2,2.5,5,10].map(x=>x*k).find(x=>r/x<=n)||k*10; const a=[]; for(let v=Math.ceil(min/s)*s; v<=max+1e-9; v+=s) a.push(Math.round(v*1e6)/1e6); return a; }
+function ksztaltSVG(ks,x,y,r,kol,tip,klik){
+  x=+x; y=+y; const at=`fill="${kol}" stroke="#fff" stroke-width="1.5"${tip?` data-tip="${esc(tip)}"`:''}${klik?` onclick="${klik}" style="cursor:pointer"`:''}`;
+  if(ks==='gora') return `<path d="M${x},${y-r-1.5}L${x+r+1.5},${y+r}L${x-r-1.5},${y+r}Z" ${at}/>`;
+  if(ks==='dol') return `<path d="M${x},${y+r+1.5}L${x+r+1.5},${y-r}L${x-r-1.5},${y-r}Z" ${at}/>`;
+  return `<circle cx="${x}" cy="${y}" r="${r}" ${at}/>`;
+}
+// o: {x:{min,max,et,fmt}, y:{...}, pasy:[{x1,x2,y1,y2,kol,op}], liH:[{y,et}], liV:[{x,et}], serie:[{kol,ks,pkt:[{x,y,tip,klik}]}], krzywe:[{kol,pts}], napisy:[{x,y,t,an}]}
+function wykresXY(o){
+  const W=640,H=330,ml=46,mr=14,mt=12,mb=40, iw=W-ml-mr, ih=H-mt-mb;
+  const X=v=>ml+(v-o.x.min)/(o.x.max-o.x.min)*iw, Y=v=>mt+ih-(v-o.y.min)/(o.y.max-o.y.min)*ih;
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="wyk" role="img" font-family="Barlow,Arial,sans-serif" font-size="11">`;
+  (o.pasy||[]).forEach(p=>{ const x1=X(cl(p.x1??o.x.min,o.x.min,o.x.max)),x2=X(cl(p.x2??o.x.max,o.x.min,o.x.max)),y1=Y(cl(p.y2??o.y.max,o.y.min,o.y.max)),y2=Y(cl(p.y1??o.y.min,o.y.min,o.y.max)); s+=`<rect x="${x1}" y="${y1}" width="${Math.max(0,x2-x1)}" height="${Math.max(0,y2-y1)}" fill="${p.kol}" opacity="${p.op??0.1}"/>`; });
+  osTicks(o.y.min,o.y.max,6).forEach(v=>{ s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E4E8E3"/><text x="${ml-6}" y="${Y(v)+4}" text-anchor="end" fill="#5B6660">${(o.y.fmt||(x=>fmt(x,0,2)))(v)}</text>`; });
+  osTicks(o.x.min,o.x.max,8).forEach(v=>{ s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${mt}" y2="${mt+ih}" stroke="#EEF1ED"/><text x="${X(v)}" y="${mt+ih+15}" text-anchor="middle" fill="#5B6660">${(o.x.fmt||(x=>fmt(x,0,2)))(v)}</text>`; });
+  s+=`<line x1="${ml}" x2="${W-mr}" y1="${mt+ih}" y2="${mt+ih}" stroke="#B9C1BB"/>`;
+  s+=`<text x="${ml+iw/2}" y="${H-6}" text-anchor="middle" fill="#3E4A44" font-weight="600">${esc(o.x.et)}</text><text transform="translate(12 ${mt+ih/2}) rotate(-90)" text-anchor="middle" fill="#3E4A44" font-weight="600">${esc(o.y.et)}</text>`;
+  (o.liH||[]).forEach(l=>{ if(l.y<o.y.min||l.y>o.y.max) return; s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(l.y)}" y2="${Y(l.y)}" stroke="#56615B" stroke-width="1" stroke-dasharray="${l.ciagla?'':'5 4'}"/>${l.et?`<text x="${W-mr-4}" y="${Y(l.y)-4}" text-anchor="end" fill="#3E4A44" font-size="10.5">${esc(l.et)}</text>`:''}`; });
+  (o.liV||[]).forEach(l=>{ if(l.x<o.x.min||l.x>o.x.max) return; s+=`<line x1="${X(l.x)}" x2="${X(l.x)}" y1="${mt}" y2="${mt+ih}" stroke="#56615B" stroke-dasharray="5 4"/>${l.et?`<text x="${X(l.x)+4}" y="${mt+11}" fill="#3E4A44" font-size="10.5">${esc(l.et)}</text>`:''}`; });
+  (o.serie||[]).forEach(se=>se.pkt.forEach(p=>{ if(p.x==null||p.y==null) return; s+=ksztaltSVG(se.ks,+X(cl(p.x,o.x.min,o.x.max)).toFixed(1),+Y(cl(p.y,o.y.min,o.y.max)).toFixed(1),4,se.kol,p.tip,p.klik); }));
+  (o.krzywe||[]).forEach(k=>{ if(!k.pts.length) return; s+=`<polyline points="${k.pts.map(([a,b])=>X(a).toFixed(1)+','+Y(cl(b,o.y.min,o.y.max)).toFixed(1)).join(' ')}" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/><polyline points="${k.pts.map(([a,b])=>X(a).toFixed(1)+','+Y(cl(b,o.y.min,o.y.max)).toFixed(1)).join(' ')}" fill="none" stroke="${k.kol}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"${k.tip?` data-tip="${esc(k.tip)}"`:''}/>`; });
+  (o.napisy||[]).forEach(n=>{ s+=`<text x="${X(n.x)}" y="${Y(n.y)}" text-anchor="${n.an||'start'}" fill="#3E4A44" font-size="11" font-weight="700">${esc(n.t)}</text>`; });
+  return s+'</svg>';
+}
+function legenda(el){ return `<div class="wyk-leg">${el.map(e=>`<span>${e.ks==='linia'?`<svg width="16" height="8" viewBox="0 0 16 8"><rect x="0" y="2.5" width="16" height="3" rx="1.5" fill="${e.kol}"/></svg>`:e.ks==='kw'?`<svg width="11" height="11" viewBox="0 0 11 11"><rect width="11" height="11" rx="3" fill="${e.kol}"/></svg>`:`<svg width="14" height="14" viewBox="-7 -7 14 14">${ksztaltSVG(e.ks,0,0,4,e.kol,'')}</svg>`}${esc(e.t)}</span>`).join('')}</div>`; }
+function tipKrowy(k){ return `${k.nr} ${k.n||''} · gr. ${k.gr} · lakt. ${k.lak??'–'} · ${fmt(k.dim,0)} DIM\nmleko ${fmt(k.ml,1)} kg · tł ${fmt(k.tl,2)} · bi ${fmt(k.bi,2)} · tł/bi ${fmt(k.tb,2)}\nmocznik ${fmt(k.mocz,0)} · LKS ${fmt(k.lks,0)}`; }
+
+function wykresLaktacji(W,L){
+  const maxD=Math.min(500,Math.max(320,...L.map(k=>k.dim||0))), maxM=Math.ceil(Math.max(50,...L.map(k=>k.ml||0))/5)*5;
+  const krz=(m,kol)=>m?{kol,pts:Array.from({length:60},(_,i)=>{ const t=5+i*(maxD-5)/59; return [t,m.f(t)]; }),tip:`szczyt ${fmt(m.szczytKg,1)} kg w ${fmt(m.szczyt,0)} dniu`}:null;
+  const p=W.wood.pierw, w=W.wood.wielo;
+  return `<div class="wyk-box"><h3>Krzywa laktacji</h3><div class="cichy">kg mleka w dniu próby wg dni laktacji · linie = dopasowana krzywa Wooda${p?.szczyt?` · szczyt pierwiastek ${fmt(p.szczytKg,1)} kg (${fmt(p.szczyt,0)} d)`:''}${w?.szczyt?` · wieloródek ${fmt(w.szczytKg,1)} kg (${fmt(w.szczyt,0)} d)`:''}</div>
+    ${legenda([{ks:'kolo',kol:AN_SERIE[0],t:'pierwiastki'},{ks:'kolo',kol:AN_SERIE[1],t:'wieloródki'},{ks:'linia',kol:AN_SERIE[0],t:'krzywa pierwiastek'},{ks:'linia',kol:AN_SERIE[1],t:'krzywa wieloródek'}])}
+    ${wykresXY({x:{min:0,max:maxD,et:'dni laktacji (DIM)'},y:{min:0,max:maxM,et:'kg mleka'},
+      serie:[{kol:AN_SERIE[1],ks:'kolo',pkt:L.filter(k=>!k.pierw).map(k=>({x:k.dim,y:k.ml,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))},{kol:AN_SERIE[0],ks:'kolo',pkt:L.filter(k=>k.pierw).map(k=>({x:k.dim,y:k.ml,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))}],
+      krzywe:[krz(w,AN_SERIE[1]),krz(p,AN_SERIE[0])].filter(Boolean)})}</div>`;
+}
+function wykresTB(W,L){
+  const U=W.U, kat=k=>k.f.ket?'ket':k.f.sara?'sara':'ok';
+  return `<div class="wyk-box"><h3>Tłuszcz / białko a dni laktacji</h3><div class="cichy">pas = zakres ${fmt(U.tbSara,1)}–${fmt(U.tbKet,1)} · ketoza liczona do ${U.dimKet} DIM</div>
+    ${legenda([{ks:'gora',kol:AN_ST.krytyczny,t:`ryzyko ketozy (> ${fmt(U.tbKet,1)})`},{ks:'dol',kol:AN_ST.powazny,t:`ryzyko SARA (< ${fmt(U.tbSara,1)})`},{ks:'kolo',kol:AN_ST.neutral,t:'w normie'}])}
+    ${wykresXY({x:{min:0,max:Math.min(500,Math.max(320,...L.map(k=>k.dim||0))),et:'dni laktacji (DIM)'},y:{min:0.6,max:2.2,et:'stosunek tł/bi',fmt:v=>fmt(v,1,2)},
+      pasy:[{y1:U.tbSara,y2:U.tbKet,kol:'#0ca30c',op:0.08},{x2:U.dimKet,y1:U.tbKet,kol:'#d03b3b',op:0.06}],
+      liH:[{y:U.tbKet,et:`${fmt(U.tbKet,1)} – ketoza`},{y:U.tbSara,et:`${fmt(U.tbSara,1)} – SARA`}],liV:[{x:U.dimKet,et:`${U.dimKet} DIM`}],
+      serie:[['ok','kolo',AN_ST.neutral],['sara','dol',AN_ST.powazny],['ket','gora',AN_ST.krytyczny]].map(([c,ks,kol])=>({kol,ks,pkt:L.filter(k=>kat(k)===c).map(k=>({x:k.dim,y:k.tb,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))}))})}</div>`;
+}
+function wykresMocznik(W,L){
+  const U=W.U, maxM=Math.max(450,Math.ceil(Math.max(...L.map(k=>k.mocz||0))/50)*50), minB=Math.min(2.6,Math.floor(Math.min(...L.map(k=>k.bi||9))*10)/10), maxB=Math.max(4.6,Math.ceil(Math.max(...L.map(k=>k.bi||0))*10)/10);
+  const pole=(a,b,c,d)=>L.filter(k=>k.mocz>=a&&k.mocz<b&&k.bi>=c&&k.bi<d).length;
+  const xs=[0,U.moczMin,U.moczMax,1e9], ys=[0,U.biNiskie,U.biWysokie,99], cx=[U.moczMin/2,(U.moczMin+U.moczMax)/2,(U.moczMax+maxM)/2], cy=[(minB+U.biNiskie)/2,(U.biNiskie+U.biWysokie)/2,(U.biWysokie+maxB)/2];
+  const napisy=[]; for(let i=0;i<3;i++) for(let j=0;j<3;j++){ const n=pole(xs[i],xs[i+1],ys[j],ys[j+1]); if(n) napisy.push({x:cx[i],y:cy[j],t:n+' szt',an:'middle'}); }
+  return `<div class="wyk-box"><h3>Mocznik × białko – bilans białka i energii</h3><div class="cichy">pola wg norm: mocznik ${fmt(U.moczMin,0)}–${fmt(U.moczMax,0)} mg/l, białko ${fmt(U.biNiskie,2)}–${fmt(U.biWysokie,2)}% · zielony pas = optimum mocznika ${fmt(U.moczOptMin,0)}–${fmt(U.moczOptMax,0)}</div>
+    ${legenda([{ks:'kolo',kol:AN_SERIE[0],t:'pierwiastki'},{ks:'kolo',kol:AN_SERIE[1],t:'wieloródki'}])}
+    ${wykresXY({x:{min:0,max:maxM,et:'mocznik, mg/l'},y:{min:minB,max:maxB,et:'białko, %',fmt:v=>fmt(v,1,2)},pasy:[{x1:U.moczOptMin,x2:U.moczOptMax,y1:U.biNiskie,y2:U.biWysokie,kol:'#0ca30c',op:0.1}],
+      liV:[{x:U.moczMin},{x:U.moczMax}],liH:[{y:U.biNiskie},{y:U.biWysokie}],napisy,
+      serie:[{kol:AN_SERIE[1],ks:'kolo',pkt:L.filter(k=>!k.pierw).map(k=>({x:k.mocz,y:k.bi,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))},{kol:AN_SERIE[0],ks:'kolo',pkt:L.filter(k=>k.pierw).map(k=>({x:k.mocz,y:k.bi,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))}]})}
+    <table class="t mat"><tbody>${[['Białko wysokie','dużo energii, mało białka','energia i białko OK','nadmiar białka przy dobrej energii'],['Białko w normie','niedobór białka','bilans prawidłowy','nadmiar białka rozkładalnego'],['Białko niskie','niedobór białka i energii','niedobór energii','niedobór energii, nadmiar białka']].map((r,i)=>`<tr><td class="l"><b>${r[0]}</b></td>${r.slice(1).map((c,j)=>`<td class="l">${c} <b>(${pole(xs[j],xs[j+1],ys[2-i],ys[3-i])})</b></td>`).join('')}</tr>`).join('')}
+      <tr><td></td><td class="l cichy">mocznik niski</td><td class="l cichy">mocznik w normie</td><td class="l cichy">mocznik wysoki</td></tr></tbody></table></div>`;
+}
+function wykresBialkoMleko(W,L){
+  const maxM=Math.ceil(Math.max(50,...L.map(k=>k.ml||0))/5)*5;
+  return `<div class="wyk-box"><h3>Białko a wydajność</h3><div class="cichy">linia = średnie białko w przedziałach co 5 kg · ${W.prog34?`poniżej 3,40% od ${W.prog34.od} kg`:'nie spada poniżej 3,40%'}</div>
+    ${legenda([{ks:'kolo',kol:AN_SERIE[0],t:'krowy'},{ks:'linia',kol:AN_SERIE[1],t:'średnia w przedziale'}])}
+    ${wykresXY({x:{min:0,max:maxM,et:'kg mleka'},y:{min:2.6,max:4.8,et:'białko, %',fmt:v=>fmt(v,1,2)},liH:[{y:3.4,et:'3,40% – próg energetyczny'}],
+      serie:[{kol:AN_SERIE[0],ks:'kolo',pkt:L.map(k=>({x:k.ml,y:k.bi,tip:tipKrowy(k),klik:`anKrowa(${k.nr})`}))}],
+      krzywe:[{kol:AN_SERIE[1],pts:W.kosze.map(b=>[(b.od+b.do)/2,b.bi]),tip:'średnie białko w przedziałach wydajności'}]})}</div>`;
+}
+function wykresECM(W,G){
+  const g=G.filter(x=>x.ecmQ[2]!=null); if(!g.length) return '';
+  const W0=640,ml=150,mr=20,rh=30,H=g.length*rh+44, mx=Math.ceil(Math.max(...g.map(x=>x.ecmQ[4]))/10)*10, X=v=>ml+v/mx*(W0-ml-mr);
+  let s=`<svg viewBox="0 0 ${W0} ${H}" class="wyk" font-family="Barlow,Arial,sans-serif" font-size="11">`;
+  osTicks(0,mx,7).forEach(v=>{ s+=`<line x1="${X(v)}" x2="${X(v)}" y1="8" y2="${H-30}" stroke="#E4E8E3"/><text x="${X(v)}" y="${H-16}" text-anchor="middle" fill="#5B6660">${v}</text>`; });
+  g.forEach((x,i)=>{ const y=14+i*rh, q=x.ecmQ;
+    s+=`<text x="${ml-8}" y="${y+10}" text-anchor="end" fill="#2B3530" font-weight="600">gr. ${x.gr}${x.gNazwa?' · '+esc(x.gNazwa):''}</text>
+      <g data-tip="${esc(`gr. ${x.gr}: ECM min ${fmt(q[0],1)} · Q1 ${fmt(q[1],1)} · mediana ${fmt(q[2],1)} · Q3 ${fmt(q[3],1)} · max ${fmt(q[4],1)} kg (${x.nW} krów)`)}">
+      <line x1="${X(q[0])}" x2="${X(q[4])}" y1="${y+6}" y2="${y+6}" stroke="#7C8781"/><rect x="${X(q[1])}" y="${y}" width="${Math.max(2,X(q[3])-X(q[1]))}" height="12" rx="3" fill="${AN_SERIE[0]}" opacity=".28" stroke="${AN_SERIE[0]}"/>
+      <line x1="${X(q[2])}" x2="${X(q[2])}" y1="${y-2}" y2="${y+14}" stroke="#0d366b" stroke-width="2.5"/><rect x="${X(q[0])-4}" y="${y-4}" width="${X(q[4])-X(q[0])+8}" height="20" fill="transparent"/></g>`; });
+  s+=`<text x="${ml+(W0-ml-mr)/2}" y="${H-2}" text-anchor="middle" fill="#3E4A44" font-weight="600">ECM, kg/dzień (mleko korygowane energią)</text></svg>`;
+  return `<div class="wyk-box"><h3>Rozkład wydajności w grupach</h3><div class="cichy">pudełko = połowa krów grupy (Q1–Q3), kreska = mediana, wąsy = min–max · nakładające się grupy = krowy do przeglądu przydziału</div>${s}</div>`;
+}
+function wykresRozrodu(W,G){
+  const g=G.filter(x=>W.rozrod.kat[x.gr]); if(!g.length) return '';
+  const W0=640,ml=70,mr=20,rh=30,H=g.length*rh+16; const X=v=>ml+v*(W0-ml-mr);
+  let s=`<svg viewBox="0 0 ${W0} ${H}" class="wyk" font-family="Barlow,Arial,sans-serif" font-size="11">`;
+  g.forEach((x,i)=>{ const k=W.rozrod.kat[x.gr], n=AN_REP.reduce((a,[c])=>a+(k[c]||0),0); if(!n) return; let acc=0; const y=8+i*rh;
+    s+=`<text x="${ml-8}" y="${y+13}" text-anchor="end" fill="#2B3530" font-weight="600">gr. ${x.gr}</text>`;
+    AN_REP.forEach(([c,t],j)=>{ const v=(k[c]||0)/n; if(!v) return; const x1=X(acc), w=v*(W0-ml-mr); acc+=v;
+      s+=`<rect x="${x1+1}" y="${y}" width="${Math.max(1,w-2)}" height="18" rx="3" fill="${AN_SERIE[j]}" data-tip="${esc(`gr. ${x.gr}: ${t} – ${k[c]} szt (${fmt(v*100,0)}%)`)}"/>${w>34?`<text x="${x1+w/2}" y="${y+13}" text-anchor="middle" fill="#fff" font-weight="700" pointer-events="none">${fmt(v*100,0)}%</text>`:''}`; });
+  });
+  return `<div class="wyk-box"><h3>Status rozrodu w grupach</h3><div class="cichy">krowy w laktacji wg statusu z DairyPlan</div>${legenda(AN_REP.map(([c,t],j)=>({ks:'kw',kol:AN_SERIE[j],t})))}${s}</svg></div>`;
+}
+function wykresTrendu(miara){
+  const ids=anProby().slice().reverse(); if(ids.length<2) return '';
+  const M={ml:['mleko, kg',k=>k.ml],ecm:['ECM, kg',k=>k.ecm],tb:['tł/bi',k=>k.tb],bi:['białko, %',k=>k.bi],mocz:['mocznik, mg/l',k=>k.mocz],lks:['LKS mediana, tys./ml',null]}[miara];
+  const wyn=ids.map(id=>anLicz(id));
+  const grs=[...new Set(wyn.flatMap(w=>w.grupy.filter(g=>g.laktacyjna).map(g=>g.gr)))].sort((a,b)=>a-b).slice(0,8);
+  const wart=(w,gr)=>{ const g=w.grupy.find(x=>x.gr===gr); if(!g) return null; return miara==='lks'?g.lksMed:miara==='ml'?g.ml:miara==='ecm'?g.ecm:miara==='tb'?g.tb:miara==='bi'?g.bi:g.mocz; };
+  const vals=wyn.flatMap(w=>grs.map(g=>wart(w,g))).filter(v=>v!=null); if(!vals.length) return '';
+  const t0=Date.parse(ids[0]), t1=Date.parse(ids[ids.length-1]), dx=v=>(Date.parse(v)-t0)/864e5, rng=Math.max(1,(t1-t0)/864e5);
+  const mn=Math.min(...vals), mx=Math.max(...vals), pad=(mx-mn)*0.15||1;
+  const serie=grs.map((g,i)=>({kol:AN_SERIE[i],ks:'kolo',pkt:ids.map((id,j)=>({x:dx(id),y:wart(wyn[j],g),tip:`gr. ${g} · ${dataPL(id)}: ${fmt(wart(wyn[j],g),miara==='tb'||miara==='bi'?2:1)}`})).filter(p=>p.y!=null)}));
+  return `${legenda(grs.map((g,i)=>({ks:'linia',kol:AN_SERIE[i],t:'gr. '+g})))}${wykresXY({x:{min:0,max:rng,et:'data próbnego doju',fmt:v=>dataPL(dataPlus(ids[0],Math.round(v))).slice(0,5)},y:{min:Math.max(0,mn-pad),max:mx+pad,et:M[0],fmt:v=>fmt(v,0,2)},
+    krzywe:serie.map(s=>({kol:s.kol,pts:s.pkt.map(p=>[p.x,p.y])})),serie})}`;
+}
+
+/* --- widok zakładki --- */
+const AN_FLAGI=[['ket','Ryzyko ketozy'],['sara','Ryzyko SARA'],['bi','Niskie białko'],['moczW','Mocznik wysoki'],['moczN','Mocznik niski'],['lks','LKS wysoki'],['zmiana','Zmiana grupy?'],['rozrod','Rozród do przeglądu']];
+function anWybrane(W){ const f=UI.anFiltr; return f&&f.length?W.grupy.filter(g=>f.includes(g.gr)):W.grupy.filter(g=>g.laktacyjna); }
+function anPrzelaczGrupe(gr){ const W=anLicz(UI.anId); let f=UI.anFiltr&&UI.anFiltr.length?[...UI.anFiltr]:W.grupy.filter(g=>g.laktacyjna).map(g=>g.gr); f=f.includes(gr)?f.filter(x=>x!==gr):[...f,gr]; UI.anFiltr=f.length?f:null; render(); }
+const kl=(v,zle,sr)=>v==null?'':zle(v)?'an-zle':sr&&sr(v)?'an-sr':'';
+R.analiza=()=>{
+  const ids=anProby();
+  if(!UI.anId||!AN[UI.anId]) UI.anId=ids[0]||null;
+  const gora=`<div class="woz-gora" data-zawsze><span class="dzien-tyt">Analiza danych</span>
+    ${ids.length?`<select class="pole" onchange="UI.anId=this.value;UI.anFiltr=null;render()" aria-label="Próbny dój">${ids.map(i=>`<option value="${i}" ${i===UI.anId?'selected':''}>próbny dój ${dataPL(i)}</option>`).join('')}</select>`:''}
+    <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${ids.length?`<button class="btn" onclick="UI.anUst=!UI.anUst;render()">⚙ Ustawienia</button><button class="btn" onclick="drukujAnalize()">Drukuj raport</button>`:''}<button class="btn glowny" onclick="modalImportu()">+ Wgraj dane</button></span></div>`;
+  if(!UI.anId) return gora+`<div class="panel"><div class="pusto"><b>Brak danych do analizy</b>Wgraj plik z SOL (dane poszczególnych sztuk) i listy grup z DairyPlan – aplikacja przypisze krowy do grup technologicznych po numerze kolczyka i policzy wskaźniki żywieniowe, ketozy, rozrodu i opłacalności.</div></div>`;
+  const W=anLicz(UI.anId), U=W.U, P=W.P, S=W.stado, G=anWybrane(W), wyb=new Set(G.map(g=>g.gr));
+  const L=W.L.filter(k=>wyb.has(k.gr)), R=W.rozrod;
+  const kafel=(t,v,o,cl)=>`<div class="kafel ${cl||''}"><span>${t}</span><b>${v}</b><span>${o||''}</span></div>`;
+  const kafle=`<div class="kafle">${kafel('Krowy w laktacji z wynikiem',S.n,`${S.pierw} pierwiastek · śr. ${fmt(S.dim,0)} DIM`)}${kafel('Mleko / ECM',`${fmt(S.ml,1)} / ${fmt(S.ecm,1)}`,'kg na krowę w dniu próby')}
+    ${kafel('Tłuszcz · białko',`${fmt(S.tl,2)} · ${fmt(S.bi,2)}`,`tł/bi ${fmt(S.tb,2)}`)}${kafel('Mocznik',fmt(S.mocz,0),'mg/l',S.mocz>U.moczMax||S.mocz<U.moczMin?'k-zle':'')}
+    ${kafel('Ryzyko ketozy',`${S.ket}`,`z ${S.nWczesne} krów do ${U.dimKet} DIM`,S.nWczesne&&S.ket/S.nWczesne>=0.15?'k-zle':'')}${kafel('Ryzyko SARA',`${S.sara}`,`${fmt(S.n?S.sara/S.n*100:0,0)}% krów, tł/bi < ${fmt(U.tbSara,1)}`,S.n&&S.sara/S.n>=0.2?'k-zle':'')}
+    ${kafel('Cielne po OOP',R.proc!=null?fmt(R.proc*100,0)+'%':'–',`${R.ciel} z ${R.nPo} krów > ${U.oop} dni`,R.proc!=null&&R.proc<0.45?'k-zle':'')}
+    ${kafel('Nadwyżka nad paszą',S.iofc!=null?fmt(S.iofc,2)+' zł':'–',`na krowę/dzień · stado ${fmt(S.iofcSuma,0)} zł/d · mleko ${fmt(U.cenaMleka,2)} zł/l`)}</div>`;
+  const ust=UI.anUst?panelUstawienAnalizy(W):'';
+  const filtr=`<div class="an-filtr" data-zawsze><span class="cichy">Grupy na wykresach i listach:</span>${W.grupy.filter(g=>g.nW).map(g=>`<button class="an-chip ${wyb.has(g.gr)?'akt':''}" onclick="anPrzelaczGrupe(${g.gr})">gr. ${g.gr}${g.gNazwa?' · '+esc(g.gNazwa):''}${g.laktacyjna?'':' (zas.)'}</button>`).join('')}</div>`;
+  const wn=`<div class="panel"><div class="ph"><h2>Wnioski żywieniowe</h2><span class="opis">reguły wg norm z ustawień · kolejność: pobranie i struktura dawki przed zmianą receptury</span></div><div class="pb"><ul class="an-wn">${W.wnioski.map(x=>`<li class="${x.p}">${x.t}</li>`).join('')||'<li class="ok">Brak sygnałów ostrzegawczych.</li>'}</ul></div></div>`;
+  const nag=`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} <button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button></div>`;
+  return gora+nag+ust+kafle+wn+tabelaGrupAn(W)+filtr+
+    `<div class="wyk-siatka">${wykresLaktacji(W,L)}${wykresTB(W,L)}${wykresMocznik(W,L)}${wykresBialkoMleko(W,L)}${wykresECM(W,G)}${wykresRozrodu(W,G)}</div>`+
+    tabelaOkresow(W)+panelRozrodu(W)+panelKrow(W,wyb)+panelTrendu();
+};
+function tabelaGrupAn(W){
+  const U=W.U, h=W.grupy.filter(g=>g.nW).map(g=>{
+    const pk=(a,b)=>b?`${a} <span class="cichy">/ ${b}</span>`:'–';
+    return `<tr class="${g.laktacyjna?'':'cichy'}"><td class="l"><b>gr. ${g.gr}</b> <span class="cichy">${esc(g.nazwa)}</span></td><td class="l">${g.gNazwa?esc(g.gNazwa)+(g.rec?` <span class="cichy">· ${esc(g.rec)}</span>`:''):'<span class="cichy">bez dawki</span>'}</td>
+      <td>${g.nW}${g.n>g.nW?` <span class="cichy">(+${g.n-g.nW})</span>`:''}</td><td>${g.pierw!=null?fmt(g.pierw*100,0)+'%':'–'}</td><td>${fmt(g.dim,0)}</td><td><b>${fmt(g.ml,1)}</b></td><td>${fmt(g.ecm,1)}</td>
+      <td>${fmt(g.tl,2)}</td><td class="${kl(g.bi,v=>v<U.biNiskie)}">${fmt(g.bi,2)}</td><td class="${kl(g.tb,v=>v<U.tbSara||v>U.tbKet,v=>v<U.tbSara+0.1)}">${fmt(g.tb,2)}</td>
+      <td class="${kl(g.mocz,v=>v>U.moczMax||v<U.moczMin,v=>v>U.moczOptMax||v<U.moczOptMin)}">${fmt(g.mocz,0)}</td><td>${fmt(g.lksMed,0)}</td>
+      <td>${pk(g.ket,g.nWczesne)}</td><td>${g.sara||'–'}</td><td>${g.moczW||'–'}</td><td>${g.lks||'–'}</td>
+      ${g.laktacyjna?`<td>${g.koszt!=null?fmt(g.koszt,2):'–'}</td><td>${fmt(g.przychod,2)}</td><td class="${kl(g.iofc,v=>v<0)}"><b>${g.iofc!=null?fmt(g.iofc,2):'–'}</b></td>`:'<td colspan="3" class="cichy">grupa zasuszona</td>'}</tr>`;
+  }).join('');
+  return `<div class="panel"><div class="ph"><h2>Grupy technologiczne</h2><span class="opis">średnie z próbnego doju · koszt paszy wg dawki obliczonej z Dawek (dziś) · nadwyżka = mleko × ${fmt(U.cenaMleka,2)} zł/l − koszt paszy</span></div>
+    <div class="przewin"><table class="t an-t"><thead><tr><th class="l">Grupa DairyPlan</th><th class="l">Grupa żywieniowa · dawka</th><th>Krów z<br>wynikiem</th><th>Pierw.</th><th>DIM</th><th>Mleko<br>kg</th><th>ECM<br>kg</th><th>Tł<br>%</th><th>Bi<br>%</th><th>Tł/bi</th><th>Mocznik<br>mg/l</th><th>LKS<br>mediana</th><th>Ketoza<br>/ ≤${U.dimKet} DIM</th><th>SARA</th><th>Mocz.<br>&gt;${fmt(U.moczMax,0)}</th><th>LKS<br>&gt;${fmt(U.lks,0)}</th><th>Pasza<br>zł/szt/d</th><th>Mleko<br>zł/szt/d</th><th>Nadwyżka<br>zł/szt/d</th></tr></thead><tbody>${h}</tbody>
+    <tfoot><tr class="suma"><td class="l">STADO (w laktacji)</td><td></td><td>${W.stado.n}</td><td>${W.stado.n?fmt(W.stado.pierw/W.stado.n*100,0)+'%':'–'}</td><td>${fmt(W.stado.dim,0)}</td><td>${fmt(W.stado.ml,1)}</td><td>${fmt(W.stado.ecm,1)}</td><td>${fmt(W.stado.tl,2)}</td><td>${fmt(W.stado.bi,2)}</td><td>${fmt(W.stado.tb,2)}</td><td>${fmt(W.stado.mocz,0)}</td><td>${fmt(W.stado.lksMed,0)}</td><td>${W.stado.ket} / ${W.stado.nWczesne}</td><td>${W.stado.sara}</td><td></td><td></td><td></td><td></td><td>${fmt(W.stado.iofc,2)}</td></tr></tfoot></table></div></div>`;
+}
+function tabelaOkresow(W){
+  const c=(o)=>o.n?`<td>${o.n}</td><td>${fmt(o.ml,1)}</td><td>${fmt(o.bi,2)}</td><td>${fmt(o.tb,2)}</td><td>${fmt(o.mocz,0)}</td>`:'<td>–</td><td></td><td></td><td></td><td></td>';
+  return `<div class="panel"><div class="ph"><h2>Pierwiastki i wieloródki wg okresu laktacji</h2><span class="opis">wybrane grupy w laktacji</span></div><div class="przewin"><table class="t an-t"><thead><tr><th class="l" rowspan="2">DIM</th><th colspan="5" style="text-align:center">Pierwiastki</th><th colspan="5" style="text-align:center">Wieloródki</th></tr><tr>${'<th>n</th><th>mleko</th><th>białko</th><th>tł/bi</th><th>mocznik</th>'.repeat(2)}</tr></thead>
+    <tbody>${W.okresy.map(o=>`<tr><td class="l">${o.b>900?'> '+(o.a-1):o.a+'–'+o.b}</td>${c(o.p)}${c(o.w)}</tr>`).join('')}</tbody></table></div></div>`;
+}
+function panelRozrodu(W){
+  const R=W.rozrod, U=W.U, lst=(a,f)=>a.length?a.slice(0,40).map(k=>`<span class="an-kr" onclick="anKrowa(${k.nr})">${k.nr}${k.n?' '+esc(k.n):''} <small>${f(k)}</small></span>`).join(''):'<span class="cichy">brak</span>';
+  return `<div class="panel"><div class="ph"><h2>Rozród</h2><span class="opis">status z DairyPlan na ${dataPL(W.P.dpData)} · okres oczekiwania ${U.oop} dni · jedna próba = zależności, nie przyczyny</span></div><div class="pb">
+    <div class="kafle">${[['Cielne po OOP',R.proc!=null?fmt(R.proc*100,0)+'%':'–',`${R.ciel} z ${R.nPo}`],['Indeks inseminacyjny',R.indeks?fmt(R.indeks,2):'–',`krowy cielne (n = ${R.nIndeks})`],['Okres usługowy',R.okres?fmt(R.okres,0)+' dni':'–',`wycielenie → skuteczna inseminacja (n = ${R.nOkres})`],['Bez inseminacji',R.bezIns.length,`> ${U.oop+21} dni, status „gotowa”`],['Niecielne > 150 dni',R.pozno.length,'przedłużona laktacja']].map(([a,b,c])=>`<div class="kafel"><span>${a}</span><b>${b}</b><span>${c}</span></div>`).join('')}</div>
+    <h3 class="an-h3">Rozród a wskaźniki żywieniowe (krowy po OOP)</h3>
+    <div class="przewin"><table class="t an-t" style="max-width:760px"><thead><tr><th class="l">Grupa krów</th><th>n</th><th>% cielnych</th><th>indeks ins.</th><th>pozostałe: n</th><th>% cielnych</th><th>indeks ins.</th></tr></thead><tbody>
+    ${R.zyw.map(z=>`<tr><td class="l">${esc(z.nazwa)}</td><td>${z.nA}</td><td><b>${z.pA!=null?fmt(z.pA*100,0)+'%':'–'}</b></td><td>${z.ilA?fmt(z.ilA,2):'–'}</td><td>${z.nB}</td><td>${z.pB!=null?fmt(z.pB*100,0)+'%':'–'}</td><td>${z.ilB?fmt(z.ilB,2):'–'}</td></tr>`).join('')}</tbody></table></div>
+    <h3 class="an-h3">Bez inseminacji po ${U.oop+21} dniach (${R.bezIns.length})</h3><div class="an-lista">${lst(R.bezIns,k=>k.dimDP+' d')}</div>
+    <h3 class="an-h3">Niecielne powyżej 150 dni (${R.pozno.length})</h3><div class="an-lista">${lst(R.pozno,k=>`${k.dimDP} d · ${esc(k.st)}${k.il?' · '+k.il+' ins.':''}`)}</div>
+    <h3 class="an-h3">3 i więcej inseminacji bez ciąży (${R.powt.length})</h3><div class="an-lista">${lst(R.powt,k=>`${k.il} ins. · ${k.dimDP??'–'} d`)}</div></div></div>`;
+}
+function anFlagaKrowy(W,k,f){ if(f==='rozrod') return W.rozrod.bezIns.includes(k)||W.rozrod.pozno.includes(k)||W.rozrod.powt.includes(k); return !!k.f[f]; }
+function panelKrow(W,wyb){
+  const U=W.U, f=UI.anFl||'', q=(UI.anQ||'').toLowerCase();
+  let a=W.krowy.filter(k=>wyb.has(k.gr)&&(k.wynik||f==='rozrod'));
+  if(f) a=a.filter(k=>anFlagaKrowy(W,k,f));
+  if(q) a=a.filter(k=>String(k.nr).includes(q)||(k.n||'').toLowerCase().includes(q)||(k.k||'').toLowerCase().includes(q));
+  const sk=UI.anSort||'nr', kier=UI.anKier||1;
+  a.sort((x,y)=>{ const p=x[sk],r=y[sk]; if(p==null) return 1; if(r==null) return -1; return (p>r?1:p<r?-1:0)*kier; });
+  const kol=[['nr','Nr'],['n','Nazwa',1],['gr','Gr.'],['lak','Lakt.'],['dim','DIM'],['ml','Mleko'],['ecm','ECM'],['tl','Tł'],['bi','Bi'],['tb','Tł/bi'],['mocz','Mocznik'],['lks','LKS'],['st','Status DP',1],['il','Ins.'],['iofc','Nadwyżka']];
+  const lic=k=>AN_FLAGI.filter(([x])=>anFlagaKrowy(W,k,x)).map(([x,t])=>`<span class="an-fl fl-${x}" title="${t}">${t}${x==='zmiana'?' → gr. '+k.doGrupy:''}</span>`).join('');
+  const ile=x=>W.krowy.filter(k=>wyb.has(k.gr)&&(k.wynik||x==='rozrod')&&anFlagaKrowy(W,k,x)).length;
+  return `<div class="panel"><div class="ph"><h2>Krowy do uwagi</h2><span class="opis">${a.length} szt · kliknij krowę, żeby zobaczyć szczegóły i historię prób</span>
+      <div class="prawo" data-zawsze><input class="pole" placeholder="szukaj nr / nazwa" value="${esc(UI.anQ||'')}" data-fid="an_q" oninput="UI.anQ=this.value;clearTimeout(window._anQt);window._anQt=setTimeout(render,250)"></div></div>
+    <div class="an-filtr" data-zawsze style="padding:8px 14px 0"><button class="an-chip ${!f?'akt':''}" onclick="UI.anFl='';render()">Wszystkie</button>${AN_FLAGI.map(([x,t])=>`<button class="an-chip ${f===x?'akt':''}" onclick="UI.anFl='${x}';render()">${t} <b>${ile(x)}</b></button>`).join('')}</div>
+    <div class="przewin" style="max-height:560px"><table class="t an-t an-krowy"><thead><tr>${kol.map(([k,t,l])=>`<th class="${l?'l':''}" onclick="UI.anKier=UI.anSort==='${k}'?-(UI.anKier||1):1;UI.anSort='${k}';render()" style="cursor:pointer">${t}${sk===k?(kier>0?' ▲':' ▼'):''}</th>`).join('')}<th class="l">Sygnały</th></tr></thead>
+    <tbody>${a.slice(0,400).map(k=>`<tr onclick="anKrowa(${k.nr})" style="cursor:pointer"><td><b>${k.nr}</b></td><td class="l">${esc(k.n||'')}</td><td>${k.gr}</td><td>${k.lak??k.lakDP??'–'}</td><td>${fmt(k.dim,0)}</td><td>${fmt(k.ml,1)}</td><td>${fmt(k.ecm,1)}</td><td>${fmt(k.tl,2)}</td>
+      <td class="${kl(k.bi,v=>v<U.biNiskie)}">${fmt(k.bi,2)}</td><td class="${kl(k.tb,v=>v<U.tbSara||(v>U.tbKet&&k.dim<=U.dimKet))}">${fmt(k.tb,2)}</td><td class="${kl(k.mocz,v=>v>U.moczMax||v<U.moczMin)}">${fmt(k.mocz,0)}</td><td class="${kl(k.lks,v=>v>U.lks)}">${fmt(k.lks,0)}</td>
+      <td class="l">${esc(k.st||'')}</td><td>${k.il??''}</td><td>${k.iofc!=null?fmt(k.iofc,2):'–'}</td><td class="l">${lic(k)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function panelTrendu(){
+  if(anProby().length<2) return `<div class="panel"><div class="ph"><h2>Trendy</h2></div><div class="pb cichy">Po wgraniu kolejnego próbnego doju pojawią się tu zmiany grup w czasie, a w szczegółach krowy – jej krzywa laktacji z kolejnych prób.</div></div>`;
+  const m=UI.anTrend||'ml';
+  return `<div class="panel"><div class="ph"><h2>Trendy grup</h2><span class="przel" data-zawsze>${[['ml','Mleko'],['ecm','ECM'],['bi','Białko'],['tb','Tł/bi'],['mocz','Mocznik'],['lks','LKS']].map(([k,t])=>`<button class="${m===k?'akt':''}" onclick="UI.anTrend='${k}';render()">${t}</button>`).join('')}</span></div><div class="pb"><div class="wyk-box" style="border:0;padding:0">${wykresTrendu(m)}</div></div></div>`;
+}
+function panelUstawienAnalizy(W){
+  const U=W.U, pole=(k,t,n=2)=>`<div><label class="et">${t}</label><input class="pole szer num" inputmode="decimal" data-fid="anu_${k}" value="${fmtIn(U[k],n)}" onchange="anUstaw('${k}',this.value)"></div>`;
+  return `<div class="panel"><div class="ph"><h2>Ustawienia analizy</h2><span class="opis">wspólne dla wszystkich prób · zapisują się w chmurze</span></div><div class="pb">
+    <div class="an-ust">${pole('cenaMleka','Cena mleka, zł/l')}${pole('oop','Okres oczekiwania, dni',0)}${pole('dimKet','Ketoza liczona do DIM',0)}${pole('tbKet','Tł/bi – ketoza powyżej')}${pole('tbSara','Tł/bi – SARA poniżej')}${pole('biNiskie','Białko niskie poniżej, %')}${pole('biWysokie','Białko wysokie powyżej, %')}
+      ${pole('moczMin','Mocznik min, mg/l',0)}${pole('moczMax','Mocznik max, mg/l',0)}${pole('moczOptMin','Mocznik optimum od',0)}${pole('moczOptMax','Mocznik optimum do',0)}${pole('lks','LKS próg, tys./ml',0)}
+      <div><label class="et">Grupy produkcyjne (propozycje zmiany grupy)</label><input class="pole szer" data-fid="anu_prod" value="${esc(U.produkcyjne)}" onchange="anUstaw('produkcyjne',this.value)"></div></div>
+    <h3 class="an-h3">Grupa DairyPlan → grupa żywieniowa z Dawek</h3>
+    <div class="an-ust">${W.grupy.map(g=>`<div><label class="et">gr. ${g.gr} ${esc(g.nazwa)}</label><select class="pole szer" onchange="const m=anUst().mapa;m[${g.gr}]=this.value;anUstaw('mapa',m)"><option value="">— bez dawki —</option>${D.grupy.map(x=>`<option value="${x.id}" ${g.gApp===x.id?'selected':''}>${esc(x.nazwa)}</option>`).join('')}</select></div>`).join('')}</div></div></div>`;
+}
+function anKrowa(nr){
+  const ids=anProby().slice().reverse(), hist=ids.map(id=>({id,k:anLicz(id).krowy.find(k=>k.nr===nr)})).filter(x=>x.k), k=anLicz(UI.anId).krowy.find(x=>x.nr===nr)||hist[hist.length-1]?.k;
+  if(!k) return;
+  const W=anLicz(UI.anId), fl=AN_FLAGI.filter(([x])=>anFlagaKrowy(W,k,x)).map(([,t])=>t);
+  const wiersz=(t,v)=>`<tr><td class="l cichy">${t}</td><td class="l"><b>${v}</b></td></tr>`;
+  let krz='';
+  if(hist.filter(h=>h.k.ml>0).length>=2){ const pk=hist.filter(h=>h.k.ml>0&&h.k.dim!=null);
+    krz=wykresXY({x:{min:0,max:Math.max(320,...pk.map(h=>h.k.dim)),et:'dni laktacji'},y:{min:0,max:Math.ceil(Math.max(45,...pk.map(h=>h.k.ml))/5)*5,et:'kg mleka'},krzywe:[{kol:AN_SERIE[0],pts:pk.map(h=>[h.k.dim,h.k.ml])}],serie:[{kol:AN_SERIE[0],ks:'kolo',pkt:pk.map(h=>({x:h.k.dim,y:h.k.ml,tip:`${dataPL(h.id)}: ${fmt(h.k.ml,1)} kg`}))}]}); }
+  modal(`Krowa ${k.nr}${k.n?' · '+esc(k.n):''}`,`<table class="t" style="font-size:13.5px"><tbody>
+    ${wiersz('Kolczyk',esc(k.k||'– (brak w SOL)'))}${wiersz('Grupa DairyPlan',`gr. ${k.gr} ${esc(W.P.grupy?.[k.gr]?.nazwa||'')}`)}${wiersz('Laktacja · wycielenie',`${k.lak??k.lakDP??'–'} · ${dataPL(k.wycDP||k.wyc)}`)}
+    ${k.wynik?wiersz('Próba '+dataPL(W.P.data),`${fmt(k.dim,0)} DIM · ${fmt(k.ml,1)} kg · ECM ${fmt(k.ecm,1)} · tł ${fmt(k.tl,2)} · bi ${fmt(k.bi,2)} · tł/bi ${fmt(k.tb,2)}`)+wiersz('Mocznik · LKS · laktoza',`${fmt(k.mocz,0)} mg/l · ${fmt(k.lks,0)} tys. · ${fmt(k.lkt,2)}%`):''}
+    ${wiersz('Rozród (DairyPlan)',`${esc(k.st||'–')}${k.il!=null?' · '+k.il+' ins.':''}${k.dins?' · ost. ins. '+dataPL(k.dins):''}${k.dimDP!=null?' · '+k.dimDP+' dni od wycielenia':''}`)}
+    ${k.iofc!=null?wiersz('Nadwyżka nad paszą',`${fmt(k.iofc,2)} zł/dzień (mleko ${fmt(k.przychod,2)} − pasza ${fmt(k.koszt,2)})`):''}
+    ${fl.length?wiersz('Sygnały',fl.join(', ')+(k.doGrupy?` (bliżej grupy ${k.doGrupy})`:'')):''}
+    ${k.inf?wiersz('Uwagi SOL',esc(k.inf)):''}</tbody></table>
+    ${hist.length>1?`<h3 class="an-h3">Historia prób</h3><div class="przewin"><table class="t an-t"><thead><tr><th class="l">Próba</th><th>DIM</th><th>Mleko</th><th>Tł</th><th>Bi</th><th>Tł/bi</th><th>Mocznik</th><th>LKS</th></tr></thead><tbody>${hist.map(h=>`<tr><td class="l">${dataPL(h.id)}</td><td>${fmt(h.k.dim,0)}</td><td>${fmt(h.k.ml,1)}</td><td>${fmt(h.k.tl,2)}</td><td>${fmt(h.k.bi,2)}</td><td>${fmt(h.k.tb,2)}</td><td>${fmt(h.k.mocz,0)}</td><td>${fmt(h.k.lks,0)}</td></tr>`).join('')}</tbody></table></div>${krz}`:''}`);
+}
+function drukujAnalize(){
+  const W=anLicz(UI.anId); if(!W) return;
+  const L=W.L, G=W.grupy.filter(g=>g.laktacyjna), czysc=h=>h.replace(/ data-tip="[^"]*"/g,'').replace(/ onclick="[^"]*"/g,'').replace(/<button[\s\S]*?<\/button>/g,'').replace(/ class="t( [^"]*)?"/g,'');
+  const box=h=>czysc(h).replace(/<div class="wyk-box">/g,'<div class="karta" style="border:1px solid #9aa;padding:6px;margin-bottom:10px">').replace(/<div class="cichy">/g,'<div class="meta">');
+  const wn=`<h2>Wnioski żywieniowe</h2><ul style="margin:0;padding-left:16px">${W.wnioski.map(x=>`<li style="margin-bottom:3px">${x.t}</li>`).join('')}</ul>`;
+  const kr=(f,t)=>{ const a=W.krowy.filter(k=>k.wynik&&anFlagaKrowy(W,k,f)); return a.length?`<h2>${t} (${a.length})</h2><table><thead><tr><th>Nr</th><th class="l">Nazwa</th><th>Gr.</th><th>Lakt.</th><th>DIM</th><th>Mleko</th><th>Tł</th><th>Bi</th><th>Tł/bi</th><th>Mocznik</th><th>LKS</th></tr></thead><tbody>${a.sort((x,y)=>x.gr-y.gr||x.nr-y.nr).map(k=>`<tr><td>${k.nr}</td><td class="l">${esc(k.n||'')}</td><td>${k.gr}</td><td>${k.lak??''}</td><td>${fmt(k.dim,0)}</td><td>${fmt(k.ml,1)}</td><td>${fmt(k.tl,2)}</td><td>${fmt(k.bi,2)}</td><td>${fmt(k.tb,2)}</td><td>${fmt(k.mocz,0)}</td><td>${fmt(k.lks,0)}</td></tr>`).join('')}</tbody></table>`:''; };
+  const tresc=naglowekDruku('Analiza danych stada – żywienie, metabolizm, rozród')+`<div class="meta">Próbny dój ${dataPL(W.P.data)} · grupy z DairyPlan ${dataPL(W.P.dpData)} · krowy w laktacji z wynikiem: ${W.stado.n} · mleko ${fmt(W.stado.ml,1)} kg, ECM ${fmt(W.stado.ecm,1)} kg, tł ${fmt(W.stado.tl,2)}%, bi ${fmt(W.stado.bi,2)}%, mocznik ${fmt(W.stado.mocz,0)} mg/l · cena mleka ${fmt(W.U.cenaMleka,2)} zł/l</div>`
+    +wn+czysc(tabelaGrupAn(W)).replace(/<div class="ph">[\s\S]*?<\/div>/,'<h2>Grupy technologiczne</h2>')
+    +`<div style="page-break-before:always"></div><h2>Wykresy</h2><div class="siatka-dr">`+box(wykresLaktacji(W,L))+box(wykresTB(W,L))+box(wykresMocznik(W,L))+box(wykresBialkoMleko(W,L))+box(wykresECM(W,G))+box(wykresRozrodu(W,G))+'</div>'
+    +czysc(tabelaOkresow(W)).replace(/<div class="ph">[\s\S]*?<\/div>/,'<h2>Pierwiastki i wieloródki wg okresu laktacji</h2>')
+    +czysc(panelRozrodu(W)).replace(/<div class="ph">[\s\S]*?<\/div>/,'<h2>Rozród</h2>').replace(/<div class="kafle">/,'<div>').replace(/<div class="kafel">/g,'<div style="display:inline-block;border:1px solid #9aa;padding:4px 8px;margin:0 6px 6px 0">')
+    +`<div style="page-break-before:always"></div>`+kr('ket','Ryzyko ketozy')+kr('sara','Ryzyko SARA')+kr('moczW','Mocznik wysoki')+kr('bi','Niskie białko');
+  drukuj('Analiza danych '+W.P.data,tresc+`<style>.siatka-dr{display:grid;grid-template-columns:1fr 1fr;gap:8px}svg.wyk{width:100%;height:auto}.wyk-leg svg{width:auto;height:11px}.wyk-leg .kw{display:inline-block;width:10px;height:10px}table.mat td{font-size:9px;padding:2px 3px}.wyk-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;margin:2px 0}.wyk-leg span{display:inline-flex;align-items:center;gap:4px}.wyk-leg .lk{display:inline-block;width:14px;height:3px}.karta{page-break-inside:avoid}.an-lista span{display:inline-block;margin:0 8px 3px 0}td.an-zle{font-weight:bold;text-decoration:underline}</style>`,true);
+}
+// podpowiedzi na wykresach (mysz i dotyk)
+(function(){
+  let tip=null;
+  const pokaz=(el,x,y)=>{ if(!tip){ tip=document.createElement('div'); tip.id='tip'; document.body.appendChild(tip); } tip.textContent=el.getAttribute('data-tip'); tip.hidden=false;
+    const w=tip.offsetWidth, h=tip.offsetHeight; tip.style.left=Math.max(6,Math.min(innerWidth-w-6,x+14))+'px'; tip.style.top=Math.max(6,(y-h-12<6?y+18:y-h-12))+'px'; };
+  document.addEventListener('pointermove',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el) pokaz(el,e.clientX,e.clientY); else if(tip) tip.hidden=true; });
+  document.addEventListener('pointerdown',e=>{ const el=e.target.closest&&e.target.closest('[data-tip]'); if(el&&e.pointerType!=='mouse') pokaz(el,e.clientX,e.clientY); else if(tip&&!el) tip.hidden=true; });
+  addEventListener('scroll',()=>{ if(tip) tip.hidden=true; },{passive:true});
+})();
+
+/* =====================================================================
    16. ZAKŁADKA: CIELAKI (miejsce na później)
    ===================================================================== */
 R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div class="pusto"><b>Moduł w przygotowaniu</b>Żywienie cieląt (rozchód Suchego TMR z zakładki Suchy TMR, preparat mlekozastępczy) dodamy w kolejnym etapie.</div></div>`;
@@ -2114,6 +2724,7 @@ async function zablokujSesje(tekst){
 }
 let adminNasluch=false;
 function nasluchAdmin(){
+  nasluchAnaliz();
   if(!adminNasluch){
     adminNasluch=true;
     fs.collection(KOL_ADMIN).doc('uprawnienia').onSnapshot(s=>{
