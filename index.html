@@ -2118,13 +2118,42 @@ let _imp={};
 function modalImportu(){
   _imp={};
   modal('Wgraj próbny dój i grupy',`
-    <div><label class="et">1. Plik z SOL (dane poszczególnych sztuk, .xlsx)</label><input type="file" class="pole szer" id="an-sol" accept=".xlsx,.xls,.csv" onchange="importPlik('sol',this)"><div class="cichy" id="an-sol-i"></div></div>
+    <div><label class="et">1. Pliki z SOL (dane poszczególnych sztuk, .xlsx) – można zaznaczyć kilka naraz (Ctrl+klik) albo dodawać po jednym</label><input type="file" class="pole szer" id="an-sol" accept=".xlsx,.xls,.csv" multiple onchange="importSOL(this)"><div class="cichy" id="an-sol-i"></div></div>
     <div><label class="et">2. Grupy z DairyPlan – wklej tekst list (Ctrl+A, Ctrl+C w DairyPlan)…</label><textarea class="pole" id="an-dp-t" rows="5" placeholder="Krowy dojne wysoko mleczne&#10;gr.1&#10; Gr Stat. Ć   Nr. Ojciec …" oninput="importTekst()"></textarea>
       <div style="margin-top:6px"><label class="et">…albo wybierz Zeszyt Excela z listami (wszystkie arkusze)</label><input type="file" class="pole szer" id="an-dp" accept=".xlsx,.xls" onchange="importPlik('dp',this)"></div><div class="cichy" id="an-dp-i"></div></div>
     <div style="max-width:220px"><label class="et">Data list z DairyPlan</label><input type="date" class="pole szer" id="an-dpd" value="${dzis()}"></div>
     <div id="an-pod" class="baner info" hidden></div>`,
   [{t:'Anuluj'},{t:'Zapisz analizę',k:'glowny',f:()=>{ zapiszImport(); return false; }}]);
 }
+// SOL eksportuje maks. 200 sztuk – kolejne pliki dokładamy do listy i łączymy po kolczyku
+async function importSOL(el){
+  const pliki=[...(el.files||[])]; if(!pliki.length) return;
+  const info=$('#an-sol-i'); info.textContent='Czytam '+(pliki.length>1?pliki.length+' pliki…':'plik…');
+  _imp.solPliki=_imp.solPliki||[];
+  for(const f of pliki){
+    try{
+      const s=parsujSOL(await czytajArkusze(f));
+      const i=_imp.solPliki.findIndex(p=>p.nazwa===f.name);
+      if(i>=0) _imp.solPliki[i]={nazwa:f.name,...s}; else _imp.solPliki.push({nazwa:f.name,...s});
+    }catch(e){ console.warn(e); toast(f.name+': '+(e.message||'nie udało się przeczytać pliku'),'zly'); }
+  }
+  el.value='';
+  polaczSOL(); podgladImportu();
+}
+function polaczSOL(){
+  const L=_imp.solPliki||[], info=$('#an-sol-i');
+  if(!L.length){ delete _imp.sol; delete _imp.plikSol; if(info) info.innerHTML=''; return; }
+  const krowy=[], byl=new Set(), daty={}; let dup=0;
+  L.forEach(p=>{ if(p.data) daty[p.data]=(daty[p.data]||0)+p.krowy.length;
+    p.krowy.forEach(k=>{ if(byl.has(k.k)){ dup++; return; } byl.add(k.k); krowy.push(k); }); });
+  const data=Object.entries(daty).sort((a,b)=>b[1]-a[1])[0]?.[0]||null;
+  _imp.sol={data,krowy}; _imp.plikSol=L.map(p=>p.nazwa).join(', ');
+  const rozne=Object.keys(daty).length>1;
+  if(info) info.innerHTML=L.map((p,i)=>`<div>${esc(p.nazwa)}: <b>${p.krowy.length}</b> szt. · dój ${dataPL(p.data)} <a href="#" onclick="usunPlikSOL(${i});return false">usuń</a></div>`).join('')
+    +(L.length>1?`<div><b>Razem: ${krowy.length} szt.</b>${dup?` (pominięto ${dup} powtórzonych kolczyków)`:''}</div>`:(dup?`<div>pominięto ${dup} powtórzonych kolczyków</div>`:''))
+    +(rozne?`<div style="color:#B42A2A;font-weight:600">Uwaga: pliki mają różne daty próbnego doju (${Object.keys(daty).map(dataPL).join(', ')}) – zapisana zostanie data ${dataPL(data)}. Sprawdź, czy nie mieszasz dwóch doi.</div>`:'');
+}
+function usunPlikSOL(i){ (_imp.solPliki||[]).splice(i,1); polaczSOL(); podgladImportu(); }
 async function importPlik(typ,el){
   const f=el.files?.[0]; if(!f) return;
   const info=$('#an-'+typ+'-i'); info.textContent='Czytam plik…';
@@ -2144,7 +2173,7 @@ function podgladImportu(){
   p.hidden=false; p.innerHTML=`Dopasowano <b>${W.stat.dopasowane}</b> z ${W.stat.sol} krów z SOL do grup DairyPlan · bez grupy (pominięte): ${W.stat.bezGrupy} · sztuki tylko z DairyPlan (np. świeżo wycielone, jałówki w grupie): ${W.stat.zwierzatDP}${AN[W.data]?`<br><b>Próbny dój ${dataPL(W.data)} jest już zapisany – zostanie zastąpiony.</b>`:''}`;
 }
 function zapiszImport(){
-  if(!_imp.sol){ toast('Wybierz plik z SOL','zly'); return; }
+  if(!_imp.sol||!_imp.sol.krowy.length){ toast('Wybierz plik z SOL','zly'); return; }
   if(!_imp.dp||!_imp.dp.zw.length){ toast('Wklej listy z DairyPlan albo wybierz Zeszyt – nie znaleziono w nich zwierząt','zly'); return; }
   if(!_imp.sol.data){ toast('W pliku z SOL brak daty próbnego doju','zly'); return; }
   const W=polaczDane(_imp.sol,_imp.dp,$('#an-dpd').value||dzis());
@@ -2571,7 +2600,7 @@ function eksport(){
 const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
 const POZIOMY=['brak','podgląd','wpis','pełny'];
 // które poziomy mają sens w danej zakładce
-const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
 const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ wozów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',suchytmr:'wpisujesz produkcję Suchego TMR; recepturę zmienia zootechnik'};
 const DOMYSLNE_UPR={
   szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,suchytmr:3,cielaki:3,ustawienia:3,uzytkownicy:3},
