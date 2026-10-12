@@ -311,6 +311,12 @@ th.rk.cel-ok,.grupa.cel-ok{outline:3px dashed var(--gl2)!important;outline-offse
 .wybor-woz label{display:flex;gap:9px;align-items:center;border:1px solid var(--linia);border-radius:6px;padding:7px 9px;cursor:pointer;background:#fff}
 .wybor-woz label:hover{background:var(--gl3)}
 .wybor-woz input{width:18px;height:18px;flex:0 0 auto}
+/* ===== RAPORT ZUŻYCIA ===== */
+table.zuz-dni td{white-space:nowrap;line-height:1.15}
+table.zuz-dni td small.zp{display:block;font-size:11.5px;color:var(--tusz2);font-weight:500}
+table.zuz-dni th{white-space:nowrap}
+.t th.gr-nag{text-align:center;border-bottom:1px solid var(--linia)}
+.t .zp-l{border-left:2px solid var(--linia)}
 /* ===== ANALIZA DANYCH ===== */
 .wyk-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(520px,100%),1fr));gap:14px;margin-bottom:14px}
 .wyk-box{background:var(--pow);border:1px solid var(--linia);border-radius:10px;padding:12px 14px 8px;min-width:0}
@@ -620,7 +626,21 @@ function jednostkaDnia(data){
   return u;
 }
 
+/* Zapis dnia: przy pierwszym otwarciu aplikacji w danym dniu powstaje dokument dnia z kopią Dawek (snap).
+   Każda zmiana w Dawkach aktualizuje kopię dziś (przeliczDniPoDawkach), a po północy dzień zostaje zamrożony –
+   to jest zapis „na koniec dnia”. Dzień, w którym nikt nie otworzył aplikacji, nie ma zapisu. */
+let _dzienZapisany='';
+function zapewnijZapisDnia(){
+  const dz=dzis(); if(_dzienZapisany===dz || !PROFIL) return;
+  if(fs && (!dniGotowe || MODULY.some(m=>!J['m:'+m]?.pierwszy))) return;   // najpierw dane z chmury
+  if(!(poziom('woz')>=2 || poziom('koszty')>=3)) return;                   // reguły: zapis dni
+  _dzienZapisany=dz;
+  if(DNI[dz]?.snap) return;
+  dzienDoEdycji(dz); saveDzien(dz);
+}
+setInterval(()=>{ try{ zapewnijZapisDnia(); }catch(e){ console.warn(e); } },60000);
 function pokazSync(){
+  setTimeout(()=>{ try{ zapewnijZapisDnia(); }catch(e){ console.warn(e); } },0);
   const e=$('#sync'); if(!e) return;
   const lista=Object.values(J);
   let kl='', t='';
@@ -1088,7 +1108,7 @@ R.dawki=()=>{
       <button class="btn maly" onclick="wyczyscKolejnosc('${r.id}')">Wyczyść</button><button class="btn maly" style="background:#fff;color:var(--gl)" onclick="UI.numerRec=null;render()">Gotowe</button></span></div>`;
   }
   return pasek+`<div class="panel"><div class="ph"><h2>Receptury</h2><span class="opis">kg świeżej masy na sztukę na dobę · liczba w rogu pola = kolejność załadunku · ◀ ▶ lub ⋮⋮ = kolejność kolumn</span>
-      <div class="prawo"><button class="btn" onclick="modalWierszRec()">+ Surowiec do receptur</button><button class="btn glowny" onclick="nowaRec()">+ Receptura</button></div></div>
+      <div class="prawo">${PROFIL?.rola==='tworca'?`<button class="btn" onclick="modalPrzywroc()" title="Tylko twórca: receptury, grupy, sektory, sztuki i dodatki ręczne z wybranego dnia">↺ Przywróć z dnia…</button>`:''}<button class="btn" onclick="modalWierszRec()">+ Surowiec do receptur</button><button class="btn glowny" onclick="nowaRec()">+ Receptura</button></div></div>
     <div class="przewin">${D.receptury.length?`<table class="t rec"><thead><tr><th class="l" style="min-width:260px;vertical-align:bottom">Surowiec</th>${nag}</tr></thead>
       <tbody>${body||`<tr><td colspan="${D.receptury.length+1}"><div class="pusto"><b>Receptury są puste</b>Dodaj surowce przyciskiem „+ Surowiec do receptur”.</div></td></tr>`}</tbody>
       <tfoot><tr class="suma"><td class="l">Dawka obliczona, kg/szt/dobę</td>${suma(st=>fmt(st.kg,2))}</tr>
@@ -1110,8 +1130,8 @@ R._grupy=C=>{
         <div class="g-gora" style="margin-top:8px"><span class="przel" title="Ile razy dziennie zadawana – dawka dobowa dzieli się na tyle wozów">${[1,2].map(z=>`<button class="${(g.zadania||1)===z?'akt':''}" onclick="ustawGrupe('${g.id}','zadania',${z})">${z}× dziennie</button>`).join('')}</span>
           <label class="cichy" style="display:flex;gap:5px;align-items:center"><input type="checkbox" ${g.dojna?'checked':''} onchange="ustawGrupe('${g.id}','dojna',this.checked)"> krowy dojne</label></div></div>
       <div><label class="et">Sektory · sztuki realne · wirt. = na ile sztuk liczyć dawkę (puste = jak realne)</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
-          <input class="pole krotkie num" inputmode="numeric" data-fid="ss_${s.id}" value="${s.sztuki}" onchange="ustawSektor('${g.id}','${s.id}','sztuki',this.value)"> szt
-          <input class="pole krotkie num wirt" inputmode="numeric" data-fid="sw_${s.id}" value="${s.wirt??''}" placeholder="${s.sztuki}" title="Wirtualne sztuki – na ile sztuk liczyć dawkę tego sektora. Puste = tyle co realnych." onchange="ustawSektor('${g.id}','${s.id}','wirt',this.value)"> wirt.${s.wirt!=null&&s.sztuki>0?` <span class="znacznik" title="sektor dostaje ${fmt(s.wirt/s.sztuki*100,0)}% dawki liczonej na realne sztuki">${fmt(s.wirt/s.sztuki*100,0)}%</span>`:''}
+          <input class="pole krotkie num" data-wpis inputmode="numeric" data-fid="ss_${s.id}" value="${s.sztuki}" onchange="ustawSektor('${g.id}','${s.id}','sztuki',this.value)"> szt
+          <input class="pole krotkie num wirt" data-wpis inputmode="numeric" data-fid="sw_${s.id}" value="${s.wirt??''}" placeholder="${s.sztuki}" title="Wirtualne sztuki – na ile sztuk liczyć dawkę tego sektora. Puste = tyle co realnych." onchange="ustawSektor('${g.id}','${s.id}','wirt',this.value)"> wirt.${s.wirt!=null&&s.sztuki>0?` <span class="znacznik" title="sektor dostaje ${fmt(s.wirt/s.sztuki*100,0)}% dawki liczonej na realne sztuki">${fmt(s.wirt/s.sztuki*100,0)}%</span>`:''}
           <button class="btn ikona usun" onclick="usunSektor('${g.id}','${s.id}')">✕</button></span>`).join('')}
           <button class="btn maly" onclick="dodajSektor('${g.id}')">+ Sektor</button></div>
         ${dodatkiGrupyHTML(g)}
@@ -1213,6 +1233,88 @@ function klikNumer(rid,sid){
 function kolejnoscKategorie(rid){ const r=receptura(rid); const kol=['obj','tres','dod']; r.kolejnosc=D.surowce.filter(s=>r.sk.some(x=>x.s===s.id&&x.kg>0)).sort((a,b)=>kol.indexOf(a.kat)-kol.indexOf(b.kat)).map(s=>s.id); saveModule('receptury'); render(); }
 function kopiujKolejnosc(rid,zrodlo){ const r=receptura(rid), z=receptura(zrodlo); const maja=z.kolejnosc.filter(id=>r.sk.some(x=>x.s===id&&x.kg>0)); r.kolejnosc=maja; saveModule('receptury'); render(); toast(`Skopiowano ${maja.length} pozycji – pozostałe dopisz kliknięciem`); }
 function wyczyscKolejnosc(rid){ receptura(rid).kolejnosc=[]; saveModule('receptury'); render(); }
+/* --- przywracanie Dawek z zapisu dnia (tylko Twórca) ---
+   Źródło: kopia Dawek zamrożona w dokumencie dnia (snap). Brak zapisu w wybranym dniu → najbliższy wcześniejszy.
+   Wraca: skład receptur, grupy (nazwa, receptura, 1×/2×, sektory ze sztukami realnymi i wirtualnymi, dodatki ręczne)
+   i – jeśli zaznaczone – wozy z tamtego dnia na dziś. Grupy i receptury utworzone później zostają bez zmian. */
+let _pz=null;
+function modalPrzywroc(){
+  if(PROFIL?.rola!=='tworca') return;
+  _pz=null;
+  modal('Przywróć dawki z dnia',`<div style="max-width:220px"><label class="et">Dzień</label><input type="date" class="pole szer" id="pz-d" max="${dataPlus(dzis(),-1)}" value="${dataPlus(dzis(),-1)}" onchange="podgladPrzywrocenia()"></div>
+    <div id="pz-info" class="baner info">Szukam zapisu…</div>
+    <label class="cichy" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="pz-wozy" checked> przywróć też wozy z tego dnia na dziś (${dataPL(dzis())}) – obecne wozy dnia zostaną zastąpione</label>`,
+  [{t:'Anuluj'},{t:'Przywróć',k:'glowny',f:()=>{ wykonajPrzywrocenie(); return false; }}]);
+  podgladPrzywrocenia();
+}
+async function znajdzZapisDnia(data){
+  let wynik=null;
+  Object.keys(DNI).forEach(k=>{ if(k<=data && DNI[k]?.snap && (!wynik||k>wynik.data)) wynik={data:k,dz:DNI[k]}; });
+  if(fs){
+    try{
+      const id=firebase.firestore.FieldPath.documentId();
+      const q=await fs.collection(KOL_DNI).where(id,'<=',data).orderBy(id,'desc').limit(15).get();
+      for(const doc of q.docs){ const r=doc.data()?.d; if(r && r.snap){ if(!wynik||doc.id>wynik.data) wynik={data:doc.id,dz:normalizujDzien(klon(r),doc.id)}; break; } }
+    }catch(e){ console.warn('zapis dnia',e); }
+  }
+  return wynik;
+}
+async function podgladPrzywrocenia(){
+  const data=mv('pz-d'), info=$('#pz-info'); if(!info) return;
+  if(!data){ info.textContent='Wybierz dzień.'; _pz=null; return; }
+  info.textContent='Szukam zapisu…';
+  const z=await znajdzZapisDnia(data);
+  if(mv('pz-d')!==data) return;                     // w międzyczasie wybrano inny dzień
+  _pz=z;
+  if(!z){ info.className='baner uwaga'; info.innerHTML=`Nie ma zapisu z ${dataPL(data)} ani z wcześniejszych dni.`; return; }
+  const S=z.dz.snap, C=kontekstBiezacy();
+  const szt=K=>Object.values(K.sektory).reduce((a,s)=>a+(s.sztuki||0),0);
+  const zm=Object.entries(S.sektory).filter(([id,s])=>{ const c=C.sektory[id]; return !c||c.sztuki!==s.sztuki||(c.wirt??null)!==(s.wirt??null); }).length;
+  const zmRec=Object.entries(S.receptury).filter(([id,r])=>!C.receptury[id]||stabilny(r.sk)!==stabilny(C.receptury[id].sk)).length;
+  const nowe=D.grupy.filter(g=>!S.grupy[g.id]).map(g=>g.nazwa);
+  const kursy=z.dz.kursy||[];
+  const wozy=$('#pz-wozy'); if(wozy){ wozy.disabled=!kursy.length; if(!kursy.length) wozy.checked=false; }
+  info.className='baner info';
+  info.innerHTML=`${z.data===data?`Zapis z <b>${dataPL(z.data)}</b>`:`Brak zapisu z ${dataPL(data)} – użyję najbliższego wcześniejszego: <b>${dataPL(z.data)}</b>`} (stan z ${new Date(S.ts||0).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}).<br>
+    Grupy: ${Object.keys(S.grupy).length} · sektory: ${Object.keys(S.sektory).length} · sztuki: ${szt(S)} (teraz ${szt(C)}) · zmienione sektory: ${zm} · zmienione receptury: ${zmRec}<br>
+    Wozy tego dnia: ${kursy.length?kursy.length:'brak'}${nowe.length?`<br>Grupy dodane później zostają bez zmian: ${nowe.map(esc).join(', ')}`:''}`;
+}
+function wykonajPrzywrocenie(){
+  const z=_pz; if(!z){ toast('Nie znaleziono zapisu do przywrócenia','zly'); return; }
+  const zWozami=!!$('#pz-wozy')?.checked && (z.dz.kursy||[]).length>0;
+  if(!confirm(`Przywrócić receptury, grupy, sektory, sztuki i dodatki ręczne z ${dataPL(z.data)}?`+(zWozami?`\n\nWozy z ${dataPL(z.data)} zastąpią dzisiejsze wozy.`:''))) return;
+  przywrocDawki(z.dz.snap, zWozami?z.dz.kursy:null);
+  zamknijModal(); render();
+  toast(`Przywrócono dawki z ${dataPL(z.data)}`+(zWozami?' razem z wozami':''));
+}
+function przywrocDawki(S,kursyZ){
+  // receptury: skład z zapisu, wiersze z 0 kg zostają w tabeli
+  Object.entries(S.receptury||{}).forEach(([rid,r])=>{
+    let x=receptura(rid);
+    if(!x){ x={id:rid,nazwa:r.nazwa,uwagi:'',sk:[],kolejnosc:[]}; D.receptury.push(x); }
+    const sk=(r.sk||[]).filter(y=>surowiec(y.s)).map(y=>({s:y.s,kg:y.kg}));
+    const zera=x.sk.filter(y=>!sk.some(q=>q.s===y.s)).map(y=>({s:y.s,kg:0}));
+    x.nazwa=r.nazwa||x.nazwa; x.sk=[...sk,...zera];
+  });
+  // grupy w kolejności z zapisu, potem grupy dodane później
+  const zZapisu=grupyC(S).map(g=>{
+    const G=grupa(g.id)||{id:g.id,uwagi:''};
+    const sektory=sektoryGrupyC(S,g.id).map(s=>{ const o={id:s.id,nazwa:s.nazwa,sztuki:s.sztuki||0}; if(s.wirt!=null) o.wirt=s.wirt; return o; });
+    const dodatki=(g.dodatki||[]).map(x=>x.tryb==='worek'?{id:x.id,s:x.s,cel:x.cel||'',tryb:'worek',kg:0,worki:x.worki,worekKg:x.worekKg}:{id:x.id,s:x.s,cel:x.cel||'',tryb:'kg',kg:x.kg,worki:1,worekKg:25});
+    return Object.assign(G,{nazwa:g.nazwa,opis:g.opis||'',recepturaId:g.recepturaId||'',zadania:g.zadania||1,kolor:g.kolor||G.kolor||'#888',dojna:!!g.dojna,sektory,dodatki});
+  });
+  D.grupy=[...zZapisu,...D.grupy.filter(g=>!S.grupy[g.id])];
+  if(kursyZ){
+    const dz=dzis(), d=dzienDoEdycji(dz);
+    d.kursy=klon(kursyZ);
+    d.kursy.forEach(k=>k.rozdzial.forEach(r=>{ const s=S.sektory[r.sektorId], g=s?S.grupy[s.grupaId]:null; if(s) r.plan=Math.round(planSek(S,r.sektorId)/(g?.zadania||1)*100)/100; }));
+    const ids=new Set(d.kursy.map(k=>k.id));
+    d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>ids.has(a.kursId)));
+    saveDzien(dz);
+  }
+  wersja++;
+  saveModule('receptury'); saveModule('grupy');
+}
 /* --- grupy i sektory --- */
 function ustawGrupe(gid,pole,v){
   const g=grupa(gid); if(!g) return;
@@ -1233,6 +1335,7 @@ function nowaGrupa(){
 function usunGrupe(gid){ const g=grupa(gid); if(!confirm(`Usunąć grupę „${g.nazwa}” razem z sektorami? Zapisane dni zachowają jej dane.`)) return; D.grupy=D.grupy.filter(x=>x.id!==gid); saveModule('grupy'); render(); }
 function dodajSektor(gid){ const g=grupa(gid); g.sektory.push({id:uid('s'),nazwa:'Sektor '+(g.sektory.length+1),sztuki:0}); saveModule('grupy'); render(); }
 function ustawSektor(gid,sid,pole,v){
+  if(poziom('dawki')<3 && pole!=='sztuki' && pole!=='wirt') return;
   const s=grupa(gid).sektory.find(x=>x.id===sid); if(!s) return;
   if(pole==='sztuki'){ s.sztuki=Math.max(0,Math.round(liczba(v))); if(s.wirt!=null && s.wirt===s.sztuki) delete s.wirt; }
   else if(pole==='wirt'){
@@ -1801,6 +1904,89 @@ function tabelaRealizacji(data){
   }).join('');
   return `<table class="t"><thead><tr><th class="l">Grupa / sektor</th><th>Szt</th><th>Obliczona<br>kg/szt</th><th>Zadana<br>kg/szt</th><th>Zadana /<br>obliczona</th><th>♻ domieszane<br>kg</th><th>Niedojady<br>nast. dnia kg</th><th>Pobrana<br>kg/szt</th><th>Pobrana /<br>obliczona</th><th class="l">Źródło</th></tr></thead><tbody>${body}</tbody></table>`;
 }
+/* Zużycie składników: zadana = świeże surowce z wozów + dodatki ręczne (dni bez wozów: plan),
+   pobrana = zadana pomniejszona proporcjonalnie o niedojady zebrane z sektora następnego dnia.
+   Gdy następnego dnia nie ma jeszcze wpisu, pobrana jest nieznana i nie liczy się do porównania. */
+function zuzycieSkladnikow(od,doD){
+  const add=(o,k,v)=>{ o[k]=(o[k]||0)+v; };
+  const dni=[], sek={}, tot={z:{},p:{},zP:{},zl:{}}; let n=0;
+  for(let d=od; d<=doD && n<400; d=dataPlus(d,1), n++){
+    const A=analizaDnia(d), C=A.C, dz={data:d,z:{},p:{},zP:{},kursy:!!(A.d&&A.d.kursy.length),pobOk:true};
+    Object.entries(A.zuz).forEach(([s,kg])=>{ add(dz.z,s,kg); add(tot.z,s,kg); add(tot.zl,s,kg*(C.ceny[s]||0)/1000); });
+    Object.values(A.sek).forEach(s=>{
+      if(!Object.keys(s.zuz).length) return;
+      const g=s.grupa, X=sek[s.id]||(sek[s.id]={id:s.id,z:{},p:{},zP:{},dni:0,dniP:0});
+      Object.assign(X,{nazwa:s.nazwa,gid:s.grupaId,gNazwa:g?.nazwa||'?',kolor:g?.kolor||'#888',gk:g?.kolejnosc??999,sk:s.kolejnosc??0});
+      X.dni++;
+      const frac=(s.pobrana!=null&&s.zadanaKg>0)?Math.max(0,Math.min(1,(s.zebraneJutro||0)/s.zadanaKg)):null;
+      if(frac==null) dz.pobOk=false; else X.dniP++;
+      Object.entries(s.zuz).forEach(([sid,kg])=>{ add(X.z,sid,kg); if(frac!=null){ const p=kg*(1-frac); add(X.p,sid,p); add(X.zP,sid,kg); add(dz.p,sid,p); add(dz.zP,sid,kg); add(tot.p,sid,p); add(tot.zP,sid,kg); } });
+    });
+    dni.push(dz);
+  }
+  let prodN=0, prodKg=0; const prod={};
+  (D.suchytmr?.partie||[]).forEach(p=>{ if(p.data>=od&&p.data<=doD){ prodN++; prodKg+=p.kg||0; (p.sklad||[]).forEach(x=>add(prod,x.s,x.kg||0)); } });
+  return {dni,sek,tot,n,prod,prodN,prodKg,dniK:dni.filter(x=>x.kursy).length,dniPob:dni.filter(x=>x.pobOk).length};
+}
+function nazwaSur(s,C){ return C.sur[s]?.nazwa||surowiec(s)?.nazwa||'?'; }
+function kolejnoscSur(ids,C){ const kat=['obj','tres','dod'], k=s=>C.sur[s]?.kat||surowiec(s)?.kat||'obj'; return surowceKolejnosc(C).filter(s=>ids.includes(s)).concat(ids.filter(s=>!C.sur[s])).sort((a,b)=>kat.indexOf(k(a))-kat.indexOf(k(b))); }
+function procPob(p,z){ return z>0?`<span class="proc ${procKlasa(p/z*100)}">${fmt(p/z*100,0)}%</span>`:'–'; }
+function tabelaZuzyciaOkres(Z){
+  const C=kontekstBiezacy(), zl=poziom('koszty')>=1, ids=kolejnoscSur(Object.keys(Z.tot.z).filter(s=>Z.tot.z[s]>0.001),C);
+  const kat=s=>C.sur[s]?.kat||surowiec(s)?.kat||'obj';
+  const kol=zl?8:7; let h='', R0={z:0,p:0,zP:0,zl:0};
+  const kp=(z,p,zP)=>zP>0?`<td class="zp-l">${fmt(zP,0)}</td><td>${fmt(p,0)}</td><td>${fmt(zP-p,0)}</td><td>${procPob(p,zP)}</td>`:`<td class="zp-l">–</td><td>–</td><td>–</td><td>–</td>`;
+  ['obj','tres','dod'].forEach(k=>{
+    const x=ids.filter(s=>kat(s)===k); if(!x.length) return; const r={z:0,p:0,zP:0,zl:0};
+    h+=`<tr class="kat"><td colspan="${kol}">${KAT[k]}</td></tr>`+x.map(s=>{ const z=Z.tot.z[s]||0,p=Z.tot.p[s]||0,zP=Z.tot.zP[s]||0,c=Z.tot.zl[s]||0; r.z+=z;r.p+=p;r.zP+=zP;r.zl+=c;
+      return `<tr><td class="l">${esc(nazwaSur(s,C))}</td><td>${fmt(z,0)}</td><td>${fmt(z/Z.n,0)}</td>${zl?`<td>${fmt(c,2)}</td>`:''}${kp(z,p,zP)}</tr>`; }).join('');
+    h+=`<tr class="pod"><td class="l">Razem</td><td>${fmt(r.z,0)}</td><td>${fmt(r.z/Z.n,0)}</td>${zl?`<td>${fmt(r.zl,2)}</td>`:''}${kp(r.z,r.p,r.zP)}</tr>`;
+    Object.keys(R0).forEach(q=>R0[q]+=r[q]);
+  });
+  return `<table class="t"><thead><tr><th class="l" rowspan="2">Surowiec</th><th colspan="${zl?3:2}" class="gr-nag">Cały okres (${Z.n} ${odm(Z.n,'dzień','dni','dni')})</th><th colspan="4" class="gr-nag zp-l">Dni ze znaną pobraną (${Z.dniPob} z ${Z.n})</th></tr>
+      <tr><th>Zadana<br>kg</th><th>Zadana<br>śr. kg/dzień</th>${zl?'<th>Zadana<br>zł</th>':''}<th class="zp-l">Zadana<br>kg</th><th>Pobrana<br>kg</th><th>W niedojadach<br>kg</th><th>Pobrana /<br>zadana</th></tr></thead>
+    <tbody>${h||`<tr><td colspan="${kol}"><div class="pusto">Brak zużycia w tym okresie.</div></td></tr>`}</tbody>
+    <tfoot><tr class="suma"><td class="l">RAZEM</td><td>${fmt(R0.z,0)}</td><td>${fmt(R0.z/Math.max(Z.n,1),0)}</td>${zl?`<td>${fmt(R0.zl,2)}</td>`:''}${kp(R0.z,R0.p,R0.zP)}</tr></tfoot></table>`;
+}
+function tabelaZuzyciaDni(Z){
+  const C=kontekstBiezacy(), ids=kolejnoscSur(Object.keys(Z.tot.z).filter(s=>Z.tot.z[s]>0.001),C);
+  const kom=(z,p,ok)=>`<td><b>${z>0.05?fmt(z,0):'–'}</b>${z>0.05?`<small class="zp">${ok&&p!=null?fmt(p,0):'?'}</small>`:''}</td>`;
+  const wiersz=(et,f,kl='')=>`<tr class="${kl}"><td class="l">${et}</td>${Z.dni.map(d=>{ const [z,p]=f(d); return kom(z,p,d.pobOk); }).join('')}${(()=>{ const [z,p,zP]=f(null); return `<td><b>${fmt(z,0)}</b><small class="zp">${zP>0?fmt(p,0):'?'}</small></td>`; })()}</tr>`;
+  const sum=o=>Object.values(o).reduce((a,v)=>a+v,0);
+  const body=ids.map(s=>wiersz(esc(nazwaSur(s,C)),d=>d?[d.z[s]||0,d.p[s]||0]:[Z.tot.z[s]||0,Z.tot.p[s]||0,Z.tot.zP[s]||0])).join('');
+  return `<table class="t zuz-dni"><thead><tr><th class="l">Surowiec</th>${Z.dni.map(d=>`<th title="${d.kursy?'z wozów':'wg planu'}">${dataPL(d.data).slice(0,5)}<br><span class="cichy">${dzienTyg(d.data).slice(0,3)}${d.kursy?'':' · plan'}</span></th>`).join('')}<th>Razem</th></tr></thead>
+    <tbody>${body||`<tr><td colspan="${Z.dni.length+2}"><div class="pusto">Brak zużycia w tym okresie.</div></td></tr>`}</tbody>
+    <tfoot>${wiersz('RAZEM',d=>d?[sum(d.z),sum(d.p)]:[sum(Z.tot.z),sum(Z.tot.p),sum(Z.tot.zP)],'suma')}</tfoot></table>`;
+}
+function tabelaZuzyciaSektory(Z){
+  const C=kontekstBiezacy(), grupy={};
+  Object.values(Z.sek).sort((a,b)=>a.gk-b.gk||a.sk-b.sk).forEach(s=>{ (grupy[s.gid]=grupy[s.gid]||{nazwa:s.gNazwa,kolor:s.kolor,ss:[]}).ss.push(s); });
+  return Object.values(grupy).map(g=>{
+    const ids=kolejnoscSur([...new Set(g.ss.flatMap(s=>Object.keys(s.z)))].filter(x=>g.ss.some(s=>(s.z[x]||0)>0.001)),C);
+    const wiele=g.ss.length>1, suma=(s,k)=>Object.values(s[k]).reduce((a,v)=>a+v,0);
+    const kom=(s,x)=>`<td class="zp-l">${fmt(s.z[x]||0,0)}</td><td>${s.zP[x]>0?fmt(s.p[x]||0,0):'–'}</td><td>${procPob(s.p[x]||0,s.zP[x]||0)}</td>`;
+    const gr=k=>x=>g.ss.reduce((a,s)=>a+(s[k][x]||0),0);
+    const body=ids.map(x=>`<tr><td class="l">${esc(nazwaSur(x,C))}</td>${g.ss.map(s=>kom(s,x)).join('')}${wiele?`<td class="zp-l"><b>${fmt(gr('z')(x),0)}</b></td><td><b>${gr('zP')(x)>0?fmt(gr('p')(x),0):'–'}</b></td><td>${procPob(gr('p')(x),gr('zP')(x))}</td>`:''}</tr>`).join('');
+    const gs=k=>g.ss.reduce((a,s)=>a+suma(s,k),0);
+    const sumy=`<tr class="suma"><td class="l">RAZEM</td>${g.ss.map(s=>`<td class="zp-l">${fmt(suma(s,'z'),0)}</td><td>${suma(s,'zP')>0?fmt(suma(s,'p'),0):'–'}</td><td>${procPob(suma(s,'p'),suma(s,'zP'))}</td>`).join('')}${wiele?`<td class="zp-l">${fmt(gs('z'),0)}</td><td>${gs('zP')>0?fmt(gs('p'),0):'–'}</td><td>${procPob(gs('p'),gs('zP'))}</td>`:''}</tr>`;
+    return `<div class="panel"><div class="ph"><h2><span class="kat-kropka" style="background:${g.kolor}"></span> ${esc(g.nazwa)}</h2><span class="opis">${g.ss.map(s=>`${esc(s.nazwa)}: pobrana znana w ${s.dniP} z ${s.dni} dni`).join(' · ')}</span></div>
+      <div class="przewin"><table class="t"><thead><tr><th class="l" rowspan="2">Surowiec</th>${g.ss.map(s=>`<th colspan="3" class="gr-nag zp-l">${esc(s.nazwa)}</th>`).join('')}${wiele?'<th colspan="3" class="gr-nag zp-l">Grupa razem</th>':''}</tr>
+        <tr>${(wiele?[...g.ss,0]:g.ss).map(()=>'<th class="zp-l">Zadana kg</th><th>Pobrana kg</th><th>Pobrana /<br>zadana</th>').join('')}</tr></thead><tbody>${body}</tbody><tfoot>${sumy}</tfoot></table></div></div>`;
+  }).join('')||'<div class="panel"><div class="pusto">Brak zużycia w tym okresie.</div></div>';
+}
+function tabelaProdukcjiZuz(Z){
+  if(!Z.prodN) return '';
+  const C=kontekstBiezacy(), ids=kolejnoscSur(Object.keys(Z.prod),C);
+  return `<table class="t"><thead><tr><th class="l">Składnik Suchego TMR</th><th>kg</th></tr></thead><tbody>${ids.map(s=>`<tr><td class="l">${esc(nazwaSur(s,C))}</td><td>${fmt(Z.prod[s],0)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr class="suma"><td class="l">RAZEM (${Z.prodN} ${odm(Z.prodN,'partia','partie','partii')})</td><td>${fmt(Z.prodKg,0)}</td></tr></tfoot></table>`;
+}
+// szybki wybór okresu
+function okresRaportu(k){
+  const dz=dzis(), t=new Date(dz+'T12:00:00'), pon=dataPlus(dz,-((t.getDay()+6)%7));
+  const m=dz.slice(0,8)+'01', mPop=dataPlus(m,-1).slice(0,8)+'01';
+  const o={dzis:[dz,dz],wczoraj:[dataPlus(dz,-1),dataPlus(dz,-1)],tydz:[pon,dz],tydzPop:[dataPlus(pon,-7),dataPlus(pon,-1)],d7:[dataPlus(dz,-6),dz],mies:[m,dz],miesPop:[mPop,dataPlus(m,-1)]}[k];
+  if(o){ UI.rapOd=o[0]; UI.rapDo=o[1]; render(); }
+}
 function tabelaZuzycia(od,doD){
   const sum={}, zl={}; let dniK=0, dniP=0, n=0;
   for(let d=od; d<=doD && n<400; d=dataPlus(d,1), n++){
@@ -1826,12 +2012,14 @@ function tabelaZuzycia(od,doD){
 R.raporty=()=>{
   const p=`<span class="przel">${[['dawki','Realizacja dawek'],['zuzycie','Zużycie surowców']].map(([k,t])=>`<button class="${UI.rapTyp===k?'akt':''}" onclick="UI.rapTyp='${k}';render()">${t}</button>`).join('')}</span>`;
   if(UI.rapTyp==='zuzycie'){
-    const Z=tabelaZuzycia(UI.rapOd,UI.rapDo);
+    const wid=UI.rapWid||'okres';
     return `<div class="woz-gora" data-zawsze><span class="dzien-tyt">Raporty</span>${p}
       <label class="cichy">od <input type="date" class="pole" value="${UI.rapOd}" onchange="UI.rapOd=this.value;render()"></label><label class="cichy">do <input type="date" class="pole" value="${UI.rapDo}" onchange="UI.rapDo=this.value;render()"></label>
       <span style="margin-left:auto"><button class="btn glowny" onclick="drukujZuzycie()">Drukuj</button></span></div>
+      <div class="woz-gora" data-zawsze style="margin-top:-6px"><span class="przel">${[['dzis','Dziś'],['wczoraj','Wczoraj'],['tydz','Ten tydzień'],['tydzPop','Poprz. tydzień'],['d7','7 dni'],['mies','Ten miesiąc'],['miesPop','Poprz. miesiąc']].map(([k,t])=>`<button onclick="okresRaportu('${k}')">${t}</button>`).join('')}</span>
+        <span class="przel">${[['okres','Razem w okresie'],['dni','Dzień po dniu'],['sektory','Sektory']].map(([k,t])=>`<button class="${wid===k?'akt':''}" onclick="UI.rapWid='${k}';render()">${t}</button>`).join('')}</span></div>
       ${UI.rapOd>UI.rapDo?'<div class="baner uwaga">Data „od” jest późniejsza niż „do”.</div>':''}
-      <div class="panel"><div class="ph"><h2>Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}</h2><span class="opis">${Z.n} dni: ${Z.dniK} z wozów, ${Z.dniP} wg planu · tylko świeże surowce (bez niedojadów)${Z.prodN?` · w tym produkcja Suchego TMR: ${Z.prodN} ${odm(Z.prodN,'partia','partie','partii')}, ${fmt(Z.prodKg,0)} kg`:''}</span></div><div class="przewin">${Z.h}</div></div>`;
+      ${trescZuzycia(wid)}`;
   }
   return `<div class="woz-gora" data-zawsze><span class="dzien-tyt">Raporty</span>${p}
       <div class="dzien-nav"><button class="btn ikona" onclick="zmienDate(-1)">◀</button><input type="date" class="pole" value="${UI.data}" onchange="UI.data=this.value||dzis();render()"><button class="btn ikona" onclick="zmienDate(1)">▶</button></div>
@@ -1840,7 +2028,29 @@ R.raporty=()=>{
       <div class="przewin">${tabelaRealizacji(UI.data)}</div></div>`;
 };
 function drukujRealizacje(){ drukuj('Realizacja dawek '+UI.data,naglowekDruku('Realizacja dawek – obliczona, zadana, pobrana',UI.data)+tabelaRealizacji(UI.data).replace(/<span class="(kat-kropka|proc)[^"]*"[^>]*>(.*?)<\/span>/g,'$2'),true); }
-function drukujZuzycie(){ const Z=tabelaZuzycia(UI.rapOd,UI.rapDo); drukuj('Zużycie surowców',naglowekDruku(`Zużycie surowców ${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}`)+`<div class="meta">${Z.n} dni: ${Z.dniK} z wozów, ${Z.dniP} wg planu</div>`+Z.h); }
+function opisZuzycia(Z){ return `${Z.n} ${odm(Z.n,'dzień','dni','dni')}: ${Z.dniK} z wozów, ${Z.n-Z.dniK} wg planu · pobrana znana w ${Z.dniPob} z ${Z.n} dni · tylko świeże surowce i dodatki ręczne (bez domieszanych niedojadów)`; }
+const OPIS_POBRANEJ='zadana = wozy + dodatki ręczne (dzień bez wozów: plan) · pobrana = zadana pomniejszona o niedojady zebrane z sektora następnego dnia, w proporcji do składu · „?” = brak wpisu z następnego dnia';
+function trescZuzycia(wid){
+  const Z=zuzycieSkladnikow(UI.rapOd,UI.rapDo), tyt=`${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}`;
+  const nag=t=>`<div class="ph"><h2>${t} ${tyt}</h2><span class="opis">${opisZuzycia(Z)}</span></div>`;
+  let h='';
+  if(wid==='dni') h=`<div class="panel">${nag('Zużycie dzień po dniu')}<div class="pb cichy" style="font-size:12.5px;padding-bottom:0">w komórce: <b>zadana kg</b>, pod nią pobrana kg · ${OPIS_POBRANEJ}</div><div class="przewin">${tabelaZuzyciaDni(Z)}</div></div>`;
+  else if(wid==='sektory') h=`<div class="panel" style="margin-bottom:8px">${nag('Zużycie w sektorach')}<div class="pb cichy" style="font-size:12.5px">${OPIS_POBRANEJ} · zadana – cały okres; pobrana i pobrana / zadana – tylko dni, w których pobrana jest znana</div></div>`+tabelaZuzyciaSektory(Z);
+  else h=`<div class="panel">${nag('Zużycie surowców')}<div class="pb cichy" style="font-size:12.5px;padding-bottom:0">${OPIS_POBRANEJ}</div><div class="przewin">${tabelaZuzyciaOkres(Z)}</div></div>`;
+  if(Z.prodN) h+=`<div class="panel"><div class="ph"><h2>Produkcja Suchego TMR ${tyt}</h2><span class="opis">składniki zużyte na produkcję (poza wozami)</span></div><div class="przewin">${tabelaProdukcjiZuz(Z)}</div></div>`;
+  return h;
+}
+function drukujZuzycie(){
+  const wid=UI.rapWid||'okres', Z=zuzycieSkladnikow(UI.rapOd,UI.rapDo), tyt=`${dataPL(UI.rapOd)} – ${dataPL(UI.rapDo)}`;
+  const czysc=t=>t.replace(/<span class="(kat-kropka|proc)[^"]*"[^>]*>(.*?)<\/span>/g,'$2');
+  const meta=`<div class="meta">${opisZuzycia(Z)}</div><div class="meta">${OPIS_POBRANEJ}</div>`;
+  let t='';
+  if(wid==='dni') t=naglowekDruku('Zużycie surowców dzień po dniu '+tyt)+meta+tabelaZuzyciaDni(Z).replace(/<small class="zp">/g,'<br><small>');
+  else if(wid==='sektory') t=naglowekDruku('Zużycie surowców w sektorach '+tyt)+meta+tabelaZuzyciaSektory(Z).replace(/<div class="ph"><h2>(.*?)<\/h2>.*?<\/div>/g,'<h2>$1</h2>').replace(/<\/?div[^>]*>/g,'');
+  else t=naglowekDruku('Zużycie surowców '+tyt)+meta+tabelaZuzyciaOkres(Z);
+  if(Z.prodN) t+='<h2>Produkcja Suchego TMR</h2>'+tabelaProdukcjiZuz(Z);
+  drukuj('Zużycie surowców',czysc(t),wid==='dni');
+}
 function drukujSurowce(){
   const plan=analizaDnia(dzis(),{plan:true}).zuz;
   const w=D.surowce.map(s=>{ const st=stanSurowca(s), du=(plan[s.id]||0)+zuzycieProdukcjiDzienne(s.id), dni=du>0?Math.floor(st*1000/du):null;
@@ -1914,13 +2124,14 @@ R.suchytmr=()=>{
   // historia
   const hist=partieOdNajnowszej().map(p=>`<tr><td class="l">${dataPL(p.data)}</td><td><b>${fmt(p.kg,0)}</b></td><td>${fmt(p.kg>0?kosztSkladu(p.sklad||[])/p.kg*1000:0,0)}</td>
       <td class="l cichy" style="font-size:12.5px">${(p.sklad||[]).map(x=>esc(surowiec(x.s)?.nazwa||x.s)+' '+fmt(x.kg,0)).join(' · ')}</td><td class="l cichy">${esc(p.kto||'')}</td>
-      <td data-wpis><button class="btn ikona usun" title="Usuń partię – składniki wrócą na stan" onclick="usunPartie('${p.id}')">✕</button></td></tr>`).join('');
+      <td><button class="btn ikona usun" title="Usuń partię – składniki wrócą na stan" onclick="usunPartie('${p.id}')">✕</button></td></tr>`).join('');
   const histPanel=`<div class="panel"><div class="ph"><h2>Historia produkcji</h2><span class="opis">${S.partie.length} ${odm(S.partie.length,'partia','partie','partii')} · usunięcie partii oddaje składniki na stan</span></div>
     <div class="przewin"><table class="t"><thead><tr><th class="l">Data</th><th>kg</th><th>zł/t</th><th class="l">Składniki (kg)</th><th class="l">Kto</th><th></th></tr></thead>
       <tbody>${hist||'<tr><td colspan="6"><div class="pusto"><b>Brak produkcji</b>Pierwsza partia pojawi się tu po kliknięciu „Wyprodukuj i rozlicz”.</div></td></tr>'}</tbody></table></div></div>`;
   return kafle+`<div class="stmr-uklad"><div>${prod}</div><div>${recPanel}</div></div>`+histPanel;
 };
 function ustawSkladnik(i,pole,v){
+  if(poziom('suchytmr')<3) return;
   const x=ST().receptura[i]; if(!x) return;
   if(pole==='proc'){ const n=parseFloatPL(v); if(!Number.isFinite(n)||n<0){ toast('Wpisz procent, np. 13 albo 12,5','zly'); render(); return; } x.proc=Math.round(n*100)/100; }
   else { if(ST().receptura.some((y,j)=>j!==i&&y.s===v)){ toast('Ten surowiec już jest w recepturze','zly'); render(); return; } x.s=v; }
@@ -1967,6 +2178,7 @@ function wyprodukujStmr(){
   toast(P&&data<=P.stanData?`Zapisano partię ${fmt(kg,0)} kg – data sprzed spisu Suchego TMR, jego stan bez zmian`:`Wyprodukowano ${fmt(kg,0)} kg Suchego TMR – stany przeliczone`);
 }
 function usunPartie(pid){
+  if(poziom('suchytmr')<3) return;
   const p=ST().partie.find(x=>x.id===pid); if(!p) return;
   if(!confirm(`Usunąć partię z ${dataPL(p.data)} (${fmt(p.kg,0)} kg)?\nSkładniki wrócą na stan, a Suchy TMR zejdzie ze stanu.`)) return;
   ST().partie=ST().partie.filter(x=>x.id!==pid); saveModule('suchytmr');
@@ -2600,11 +2812,16 @@ function eksport(){
 const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
 const POZIOMY=['brak','podgląd','wpis','pełny'];
 // które poziomy mają sens w danej zakładce
-const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
-const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ wozów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',suchytmr:'wpisujesz produkcję Suchego TMR; recepturę zmienia zootechnik'};
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,2,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ wozów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',
+  dawki:'zmieniasz tylko liczby sztuk realnych i wirtualnych w sektorach; receptury, dodatki ręczne i ustawienia grup zmienia szef',
+  suchytmr:'dodajesz nowe partie produkcji; recepturę zmienia szef, a zapisane partie poprawia lub usuwa szef'};
+// w Dawkach poziom 2 nazywa się „sztuki”
+function nazwaPoziomu(tab,v){ return tab==='dawki'&&v===2?'sztuki':POZIOMY[v]; }
+const WER_UPR=2;   // wersja macierzy w chmurze – przy zmianie domyślnych zasad twórca jednorazowo ją aktualizuje
 const DOMYSLNE_UPR={
   szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,suchytmr:3,cielaki:3,ustawienia:3,uzytkownicy:3},
-  zootechnik:{woz:3,dawki:3,surowce:3,koszty:1,raporty:1,suchytmr:3,cielaki:3,ustawienia:1,uzytkownicy:0},
+  zootechnik:{woz:3,dawki:2,surowce:3,koszty:1,raporty:1,suchytmr:2,cielaki:3,ustawienia:1,uzytkownicy:0},
   pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,suchytmr:1,cielaki:1,ustawienia:0,uzytkownicy:0}
 };
 let PROFIL=null;     // {uid, login, imie, rola, aktywny}
@@ -2697,7 +2914,7 @@ async function utworzTworce(){
     bt.set(fs.collection(KOL_UZYT).doc(uid),{login:l.toLowerCase(),imie:i,rola:'tworca',aktywny:true,utworzono:t,utworzyl:uid,ostatnio:t});
     bt.set(fs.collection(KOL_ADMIN).doc('init'),{ts:t,uid});
     await bt.commit();
-    await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:t});
+    await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:t,wer:WER_UPR});
   }catch(e){ tworzeTworce=false; console.warn(e); try{ if(auth.currentUser) await auth.currentUser.delete(); }catch(x){} pokazEkranLogowania('start',bladAuth(e)); return; }
   tworzeTworce=false;
 }
@@ -2751,6 +2968,16 @@ async function zablokujSesje(tekst){
   localStorage.removeItem(LS+'profil');
   try{ await auth.signOut(); }catch(e){ pokazEkranLogowania('logowanie',tekst); }
 }
+// jednorazowe dostosowanie zapisanej macierzy do nowych zasad (wer 1 → 2): zootechnik w Dawkach zmienia tylko sztuki,
+// w Suchym TMR tylko dodaje partie, a w Raportach widzi zużycie składników
+function migrujUprawnienia(m,odWer){
+  if(odWer<2 && m.zootechnik){
+    if(m.zootechnik.dawki===3) m.zootechnik.dawki=2;
+    if(m.zootechnik.suchytmr===3) m.zootechnik.suchytmr=2;
+    if(!(m.zootechnik.raporty>=1)) m.zootechnik.raporty=1;
+  }
+  return m;
+}
 let adminNasluch=false;
 function nasluchAdmin(){
   nasluchAnaliz();
@@ -2758,12 +2985,18 @@ function nasluchAdmin(){
     adminNasluch=true;
     fs.collection(KOL_ADMIN).doc('uprawnienia').onSnapshot(s=>{
       if(s.exists){
-        UPR=s.data().m||klon(DOMYSLNE_UPR); lsZapisz('uprawnienia',UPR);
+        const dok=s.data()||{};
+        UPR=dok.m||klon(DOMYSLNE_UPR); lsZapisz('uprawnienia',UPR);
         // nowa zakładka (np. Suchy TMR) – twórca dopisuje domyślne poziomy do macierzy w chmurze, żeby czytały je reguły
         const brak=Object.keys(DOMYSLNE_UPR).some(r=>Object.keys(DOMYSLNE_UPR[r]).some(k=>typeof UPR?.[r]?.[k]!=='number'));
-        if(brak && PROFIL?.rola==='tworca'){ const m=klon(UPR)||{}; Object.keys(DOMYSLNE_UPR).forEach(r=>{ m[r]={...DOMYSLNE_UPR[r],...(m[r]||{})}; }); fs.collection(KOL_ADMIN).doc('uprawnienia').set({m,ts:Date.now()}).catch(e=>console.warn('uprawnienia',e)); }
+        const stara=(dok.wer||1)<WER_UPR;
+        if((brak||stara) && PROFIL?.rola==='tworca'){
+          const m=klon(UPR)||{}; Object.keys(DOMYSLNE_UPR).forEach(r=>{ m[r]={...DOMYSLNE_UPR[r],...(m[r]||{})}; });
+          if(stara) migrujUprawnienia(m,dok.wer||1);
+          fs.collection(KOL_ADMIN).doc('uprawnienia').set({m,ts:Date.now(),wer:WER_UPR}).catch(e=>console.warn('uprawnienia',e));
+        }
       }
-      else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now()}).catch(()=>{});
+      else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now(),wer:WER_UPR}).catch(()=>{});
       rysujZakladki(); odswiezZdalnie();
     },e=>console.warn('uprawnienia',e));
   }
@@ -2829,7 +3062,7 @@ R.uzytkownicy=()=>{
   const twor=PROFIL.rola==='tworca';
   const macierz=ZAKLADKI.map(([k,t])=>`<tr><td class="l"><b>${t}</b></td><td><span class="lv lv3" style="display:inline-block;border-radius:14px;padding:4px 10px;font-weight:700;font-size:13px">pełny</span></td>
     ${['szef','zootechnik','pracownik'].map(r=>{ const v=UPR?.[r]?.[k]??DOMYSLNE_UPR[r]?.[k]??0;
-      return `<td><select class="lv lv${v}" ${twor?'':'disabled'} onchange="ustawUpr('${r}','${k}',this.value)">${POZ_ZAKL[k].map(x=>`<option value="${x}" ${x===v?'selected':''}>${POZIOMY[x]}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('');
+      return `<td><select class="lv lv${v}" ${twor?'':'disabled'} onchange="ustawUpr('${r}','${k}',this.value)">${POZ_ZAKL[k].map(x=>`<option value="${x}" ${x===v?'selected':''}>${nazwaPoziomu(k,x)}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('');
   return `<div class="panel"><div class="ph"><h2>Konta</h2><span class="opis">${UZYT.filter(u=>u.aktywny).length} aktywnych</span>
       <div class="prawo"><button class="btn glowny" onclick="modalNoweKonto()">+ Dodaj osobę</button></div></div>
     <div class="przewin"><table class="t"><thead><tr><th class="l">Osoba</th><th class="l">Rola</th><th class="l">Status</th><th class="l">Ostatnie logowanie</th><th></th></tr></thead><tbody>${wiersze||'<tr><td colspan="5"><div class="pusto">Ładowanie listy kont…</div></td></tr>'}</tbody></table></div>
@@ -2837,7 +3070,7 @@ R.uzytkownicy=()=>{
       Gdy ktoś zapomni hasła: zablokuj jego konto i załóż nowe z innym loginem. Jeśli login jest adresem e-mail, wystarczy wysłać link do zmiany hasła.</div></div>
   <div class="panel"><div class="ph"><h2>Co może każda rola</h2><span class="opis">${twor?'zmiana działa od razu na wszystkich urządzeniach':'zmieniać może tylko twórca'}</span></div>
     <div class="przewin"><table class="t upr" style="max-width:820px"><thead><tr><th class="l">Zakładka</th>${['tworca','szef','zootechnik','pracownik'].map(r=>`<th><span class="rola-zn" style="background:${ROLE[r].kol}">${ROLE[r].n}</span></th>`).join('')}</tr></thead><tbody>${macierz}</tbody></table></div>
-    <div class="pb cichy" style="border-top:1px solid var(--linia)"><b>brak</b> – zakładka ukryta · <b>podgląd</b> – tylko odczyt · <b>wpis</b> – Wóz: kilogramy i niedojady, Surowce: dostawy i spis · <b>pełny</b> – wszystko.
+    <div class="pb cichy" style="border-top:1px solid var(--linia)"><b>brak</b> – zakładka ukryta · <b>podgląd</b> – tylko odczyt · <b>wpis</b> – Wóz: kilogramy i niedojady, Surowce: dostawy i spis, Suchy TMR: tylko nowe partie · <b>sztuki</b> – Dawki: tylko sztuki realne i wirtualne w sektorach (zmiana przelicza dzisiejsze wozy) · <b>pełny</b> – wszystko.
       Twórca ma zawsze pełny dostęp, żeby nie dało się zablokować aplikacji.</div></div>`;
 };
 async function ustawKonto(uid,pole,v){
@@ -2849,7 +3082,7 @@ async function ustawKonto(uid,pole,v){
 async function ustawUpr(rola,tab,v){
   if(PROFIL?.rola!=='tworca') return;
   UPR=klon(UPR); UPR[rola]=UPR[rola]||{}; UPR[rola][tab]=+v;
-  try{ await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:UPR,ts:Date.now()}); toast(`${ROLE[rola].n} – ${ZAKLADKI.find(z=>z[0]===tab)[1]}: ${POZIOMY[+v]}`); }
+  try{ await fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:UPR,ts:Date.now(),wer:WER_UPR}); toast(`${ROLE[rola].n} – ${ZAKLADKI.find(z=>z[0]===tab)[1]}: ${nazwaPoziomu(tab,+v)}`); }
   catch(e){ toast('Nie udało się zapisać uprawnień','zly'); }
   render();
 }
