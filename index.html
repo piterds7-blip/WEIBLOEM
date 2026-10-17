@@ -116,7 +116,8 @@ table.rec th.rk{text-align:center;min-width:118px;vertical-align:top;padding:8px
 .rk-grupy{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin:5px 0}
 .rk-grupy span{font-size:11px;padding:0 5px;border-radius:3px;color:#fff;font-weight:600}
 .rk-akcje{display:flex;gap:3px;justify-content:center}
-.nr-mini{position:absolute;left:2px;top:2px;font-size:10px;font-weight:700;color:var(--gl2)}
+.kom-w{position:relative;display:inline-block}
+.nr-mini{position:absolute;right:-6px;top:-8px;z-index:1;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--gl2);color:#fff;font-size:10px;font-weight:700;line-height:15px;text-align:center;pointer-events:none}
 th.rk.numerowanie,td.kom.numerowanie{background:#EEF5EF}
 button.nr{width:30px;height:30px;border-radius:50%;border:2px dashed var(--gl2);background:#fff;color:var(--gl2);font-weight:700;cursor:pointer;font-size:14px;transition:transform .15s}
 button.nr:hover{transform:scale(1.1)}
@@ -318,6 +319,24 @@ table.zuz-dni th{white-space:nowrap}
 .t th.gr-nag{text-align:center;border-bottom:1px solid var(--linia)}
 .t .zp-l{border-left:2px solid var(--linia)}
 /* ===== ANALIZA DANYCH ===== */
+.an-filtry{border:2px solid var(--gl3,#cfe0d4)}
+.an-frz{display:flex;gap:10px 14px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--linia)}
+.an-frz:last-of-type{border-bottom:0}
+.an-fet{flex:0 0 190px;font:600 17px var(--font-w);padding-top:8px;color:var(--tusz)}
+.an-fprz{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0}
+.an-fb{min-height:44px;padding:8px 16px;border:2px solid var(--linia);background:#fff;border-radius:10px;font-size:16px;font-weight:600;color:var(--tusz);cursor:pointer}
+.an-fb:hover{border-color:var(--gl)}
+.an-fb.akt{background:var(--gl);border-color:var(--gl);color:#fff}
+.an-fn{display:inline-block;min-width:26px;margin-left:4px;padding:1px 7px;border-radius:10px;background:var(--pow2,#eef2ee);color:var(--tusz2);font-size:14px}
+.an-fb.akt .an-fn{background:rgba(255,255,255,.25);color:#fff}
+.an-szukaj{width:100%;max-width:520px;min-height:46px;font-size:18px}
+.an-wyniki{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.an-wynik{display:flex;flex-direction:column;align-items:flex-start;min-height:52px;padding:6px 12px;border:2px solid var(--gl);border-radius:10px;background:#fff;font-size:17px;cursor:pointer;text-align:left}
+.an-wynik small{font-size:13px;color:var(--tusz2);font-weight:500}
+.an-wynik:hover{background:var(--gl3,#e6f0e9)}
+.an-aktywny{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:12px 14px;border-radius:10px;background:#FFF6E2;border:2px solid #E7C66A;font-size:16px}
+.an-aktywny span{flex:1;min-width:220px}
+@media (max-width:700px){ .an-frz{flex-direction:column;gap:6px} .an-fet{flex:none;padding-top:0} .an-fb{flex:1 1 auto} }
 .wyk-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(520px,100%),1fr));gap:14px;margin-bottom:14px}
 .wyk-box{background:var(--pow);border:1px solid var(--linia);border-radius:10px;padding:12px 14px 8px;min-width:0}
 .wyk-box h3{font:600 18px var(--font-w);margin:0 0 2px}
@@ -1095,7 +1114,7 @@ R.dawki=()=>{
         return `<td class="kom numerowanie" style="text-align:left"><button class="nr ${n?'ma':''}" onclick="klikNumer('${r.id}','${s.id}')" aria-label="Kolejność">${n||'+'}</button><span class="nr-kg">${fmt(kg,2,3)} kg</span></td>`;
       }
       const n=kg>0?(r.kolejnosc||[]).filter(id=>r.sk.some(y=>y.s===id&&y.kg>0)).indexOf(s.id)+1:0;
-      return `<td class="kom">${n?`<span class="nr-mini">${n}</span>`:''}<input class="pole num" inputmode="decimal" data-fid="rk_${r.id}_${s.id}" value="${kg?fmtIn(kg,3):''}" placeholder="–" onchange="ustawKg('${r.id}','${s.id}',this.value)"></td>`;
+      return `<td class="kom"><span class="kom-w">${n?`<span class="nr-mini" title="kolejność załadunku">${n}</span>`:''}<input class="pole num" inputmode="decimal" data-fid="rk_${r.id}_${s.id}" value="${kg?fmtIn(kg,3):''}" placeholder="–" onchange="ustawKg('${r.id}','${s.id}',this.value)"></span></td>`;
     }).join('')}</tr>`).join('');
   const suma=k=>D.receptury.map(r=>{ const st=statRec(C,r.id); return `<td>${k(st)}</td>`; }).join('');
   let pasek='';
@@ -2426,10 +2445,25 @@ function dopasujWood(pk){
   const szczyt=(b>0&&c>0)?b/c:null;
   return {f,szczyt,szczytKg:szczyt?f(szczyt):null,n:P.length};
 }
-let _anC={};
-function anLicz(id){
+/* Filtry analizy (panel na górze zakładki) – działają na całą analizę: kafle, wnioski, tabele, wykresy, rozród, listę i trendy.
+   lak: '' | '1' pierwiastki | '2' wieloródki (2+) · etap: przedział dni laktacji · grupy: wybrane grupy DairyPlan */
+const AN_ETAPY=[['0-30','0–30 dni',0,30],['31-100','31–100 dni',31,100],['101-200','101–200 dni',101,200],['201-300','201–300 dni',201,300],['301+','301 dni i więcej',301,99999]];
+function anFiltrAkt(){ return {lak:UI.anLak||'',etap:UI.anEtap||'',grupy:UI.anFiltr&&UI.anFiltr.length?[...UI.anFiltr]:null}; }
+function anLakK(k){ const l=k.lak??k.lakDP; return l==null?null:+l; }
+function anDimK(k){ return k.dim??k.dimDP??null; }
+function anPasuje(k,f){
+  if(f.lak){ const l=anLakK(k); if(l==null||(f.lak==='1'?l!==1:l<2)) return false; }
+  if(f.etap){ const e=AN_ETAPY.find(x=>x[0]===f.etap), d=anDimK(k); if(!e||d==null||d<e[2]||d>e[3]) return false; }
+  if(f.grupy && !f.grupy.includes(k.gr)) return false;
+  return true;
+}
+const anFiltrPusty=f=>!f.lak&&!f.etap&&!f.grupy;
+let _anC=new Map(), _anCW=-1;
+function anLicz(id,f){
   const P=AN[id]; if(!P) return null;
-  const klucz=id+'|'+wersja; if(_anC.k===klucz) return _anC.w;
+  f=f||anFiltrAkt();
+  if(_anCW!==wersja){ _anC=new Map(); _anCW=wersja; }
+  const klucz=id+'|'+f.lak+'|'+f.etap+'|'+(f.grupy||[]).join(','); if(_anC.has(klucz)) return _anC.get(klucz);
   const U=anUst(), Cb=kontekstBiezacy(), GD=grupyDnia(analizaDnia(dzis(),{plan:true}));
   const kosztApp={}; GD.forEach(g=>{ if(g.sztuki>0) kosztApp[g.id]=g.koszt/g.sztuki; });
   const cenaKgMleka=U.cenaMleka/1.03;   // cena za litr → za kg (1 l ≈ 1,03 kg)
@@ -2448,7 +2482,7 @@ function anLicz(id){
       k.przychod=k.ml*cenaKgMleka; k.iofc=k.koszt!=null?k.przychod-k.koszt:null;
     }
     return k;
-  });
+  }).filter(k=>anPasuje(k,f));
   // grupy
   const nry=[...new Set(krowy.map(k=>k.gr))].sort((a,b)=>a-b);
   const grupy=nry.map((gr,i)=>{
@@ -2497,9 +2531,9 @@ function anLicz(id){
   const stado={n:L.length,ml:srednia(L.map(k=>k.ml)),ecm:srednia(L.map(k=>k.ecm)),tl:srednia(L.map(k=>k.tl)),bi:srednia(L.map(k=>k.bi)),tb:srednia(L.map(k=>k.tb)),mocz:srednia(L.map(k=>k.mocz)),
     lksMed:kwantyl(L.map(k=>k.lks),0.5),ket:L.filter(k=>k.f.ket).length,nWczesne:L.filter(k=>k.dim!=null&&k.dim<=U.dimKet).length,sara:L.filter(k=>k.f.sara).length,
     iofc:srednia(L.map(k=>k.iofc)),iofcSuma:L.reduce((a,k)=>a+(k.iofc||0),0),dim:srednia(L.map(k=>k.dim)),pierw:L.filter(k=>k.pierw).length};
-  const w={P,U,krowy,grupy,L,lakGr,rozrod,wood,kosze,prog34,okresy,stado,med,prod};
+  const w={P,U,krowy,grupy,L,lakGr,rozrod,wood,kosze,prog34,okresy,stado,med,prod,filtr:f};
   w.wnioski=anWnioski(w);
-  _anC={k:klucz,w}; return w;
+  _anC.set(klucz,w); return w;
 }
 // Wnioski – kolejność wg schematu diagnostycznego: najpierw pobranie i struktura dawki, potem skład receptury
 function anWnioski(W){
@@ -2643,14 +2677,45 @@ function wykresTrendu(miara){
 
 /* --- widok zakładki --- */
 const AN_FLAGI=[['ket','Ryzyko ketozy'],['sara','Ryzyko SARA'],['bi','Niskie białko'],['moczW','Mocznik wysoki'],['moczN','Mocznik niski'],['lks','LKS wysoki'],['zmiana','Zmiana grupy?'],['rozrod','Rozród do przeglądu']];
-function anWybrane(W){ const f=UI.anFiltr; return f&&f.length?W.grupy.filter(g=>f.includes(g.gr)):W.grupy.filter(g=>g.laktacyjna); }
-function anPrzelaczGrupe(gr){ const W=anLicz(UI.anId); let f=UI.anFiltr&&UI.anFiltr.length?[...UI.anFiltr]:W.grupy.filter(g=>g.laktacyjna).map(g=>g.gr); f=f.includes(gr)?f.filter(x=>x!==gr):[...f,gr]; UI.anFiltr=f.length?f:null; render(); }
+function anWybrane(W){ return W.filtr.grupy?W.grupy:W.grupy.filter(g=>g.laktacyjna); }
+function anPrzelaczGrupe(gr){ let f=UI.anFiltr&&UI.anFiltr.length?[...UI.anFiltr]:[]; f=f.includes(gr)?f.filter(x=>x!==gr):[...f,gr]; UI.anFiltr=f.length?f:null; render(); }
+function anWyczyscFiltry(){ UI.anLak=''; UI.anEtap=''; UI.anFiltr=null; UI.anSzukaj=''; render(); }
+function opisFiltru(f){ const a=[]; if(f.lak) a.push(f.lak==='1'?'pierwiastki':'wieloródki'); if(f.etap) a.push(AN_ETAPY.find(x=>x[0]===f.etap)[1]); if(f.grupy) a.push((f.grupy.length===1?'grupa ':'grupy ')+f.grupy.join(', ')); return a.join(' · '); }
+// duży panel wyboru – to, co tu wybrano, dotyczy całej strony poniżej
+function panelFiltrowAn(id){
+  const f=anFiltrAkt(), B=anLicz(id,{lak:'',etap:'',grupy:null});
+  // liczba krów w laktacji z wynikiem dla każdej opcji (przy pozostałych wyborach bez zmian)
+  const ile=g=>anLicz(id,{...f,...g}).stado.n;
+  const prz=(akt,on,txt,n)=>`<button class="an-fb ${akt?'akt':''}" onclick="${on};render()">${txt}${n!=null?` <span class="an-fn">${n}</span>`:''}</button>`;
+  const lak=[['','Wszystkie'],['1','Pierwiastki (1. laktacja)'],['2','Wieloródki (2. i dalsze)']].map(([v,t])=>prz(f.lak===v,`UI.anLak='${v}'`,t,ile({lak:v}))).join('');
+  const etap=[['','Wszystkie dni']].concat(AN_ETAPY.map(e=>[e[0],e[1]])).map(([v,t])=>prz(f.etap===v,`UI.anEtap='${v}'`,t,ile({etap:v}))).join('');
+  const grupy=prz(!f.grupy,`UI.anFiltr=null`,'Wszystkie grupy')+B.grupy.filter(g=>g.nW).map(g=>prz(f.grupy?.includes(g.gr),`anPrzelaczGrupe(${g.gr});return`,`gr. ${g.gr}${g.gNazwa?' · '+esc(g.gNazwa):''}${g.laktacyjna?'':' (zasuszone)'}`)).join('');
+  const q=(UI.anSzukaj||'').trim(), wyn=q?anSzukajKrow(id,q):[];
+  const wyniki=q?(wyn.length?`<div class="an-wyniki">${wyn.slice(0,12).map(k=>`<button class="an-wynik" onclick="anKrowa(${k.nr})"><b>${k.nr}</b>${k.n?' '+esc(k.n):''}<small>${esc(k.k||'brak w SOL')} · gr. ${k.gr} · ${anLakK(k)??'–'}. lakt. · ${anDimK(k)??'–'} dni</small></button>`).join('')}${wyn.length>12?`<span class="cichy">… i ${wyn.length-12} więcej – wpisz więcej cyfr</span>`:''}</div>`:`<div class="cichy" style="margin-top:6px">Nie ma krowy z takim numerem w tym próbnym doju.</div>`):'';
+  const akt=!anFiltrPusty(f);
+  return `<div class="panel an-filtry" data-zawsze><div class="pb">
+    <div class="an-frz"><span class="an-fet">Które krowy?</span><div class="an-fprz">${lak}</div></div>
+    <div class="an-frz"><span class="an-fet">Ile dni po wycieleniu?</span><div class="an-fprz">${etap}</div></div>
+    <div class="an-frz"><span class="an-fet">Które grupy?</span><div class="an-fprz">${grupy}</div></div>
+    <div class="an-frz"><span class="an-fet">Znajdź krowę</span><div style="flex:1;min-width:0"><input class="pole an-szukaj" type="search" inputmode="numeric" placeholder="wpisz numer DairyPlan albo kolczyk, np. 6221" value="${esc(UI.anSzukaj||'')}" data-fid="an_szukaj"
+      oninput="UI.anSzukaj=this.value;clearTimeout(window._anSt);window._anSt=setTimeout(render,300)" onkeydown="if(event.key==='Enter'){const w=anSzukajKrow(UI.anId,this.value.trim());if(w.length===1)anKrowa(w[0].nr);}">${wyniki}</div></div>
+    ${akt?`<div class="an-aktywny"><span>Pokazuję tylko: <b>${opisFiltru(f)}</b> – <b>${anLicz(id).stado.n}</b> ${odm(anLicz(id).stado.n,'krowa','krowy','krów')} w laktacji z wynikiem. Wszystko poniżej dotyczy tylko tych krów.</span><button class="btn duzy" onclick="anWyczyscFiltry()">✕ Pokaż wszystkie krowy</button></div>`:''}
+  </div></div>`;
+}
+// wyszukiwanie po numerze DairyPlan albo kolczyku (same cyfry, bez spacji); dokładny numer na początku
+function anSzukajKrow(id,q){
+  const W=anLicz(id,{lak:'',etap:'',grupy:null}); if(!W) return [];
+  const t=String(q||'').toUpperCase().replace(/\s+/g,''); if(!t) return [];
+  const cyf=t.replace(/\D/g,'');
+  const a=W.krowy.filter(k=>String(k.nr).includes(cyf||'#')||(t.length>=4&&(k.k||'').toUpperCase().includes(t))||(cyf.length>=4&&(k.k||'').replace(/\D/g,'').includes(cyf)));
+  return a.sort((x,y)=>(String(y.nr)===cyf)-(String(x.nr)===cyf)||String(x.nr).indexOf(cyf)-String(y.nr).indexOf(cyf)||x.nr-y.nr);
+}
 const kl=(v,zle,sr)=>v==null?'':zle(v)?'an-zle':sr&&sr(v)?'an-sr':'';
 R.analiza=()=>{
   const ids=anProby();
   if(!UI.anId||!AN[UI.anId]) UI.anId=ids[0]||null;
   const gora=`<div class="woz-gora" data-zawsze><span class="dzien-tyt">Analiza danych</span>
-    ${ids.length?`<select class="pole" onchange="UI.anId=this.value;UI.anFiltr=null;render()" aria-label="Próbny dój">${ids.map(i=>`<option value="${i}" ${i===UI.anId?'selected':''}>próbny dój ${dataPL(i)}</option>`).join('')}</select>`:''}
+    ${ids.length?`<select class="pole" onchange="UI.anId=this.value;render()" aria-label="Próbny dój">${ids.map(i=>`<option value="${i}" ${i===UI.anId?'selected':''}>próbny dój ${dataPL(i)}</option>`).join('')}</select>`:''}
     <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${ids.length?`<button class="btn" onclick="UI.anUst=!UI.anUst;render()">⚙ Ustawienia</button><button class="btn" onclick="drukujAnalize()">Drukuj raport</button>`:''}<button class="btn glowny" onclick="modalImportu()">+ Wgraj dane</button></span></div>`;
   if(!UI.anId) return gora+`<div class="panel"><div class="pusto"><b>Brak danych do analizy</b>Wgraj plik z SOL (dane poszczególnych sztuk) i listy grup z DairyPlan – aplikacja przypisze krowy do grup technologicznych po numerze kolczyka i policzy wskaźniki żywieniowe, ketozy, rozrodu i opłacalności.</div></div>`;
   const W=anLicz(UI.anId), U=W.U, P=W.P, S=W.stado, G=anWybrane(W), wyb=new Set(G.map(g=>g.gr));
@@ -2661,11 +2726,11 @@ R.analiza=()=>{
     ${kafel('Ryzyko ketozy',`${S.ket}`,`z ${S.nWczesne} krów do ${U.dimKet} DIM`,S.nWczesne&&S.ket/S.nWczesne>=0.15?'k-zle':'')}${kafel('Ryzyko SARA',`${S.sara}`,`${fmt(S.n?S.sara/S.n*100:0,0)}% krów, tł/bi < ${fmt(U.tbSara,1)}`,S.n&&S.sara/S.n>=0.2?'k-zle':'')}
     ${kafel('Cielne po OOP',R.proc!=null?fmt(R.proc*100,0)+'%':'–',`${R.ciel} z ${R.nPo} krów > ${U.oop} dni`,R.proc!=null&&R.proc<0.45?'k-zle':'')}
     ${kafel('Nadwyżka nad paszą',S.iofc!=null?fmt(S.iofc,2)+' zł':'–',`na krowę/dzień · stado ${fmt(S.iofcSuma,0)} zł/d · mleko ${fmt(U.cenaMleka,2)} zł/l`)}</div>`;
-  const ust=UI.anUst?panelUstawienAnalizy(W):'';
-  const filtr=`<div class="an-filtr" data-zawsze><span class="cichy">Grupy na wykresach i listach:</span>${W.grupy.filter(g=>g.nW).map(g=>`<button class="an-chip ${wyb.has(g.gr)?'akt':''}" onclick="anPrzelaczGrupe(${g.gr})">gr. ${g.gr}${g.gNazwa?' · '+esc(g.gNazwa):''}${g.laktacyjna?'':' (zas.)'}</button>`).join('')}</div>`;
+  const ust=UI.anUst?panelUstawienAnalizy(anLicz(UI.anId,{lak:'',etap:'',grupy:null})):'';
   const wn=`<div class="panel"><div class="ph"><h2>Wnioski żywieniowe</h2><span class="opis">reguły wg norm z ustawień · kolejność: pobranie i struktura dawki przed zmianą receptury</span></div><div class="pb"><ul class="an-wn">${W.wnioski.map(x=>`<li class="${x.p}">${x.t}</li>`).join('')||'<li class="ok">Brak sygnałów ostrzegawczych.</li>'}</ul></div></div>`;
   const nag=`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} <button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button></div>`;
-  return gora+nag+ust+kafle+wn+tabelaGrupAn(W)+filtr+
+  if(!W.krowy.length) return gora+nag+panelFiltrowAn(UI.anId)+`<div class="panel"><div class="pusto"><b>Brak krów dla tego wyboru</b>Zmień wybór powyżej albo kliknij „Pokaż wszystkie krowy”.</div></div>`;
+  return gora+nag+ust+panelFiltrowAn(UI.anId)+kafle+wn+tabelaGrupAn(W)+
     `<div class="wyk-siatka">${wykresLaktacji(W,L)}${wykresTB(W,L)}${wykresMocznik(W,L)}${wykresBialkoMleko(W,L)}${wykresECM(W,G)}${wykresRozrodu(W,G)}</div>`+
     tabelaOkresow(W)+panelRozrodu(W)+panelKrow(W,wyb)+panelTrendu();
 };
@@ -2681,7 +2746,7 @@ function tabelaGrupAn(W){
   }).join('');
   return `<div class="panel"><div class="ph"><h2>Grupy technologiczne</h2><span class="opis">średnie z próbnego doju · koszt paszy wg dawki obliczonej z Dawek (dziś) · nadwyżka = mleko × ${fmt(U.cenaMleka,2)} zł/l − koszt paszy</span></div>
     <div class="przewin"><table class="t an-t"><thead><tr><th class="l">Grupa DairyPlan</th><th class="l">Grupa żywieniowa · dawka</th><th>Krów z<br>wynikiem</th><th>Pierw.</th><th>DIM</th><th>Mleko<br>kg</th><th>ECM<br>kg</th><th>Tł<br>%</th><th>Bi<br>%</th><th>Tł/bi</th><th>Mocznik<br>mg/l</th><th>LKS<br>mediana</th><th>Ketoza<br>/ ≤${U.dimKet} DIM</th><th>SARA</th><th>Mocz.<br>&gt;${fmt(U.moczMax,0)}</th><th>LKS<br>&gt;${fmt(U.lks,0)}</th><th>Pasza<br>zł/szt/d</th><th>Mleko<br>zł/szt/d</th><th>Nadwyżka<br>zł/szt/d</th></tr></thead><tbody>${h}</tbody>
-    <tfoot><tr class="suma"><td class="l">STADO (w laktacji)</td><td></td><td>${W.stado.n}</td><td>${W.stado.n?fmt(W.stado.pierw/W.stado.n*100,0)+'%':'–'}</td><td>${fmt(W.stado.dim,0)}</td><td>${fmt(W.stado.ml,1)}</td><td>${fmt(W.stado.ecm,1)}</td><td>${fmt(W.stado.tl,2)}</td><td>${fmt(W.stado.bi,2)}</td><td>${fmt(W.stado.tb,2)}</td><td>${fmt(W.stado.mocz,0)}</td><td>${fmt(W.stado.lksMed,0)}</td><td>${W.stado.ket} / ${W.stado.nWczesne}</td><td>${W.stado.sara}</td><td></td><td></td><td></td><td></td><td>${fmt(W.stado.iofc,2)}</td></tr></tfoot></table></div></div>`;
+    <tfoot><tr class="suma"><td class="l">${anFiltrPusty(W.filtr)?'STADO (w laktacji)':'RAZEM wybrane krowy'}</td><td></td><td>${W.stado.n}</td><td>${W.stado.n?fmt(W.stado.pierw/W.stado.n*100,0)+'%':'–'}</td><td>${fmt(W.stado.dim,0)}</td><td>${fmt(W.stado.ml,1)}</td><td>${fmt(W.stado.ecm,1)}</td><td>${fmt(W.stado.tl,2)}</td><td>${fmt(W.stado.bi,2)}</td><td>${fmt(W.stado.tb,2)}</td><td>${fmt(W.stado.mocz,0)}</td><td>${fmt(W.stado.lksMed,0)}</td><td>${W.stado.ket} / ${W.stado.nWczesne}</td><td>${W.stado.sara}</td><td></td><td></td><td></td><td></td><td>${fmt(W.stado.iofc,2)}</td></tr></tfoot></table></div></div>`;
 }
 function tabelaOkresow(W){
   const c=(o)=>o.n?`<td>${o.n}</td><td>${fmt(o.ml,1)}</td><td>${fmt(o.bi,2)}</td><td>${fmt(o.tb,2)}</td><td>${fmt(o.mocz,0)}</td>`:'<td>–</td><td></td><td></td><td></td><td></td>';
@@ -2701,17 +2766,16 @@ function panelRozrodu(W){
 }
 function anFlagaKrowy(W,k,f){ if(f==='rozrod') return W.rozrod.bezIns.includes(k)||W.rozrod.pozno.includes(k)||W.rozrod.powt.includes(k); return !!k.f[f]; }
 function panelKrow(W,wyb){
-  const U=W.U, f=UI.anFl||'', q=(UI.anQ||'').toLowerCase();
+  const U=W.U, f=UI.anFl||'', q=(UI.anSzukaj||'').trim();
   let a=W.krowy.filter(k=>wyb.has(k.gr)&&(k.wynik||f==='rozrod'));
   if(f) a=a.filter(k=>anFlagaKrowy(W,k,f));
-  if(q) a=a.filter(k=>String(k.nr).includes(q)||(k.n||'').toLowerCase().includes(q)||(k.k||'').toLowerCase().includes(q));
+  if(q){ const s=new Set(anSzukajKrow(UI.anId,q).map(k=>k.nr)); a=a.filter(k=>s.has(k.nr)); }
   const sk=UI.anSort||'nr', kier=UI.anKier||1;
   a.sort((x,y)=>{ const p=x[sk],r=y[sk]; if(p==null) return 1; if(r==null) return -1; return (p>r?1:p<r?-1:0)*kier; });
   const kol=[['nr','Nr'],['n','Nazwa',1],['gr','Gr.'],['lak','Lakt.'],['dim','DIM'],['ml','Mleko'],['ecm','ECM'],['tl','Tł'],['bi','Bi'],['tb','Tł/bi'],['mocz','Mocznik'],['lks','LKS'],['st','Status DP',1],['il','Ins.'],['iofc','Nadwyżka']];
   const lic=k=>AN_FLAGI.filter(([x])=>anFlagaKrowy(W,k,x)).map(([x,t])=>`<span class="an-fl fl-${x}" title="${t}">${t}${x==='zmiana'?' → gr. '+k.doGrupy:''}</span>`).join('');
   const ile=x=>W.krowy.filter(k=>wyb.has(k.gr)&&(k.wynik||x==='rozrod')&&anFlagaKrowy(W,k,x)).length;
-  return `<div class="panel"><div class="ph"><h2>Krowy do uwagi</h2><span class="opis">${a.length} szt · kliknij krowę, żeby zobaczyć szczegóły i historię prób</span>
-      <div class="prawo" data-zawsze><input class="pole" placeholder="szukaj nr / nazwa" value="${esc(UI.anQ||'')}" data-fid="an_q" oninput="UI.anQ=this.value;clearTimeout(window._anQt);window._anQt=setTimeout(render,250)"></div></div>
+  return `<div class="panel"><div class="ph"><h2>Krowy do uwagi</h2><span class="opis">${a.length} szt${q?` · tylko pasujące do „${esc(q)}”`:''} · kliknij krowę, żeby zobaczyć szczegóły i historię prób</span></div>
     <div class="an-filtr" data-zawsze style="padding:8px 14px 0"><button class="an-chip ${!f?'akt':''}" onclick="UI.anFl='';render()">Wszystkie</button>${AN_FLAGI.map(([x,t])=>`<button class="an-chip ${f===x?'akt':''}" onclick="UI.anFl='${x}';render()">${t} <b>${ile(x)}</b></button>`).join('')}</div>
     <div class="przewin" style="max-height:560px"><table class="t an-t an-krowy"><thead><tr>${kol.map(([k,t,l])=>`<th class="${l?'l':''}" onclick="UI.anKier=UI.anSort==='${k}'?-(UI.anKier||1):1;UI.anSort='${k}';render()" style="cursor:pointer">${t}${sk===k?(kier>0?' ▲':' ▼'):''}</th>`).join('')}<th class="l">Sygnały</th></tr></thead>
     <tbody>${a.slice(0,400).map(k=>`<tr onclick="anKrowa(${k.nr})" style="cursor:pointer"><td><b>${k.nr}</b></td><td class="l">${esc(k.n||'')}</td><td>${k.gr}</td><td>${k.lak??k.lakDP??'–'}</td><td>${fmt(k.dim,0)}</td><td>${fmt(k.ml,1)}</td><td>${fmt(k.ecm,1)}</td><td>${fmt(k.tl,2)}</td>
@@ -2733,9 +2797,10 @@ function panelUstawienAnalizy(W){
     <div class="an-ust">${W.grupy.map(g=>`<div><label class="et">gr. ${g.gr} ${esc(g.nazwa)}</label><select class="pole szer" onchange="const m=anUst().mapa;m[${g.gr}]=this.value;anUstaw('mapa',m)"><option value="">— bez dawki —</option>${D.grupy.map(x=>`<option value="${x.id}" ${g.gApp===x.id?'selected':''}>${esc(x.nazwa)}</option>`).join('')}</select></div>`).join('')}</div></div></div>`;
 }
 function anKrowa(nr){
-  const ids=anProby().slice().reverse(), hist=ids.map(id=>({id,k:anLicz(id).krowy.find(k=>k.nr===nr)})).filter(x=>x.k), k=anLicz(UI.anId).krowy.find(x=>x.nr===nr)||hist[hist.length-1]?.k;
+  const BF={lak:'',etap:'',grupy:null};
+  const ids=anProby().slice().reverse(), hist=ids.map(id=>({id,k:anLicz(id,BF).krowy.find(k=>k.nr===nr)})).filter(x=>x.k), k=anLicz(UI.anId,BF).krowy.find(x=>x.nr===nr)||hist[hist.length-1]?.k;
   if(!k) return;
-  const W=anLicz(UI.anId), fl=AN_FLAGI.filter(([x])=>anFlagaKrowy(W,k,x)).map(([,t])=>t);
+  const W=anLicz(UI.anId,BF), fl=AN_FLAGI.filter(([x])=>anFlagaKrowy(W,k,x)).map(([,t])=>t);
   const wiersz=(t,v)=>`<tr><td class="l cichy">${t}</td><td class="l"><b>${v}</b></td></tr>`;
   let krz='';
   if(hist.filter(h=>h.k.ml>0).length>=2){ const pk=hist.filter(h=>h.k.ml>0&&h.k.dim!=null);
@@ -2755,7 +2820,7 @@ function drukujAnalize(){
   const box=h=>czysc(h).replace(/<div class="wyk-box">/g,'<div class="karta" style="border:1px solid #9aa;padding:6px;margin-bottom:10px">').replace(/<div class="cichy">/g,'<div class="meta">');
   const wn=`<h2>Wnioski żywieniowe</h2><ul style="margin:0;padding-left:16px">${W.wnioski.map(x=>`<li style="margin-bottom:3px">${x.t}</li>`).join('')}</ul>`;
   const kr=(f,t)=>{ const a=W.krowy.filter(k=>k.wynik&&anFlagaKrowy(W,k,f)); return a.length?`<h2>${t} (${a.length})</h2><table><thead><tr><th>Nr</th><th class="l">Nazwa</th><th>Gr.</th><th>Lakt.</th><th>DIM</th><th>Mleko</th><th>Tł</th><th>Bi</th><th>Tł/bi</th><th>Mocznik</th><th>LKS</th></tr></thead><tbody>${a.sort((x,y)=>x.gr-y.gr||x.nr-y.nr).map(k=>`<tr><td>${k.nr}</td><td class="l">${esc(k.n||'')}</td><td>${k.gr}</td><td>${k.lak??''}</td><td>${fmt(k.dim,0)}</td><td>${fmt(k.ml,1)}</td><td>${fmt(k.tl,2)}</td><td>${fmt(k.bi,2)}</td><td>${fmt(k.tb,2)}</td><td>${fmt(k.mocz,0)}</td><td>${fmt(k.lks,0)}</td></tr>`).join('')}</tbody></table>`:''; };
-  const tresc=naglowekDruku('Analiza danych stada – żywienie, metabolizm, rozród')+`<div class="meta">Próbny dój ${dataPL(W.P.data)} · grupy z DairyPlan ${dataPL(W.P.dpData)} · krowy w laktacji z wynikiem: ${W.stado.n} · mleko ${fmt(W.stado.ml,1)} kg, ECM ${fmt(W.stado.ecm,1)} kg, tł ${fmt(W.stado.tl,2)}%, bi ${fmt(W.stado.bi,2)}%, mocznik ${fmt(W.stado.mocz,0)} mg/l · cena mleka ${fmt(W.U.cenaMleka,2)} zł/l</div>`
+  const tresc=naglowekDruku('Analiza danych stada – żywienie, metabolizm, rozród')+(anFiltrPusty(W.filtr)?'':`<div class="meta" style="font-size:13px;font-weight:bold">Wybrane krowy: ${opisFiltru(W.filtr)}</div>`)+`<div class="meta">Próbny dój ${dataPL(W.P.data)} · grupy z DairyPlan ${dataPL(W.P.dpData)} · krowy w laktacji z wynikiem: ${W.stado.n} · mleko ${fmt(W.stado.ml,1)} kg, ECM ${fmt(W.stado.ecm,1)} kg, tł ${fmt(W.stado.tl,2)}%, bi ${fmt(W.stado.bi,2)}%, mocznik ${fmt(W.stado.mocz,0)} mg/l · cena mleka ${fmt(W.U.cenaMleka,2)} zł/l</div>`
     +wn+czysc(tabelaGrupAn(W)).replace(/<div class="ph">[\s\S]*?<\/div>/,'<h2>Grupy technologiczne</h2>')
     +`<div style="page-break-before:always"></div><h2>Wykresy</h2><div class="siatka-dr">`+box(wykresLaktacji(W,L))+box(wykresTB(W,L))+box(wykresMocznik(W,L))+box(wykresBialkoMleko(W,L))+box(wykresECM(W,G))+box(wykresRozrodu(W,G))+'</div>'
     +czysc(tabelaOkresow(W)).replace(/<div class="ph">[\s\S]*?<\/div>/,'<h2>Pierwiastki i wieloródki wg okresu laktacji</h2>')
