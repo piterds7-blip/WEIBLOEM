@@ -473,7 +473,7 @@ const KOL_UZYT  = 'weibloem_uzytkownicy'; // jeden dokument = jedno konto (id = 
 const KOL_ADMIN = 'weibloem_admin';       // 'init' (pierwszy twórca utworzony), 'uprawnienia' (macierz ról)
 const KOL_MODULY = 'weibloem_moduly';  // kolekcja: jeden dokument = jeden moduł
 const KOL_DNI    = 'weibloem_dni';     // kolekcja: jeden dokument = jeden dzień żywienia (id RRRR-MM-DD)
-const KOL_ANALIZY= 'weibloem_analizy'; // kolekcja: jeden dokument = jeden próbny dój (id RRRR-MM-DD) + 'ustawienia' – tylko Twórca
+const KOL_ANALIZY= 'weibloem_analizy'; // kolekcja: jeden dokument = jeden próbny dój (id RRRR-MM-DD) + 'ustawienia' – dostęp wg macierzy uprawnień (zakładka Analiza danych)
 const WERSJA_DANYCH = 1;               // sufiks kluczy localStorage; zmiana struktury = +1 i wpis w MIGRACJE
 const DEBOUNCE_MS = 800;
 const DNI_WSTECZ = 60;                 // ile dni wstecz nasłuchujemy na żywo
@@ -587,7 +587,7 @@ function wypchnij(klucz){
   clearTimeout(u.timer); u.timer=null;
   if(!fs || !u.pierwszy){ pokazSync(); return; }   // czekamy na pierwszy snapshot – nie nadpisujemy chmury starym cache
   const dane=u.pobierz(); if(dane==null){ pokazSync(); return; }
-  const ts=u.ts; u.wyslanyTs=ts; u.wTrakcie=true; pokazSync();
+  const ts=u.ts; u.wyslanyTs=ts; u.wTrakcie=true; u.wyslanyOd=Date.now(); pokazSync();
   u.ref().set({d:klon(dane),_ts:ts,_dev:DEV,_v:WERSJA_DANYCH})
     .then(()=>{ u.wTrakcie=false; u.blad=null; if(u.ts===ts && !u.timer){ u.niezsync=false; zapiszLokalnie(u); } syncBlad=false; pokazSync(); if(klucz.startsWith('a:')) odswiezZdalnie(); })
     .catch(e=>{
@@ -646,8 +646,10 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 addEventListener('pagehide',wypchnijOczekujace);
 addEventListener('offline',()=>pokazSync());
 
-/* --- analizy (tylko Twórca): jeden nasłuch kolekcji, jednostka = próbny dój albo 'ustawienia' --- */
-let analizyNasluch=false, analizyGotowe=false, analizyBlad=null, analizyStop=null;
+/* --- analizy (rola z dostępem do zakładki Analiza danych): jeden nasłuch kolekcji, jednostka = próbny dój albo 'ustawienia' --- */
+let analizyNasluch=false, analizyGotowe=false, analizyBlad=null, analizyStop=null, analizyStartTs=0;
+// odświeżanie paska stanu zapisu, gdy coś czeka na wysłanie (żeby po 30 s pokazać przyczynę)
+setInterval(()=>{ if(UI.tab==='analiza' && Object.values(J).some(u=>u.klucz.startsWith('a:')&&(u.niezsync||u.wTrakcie))) odswiezZdalnie(); },10000);
 function jednostkaAnalizy(id){
   const k='a:'+id; if(J[k]) return J[k];
   const u=jednostka(k,{ref:()=>fs.collection(KOL_ANALIZY).doc(id),pobierz:()=>AN[id]??null,ustaw:d=>{ AN[id]=d; }});
@@ -655,8 +657,8 @@ function jednostkaAnalizy(id){
   return u;
 }
 function nasluchAnaliz(){
-  if(!fs || analizyNasluch || PROFIL?.rola!=='tworca') return;
-  analizyNasluch=true; analizyBlad=null;
+  if(!fs || analizyNasluch || poziom('analiza')<1) return;
+  analizyNasluch=true; analizyBlad=null; analizyStartTs=Date.now();
   analizyStop=fs.collection(KOL_ANALIZY).onSnapshot(qs=>{
     analizyBlad=null;
     qs.docChanges().forEach(ch=>{
@@ -675,13 +677,17 @@ function stanChmuryAnalizy(id){
   if(analizyBlad==='uprawnienia'||u?.blad==='uprawnienia') return {kl:'zle',t:'Nie zapisano w chmurze – serwer odmówił dostępu. Opublikuj aktualne reguły Firestore (blok „weibloem_analizy”), potem kliknij „Wyślij ponownie”. Do tego czasu ten próbny dój jest tylko na tym urządzeniu.',btn:true};
   if(analizyBlad||u?.blad) return {kl:'zle',t:'Nie zapisano w chmurze ('+esc(analizyBlad||u.blad)+'). Ten próbny dój jest na razie tylko na tym urządzeniu.',btn:true};
   if(!navigator.onLine && u?.niezsync) return {kl:'czeka',t:'Brak internetu – próbny dój wyśle się do chmury, gdy wróci połączenie.'};
+  const pozno=t=>t&&Date.now()-t>30000, min=t=>Math.max(1,Math.round((Date.now()-t)/60000));
+  if(u?.niezsync && poziom('analiza')<3) return {kl:'zle',t:'Ten próbny dój jest tylko na tym urządzeniu – Twoja rola ma w Analizie danych tylko podgląd, więc nie może go wysłać. Poproś Twórcę o poziom „pełny” albo wgraj dane z konta z pełnym dostępem.'};
+  if(u?.wTrakcie && pozno(u.wyslanyOd)) return {kl:'zle',t:`Serwer nie potwierdził zapisu od ${min(u.wyslanyOd)} min. Sprawdź internet i limit zapisów w Firebase (Usage), potem kliknij „Wyślij ponownie”.`,btn:true};
+  if(u?.niezsync && !analizyGotowe && pozno(analizyStartTs)) return {kl:'zle',t:'Brak połączenia z chmurą analiz – próbny dój czeka na tym urządzeniu. Kliknij „Wyślij ponownie”; jeśli nie pomoże, sprawdź opublikowane reguły Firestore.',btn:true};
   if(u && (u.niezsync||u.wTrakcie||u.timer)) return {kl:'czeka',t:'Wysyłanie do chmury…',btn:!u.wTrakcie&&!u.timer&&analizyGotowe};
-  return {kl:'ok',t:'Zapisane w chmurze – widoczne na wszystkich urządzeniach Twórcy.'};
+  return {kl:'ok',t:'Zapisane w chmurze – widoczne na wszystkich urządzeniach i kontach z dostępem do Analizy danych.'};
 }
 function wyslijAnalizyPonownie(){
   if(!fs) return;
-  Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')){ u.blad=null; u.bladPokazany=false; } });
-  if(analizyBlad||!analizyNasluch){ try{ analizyStop&&analizyStop(); }catch(e){} analizyNasluch=false; analizyGotowe=false; Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')) u.pierwszy=false; }); nasluchAnaliz(); }
+  Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')){ u.blad=null; u.bladPokazany=false; if(u.wTrakcie&&Date.now()-(u.wyslanyOd||0)>30000) u.wTrakcie=false; } });
+  if(analizyBlad||!analizyNasluch||!analizyGotowe){ try{ analizyStop&&analizyStop(); }catch(e){} analizyNasluch=false; analizyGotowe=false; Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')) u.pierwszy=false; }); nasluchAnaliz(); }
   else Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')&&u.niezsync) wypchnij(u.klucz); });
   toast('Wysyłam analizy do chmury…'); render();
 }
@@ -2443,7 +2449,7 @@ function drukujKarteStmr(){
 }
 
 /* =====================================================================
-   15b. ZAKŁADKA: ANALIZA DANYCH – próbne doje z SOL + grupy technologiczne z DairyPlan (tylko Twórca)
+   15b. ZAKŁADKA: ANALIZA DANYCH – próbne doje z SOL + grupy technologiczne z DairyPlan (dostęp wg macierzy: podgląd albo pełny)
    Jeden dokument w kolekcji weibloem_analizy = jeden próbny dój (id = data próby) + dokument 'ustawienia'.
    W dokumencie są surowe dane krów; wszystkie wskaźniki liczą się w przeglądarce, więc zmiana progów działa wstecz.
    Numer DairyPlan → kolczyk: 4 cyfry = cyfry 5–2 od końca kolczyka, 5 cyfr = 5 ostatnich cyfr.
@@ -2455,6 +2461,7 @@ const AN_REP=[['cielna','cielne'],['insem','inseminowane'],['oop','w okresie ocz
 function anUst(){ const u=AN.ustawienia||{}; return {...AN_DOMYSLNE,...u,mapa:{...(u.mapa||{})}}; }
 function anProby(){ return Object.keys(AN).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k)&&AN[k]&&Array.isArray(AN[k].krowy)).sort().reverse(); }
 function anUstaw(pole,v){
+  if(poziom('analiza')<3) return;
   const u=anUst();
   if(pole==='mapa') u.mapa=v;
   else if(pole==='produkcyjne') u.produkcyjne=String(v).replace(/[^\d,; ]/g,'');
@@ -2643,6 +2650,7 @@ function podgladImportu(){
   p.hidden=false; p.innerHTML=`Dopasowano <b>${W.stat.dopasowane}</b> z ${W.stat.sol} krów z SOL do grup DairyPlan · bez grupy (pominięte): ${W.stat.bezGrupy} · sztuki tylko z DairyPlan (np. świeżo wycielone, jałówki w grupie): ${W.stat.zwierzatDP}${AN[W.data]?`<br><b>Próbny dój ${dataPL(W.data)} jest już zapisany – zostanie zastąpiony.</b>`:''}`;
 }
 function zapiszImport(){
+  if(poziom('analiza')<3) return;
   if(!_imp.sol||!_imp.sol.krowy.length){ toast('Wybierz plik z SOL','zly'); return; }
   if(!_imp.dp||!_imp.dp.zw.length){ toast('Wklej listy z DairyPlan albo wybierz Zeszyt – nie znaleziono w nich zwierząt','zly'); return; }
   if(!_imp.sol.data){ toast('W pliku z SOL brak daty próbnego doju','zly'); return; }
@@ -2656,6 +2664,7 @@ function zapiszImport(){
   toast(`Zapisano próbny dój ${dataPL(W.data)} – ${W.stat.dopasowane} krów w grupach`);
 }
 function usunAnalize(id){
+  if(poziom('analiza')<3) return;
   if(!confirm(`Usunąć próbny dój ${dataPL(id)} z analiz? Tej operacji nie można cofnąć.`)) return;
   const u=J['a:'+id]; if(u) clearTimeout(u.timer);
   delete AN[id]; delete J['a:'+id]; try{ localStorage.removeItem(LS+'a:'+id); }catch(e){}
@@ -2953,12 +2962,12 @@ function anSzukajKrow(id,q){
 }
 const kl=(v,zle,sr)=>v==null?'':zle(v)?'an-zle':sr&&sr(v)?'an-sr':'';
 R.analiza=()=>{
-  const ids=anProby();
+  const ids=anProby(), pelny=poziom('analiza')>=3;
   if(!UI.anId||!AN[UI.anId]) UI.anId=ids[0]||null;
   const gora=`<div class="woz-gora" data-zawsze><span class="dzien-tyt">Analiza danych</span>
     ${ids.length?`<select class="pole" onchange="UI.anId=this.value;render()" aria-label="Próbny dój">${ids.map(i=>`<option value="${i}" ${i===UI.anId?'selected':''}>próbny dój ${dataPL(i)}</option>`).join('')}</select>`:''}
-    <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${ids.length?`<button class="btn" onclick="UI.anUst=!UI.anUst;render()">⚙ Ustawienia</button><button class="btn" onclick="drukujAnalize()">Drukuj raport</button>`:''}<button class="btn glowny" onclick="modalImportu()">+ Wgraj dane</button></span></div>`;
-  if(!UI.anId) return gora+`<div class="panel"><div class="pusto"><b>Brak danych do analizy</b>Wgraj plik z SOL (dane poszczególnych sztuk) i listy grup z DairyPlan – aplikacja przypisze krowy do grup technologicznych po numerze kolczyka i policzy wskaźniki żywieniowe, ketozy, rozrodu i opłacalności.</div></div>`;
+    <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">${ids.length&&pelny?`<button class="btn" onclick="UI.anUst=!UI.anUst;render()">⚙ Ustawienia</button>`:''}${ids.length?`<button class="btn" data-zawsze onclick="drukujAnalize()">Drukuj raport</button>`:''}${pelny?`<button class="btn glowny" onclick="modalImportu()">+ Wgraj dane</button>`:''}</span></div>`;
+  if(!UI.anId) return gora+`<div class="panel"><div class="pusto"><b>Brak danych do analizy</b>${pelny?'Wgraj plik z SOL (dane poszczególnych sztuk) i listy grup z DairyPlan – aplikacja przypisze krowy do grup technologicznych po numerze kolczyka i policzy wskaźniki żywieniowe, ketozy, rozrodu i opłacalności.':'Nikt jeszcze nie wgrał próbnego doju. Twoja rola ma tu tylko podgląd – dane wgrywa osoba z pełnym dostępem.'}</div></div>`;
   const W=anLicz(UI.anId), U=W.U, P=W.P, S=W.stado, G=anWybrane(W), wyb=new Set(G.map(g=>g.gr));
   const L=W.L.filter(k=>wyb.has(k.gr)), R=W.rozrod;
   const kafel=(t,v,o,cl)=>`<div class="kafel ${cl||''}"><span>${t}</span><b>${v}</b><span>${o||''}</span></div>`;
@@ -2967,11 +2976,11 @@ R.analiza=()=>{
     ${kafel('Ryzyko ketozy',`${S.ket}`,`z ${S.nWczesne} krów do ${U.dimKet} DIM`,S.nWczesne&&S.ket/S.nWczesne>=0.15?'k-zle':'')}${kafel('Ryzyko SARA',`${S.sara}`,`${fmt(S.n?S.sara/S.n*100:0,0)}% krów, tł/bi < ${fmt(U.tbSara,1)}`,S.n&&S.sara/S.n>=0.2?'k-zle':'')}
     ${kafel('Cielne po OOP',R.proc!=null?fmt(R.proc*100,0)+'%':'–',`${R.ciel} z ${R.nPo} krów > ${U.oop} dni`,R.proc!=null&&R.proc<0.45?'k-zle':'')}
     ${kafel('Nadwyżka nad paszą',S.iofc!=null?fmt(S.iofc,2)+' zł':'–',`na krowę/dzień · stado ${fmt(S.iofcSuma,0)} zł/d · mleko ${fmt(U.cenaMleka,2)} zł/l`)}</div>`;
-  const ust=UI.anUst?panelUstawienAnalizy(anLicz(UI.anId,{lak:'',etap:'',grupy:null})):'';
+  const ust=UI.anUst&&pelny?panelUstawienAnalizy(anLicz(UI.anId,{lak:'',etap:'',grupy:null})):'';
   const wn=`<div class="panel"><div class="ph"><h2>Wnioski żywieniowe</h2><span class="opis">reguły wg norm z ustawień · kolejność: pobranie i struktura dawki przed zmianą receptury</span></div><div class="pb"><ul class="an-wn">${W.wnioski.map(x=>`<li class="${x.p}">${x.t}</li>`).join('')||'<li class="ok">Brak sygnałów ostrzegawczych.</li>'}</ul></div></div>`;
   const sc=stanChmuryAnalizy(UI.anId);
-  const chmura=`<div class="an-chmura ${sc.kl}" data-zawsze><span>${sc.kl==='ok'?'☁ ':sc.kl==='zle'?'⚠ ':''}${sc.t}</span>${sc.btn?`<button class="btn maly" onclick="wyslijAnalizyPonownie()">Wyślij ponownie</button>`:''}</div>`;
-  const nag=chmura+`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} <button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button></div>`;
+  const chmura=`<div class="an-chmura ${sc.kl}" data-zawsze><span>${sc.kl==='ok'?'☁ ':sc.kl==='zle'?'⚠ ':''}${sc.t}</span>${sc.btn&&pelny?`<button class="btn maly" onclick="wyslijAnalizyPonownie()">Wyślij ponownie</button>`:''}</div>`;
+  const nag=chmura+`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} ${pelny?`<button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button>`:''}</div>`;
   if(!W.krowy.length) return gora+nag+panelFiltrowAn(UI.anId)+`<div class="panel"><div class="pusto"><b>Brak krów dla tego wyboru</b>Zmień wybór powyżej albo kliknij „Pokaż wszystkie krowy”.</div></div>`;
   return gora+nag+ust+panelFiltrowAn(UI.anId)+kafle+wn+tabelaGrupAn(W)+
     `<div class="wyk-siatka">${wykresLaktacji(W,L)}${wykresTB(W,L)}${wykresMocznik(W,L)}${wykresBialkoMleko(W,L)}${wykresECM(W,G)}${wykresRozrodu(W,G)}</div>`+
@@ -3120,7 +3129,7 @@ function eksport(){
 const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
 const POZIOMY=['brak','podgląd','wpis','pełny'];
 // które poziomy mają sens w danej zakładce
-const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,2,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,2,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,1,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
 const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ wozów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',
   dawki:'zmieniasz tylko liczby sztuk (realnych i wirtualnych) albo kg TMR na sektor; receptury, dodatki ręczne i ustawienia grup zmienia szef',
   suchytmr:'dodajesz nowe partie produkcji; recepturę zmienia szef, a zapisane partie poprawia lub usuwa szef'};
@@ -3152,6 +3161,7 @@ function banerPoziomu(tab){
 // Po narysowaniu zakładki blokuje to, czego rola nie może. data-zawsze = nawigacja/druk, data-wpis = dozwolone od poziomu „wpis”.
 function zastosujPoziom(w,tab){
   const p=poziom(tab); if(p>=3) return;
+  if(tab==='analiza') return;   // Analiza danych sama nie rysuje przycisków edycji dla podglądu – filtry, sortowanie i karty krów działają
   const wolno=el=>el.closest('[data-zawsze]') || (p===2 && el.closest('[data-wpis]'));
   $$('input,select,textarea,button',w).forEach(el=>{
     if(wolno(el)) return;
@@ -3305,7 +3315,7 @@ function nasluchAdmin(){
         }
       }
       else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now(),wer:WER_UPR}).catch(()=>{});
-      rysujZakladki(); odswiezZdalnie();
+      rysujZakladki(); nasluchAnaliz(); odswiezZdalnie();
     },e=>console.warn('uprawnienia',e));
   }
   if(!uzytNasluch && poziom('uzytkownicy')>=1){
