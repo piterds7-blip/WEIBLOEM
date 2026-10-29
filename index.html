@@ -367,6 +367,12 @@ table.zuz-dni th{white-space:nowrap}
 .t th.gr-nag{text-align:center;border-bottom:1px solid var(--linia)}
 .t .zp-l{border-left:2px solid var(--linia)}
 /* ===== ANALIZA DANYCH ===== */
+.an-chmura{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;border-radius:8px;margin-bottom:10px;font-size:14px}
+.an-chmura.ok{background:#EAF5EC;color:#1E5E37}
+.an-chmura.czeka{background:#FFF6E2;color:#6B4E00}
+.an-chmura.zle{background:#FBEDEA;color:#8E2A20;font-weight:600;border:1px solid #E4B5AE}
+.an-chmura.lok{background:var(--pow2);color:var(--tusz2)}
+.an-chmura span{flex:1;min-width:220px}
 .an-filtry{border:2px solid var(--gl3,#cfe0d4)}
 .an-frz{display:flex;gap:10px 14px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--linia)}
 .an-frz:last-of-type{border-bottom:0}
@@ -583,9 +589,15 @@ function wypchnij(klucz){
   const dane=u.pobierz(); if(dane==null){ pokazSync(); return; }
   const ts=u.ts; u.wyslanyTs=ts; u.wTrakcie=true; pokazSync();
   u.ref().set({d:klon(dane),_ts:ts,_dev:DEV,_v:WERSJA_DANYCH})
-    .then(()=>{ u.wTrakcie=false; if(u.ts===ts && !u.timer){ u.niezsync=false; zapiszLokalnie(u); } syncBlad=false; pokazSync(); })
+    .then(()=>{ u.wTrakcie=false; u.blad=null; if(u.ts===ts && !u.timer){ u.niezsync=false; zapiszLokalnie(u); } syncBlad=false; pokazSync(); if(klucz.startsWith('a:')) odswiezZdalnie(); })
     .catch(e=>{
       u.wTrakcie=false; console.warn('Zapis '+klucz,e);
+      if(klucz.startsWith('a:')){
+        // analiza zostaje na tym urządzeniu (nie cofamy), zakładka pokaże przyczynę i przycisk „Wyślij ponownie”
+        u.blad=e&&e.code==='permission-denied'?'uprawnienia':(e&&e.message)||'błąd';
+        if(!u.bladPokazany){ u.bladPokazany=true; toast('Analiza nie zapisała się w chmurze – szczegóły w zakładce Analiza danych','zly'); }
+        syncBlad=u.blad!=='uprawnienia'; pokazSync(); odswiezZdalnie(); return;
+      }
       if(e && e.code==='permission-denied'){
         // rola nie może zapisywać tego modułu – cofamy lokalną zmianę do stanu z chmury
         toast('Brak uprawnień do zapisu ('+klucz.replace(/^m:|^d:/,'')+') – przywrócono dane z chmury','zly');
@@ -635,7 +647,7 @@ addEventListener('pagehide',wypchnijOczekujace);
 addEventListener('offline',()=>pokazSync());
 
 /* --- analizy (tylko Twórca): jeden nasłuch kolekcji, jednostka = próbny dój albo 'ustawienia' --- */
-let analizyNasluch=false, analizyGotowe=false;
+let analizyNasluch=false, analizyGotowe=false, analizyBlad=null, analizyStop=null;
 function jednostkaAnalizy(id){
   const k='a:'+id; if(J[k]) return J[k];
   const u=jednostka(k,{ref:()=>fs.collection(KOL_ANALIZY).doc(id),pobierz:()=>AN[id]??null,ustaw:d=>{ AN[id]=d; }});
@@ -644,16 +656,34 @@ function jednostkaAnalizy(id){
 }
 function nasluchAnaliz(){
   if(!fs || analizyNasluch || PROFIL?.rola!=='tworca') return;
-  analizyNasluch=true;
-  fs.collection(KOL_ANALIZY).onSnapshot(qs=>{
+  analizyNasluch=true; analizyBlad=null;
+  analizyStop=fs.collection(KOL_ANALIZY).onSnapshot(qs=>{
+    analizyBlad=null;
     qs.docChanges().forEach(ch=>{
       const id=ch.doc.id, k='a:'+id;
       if(ch.type==='removed'){ if(J[k]&&!J[k].niezsync){ delete AN[id]; delete J[k]; try{ localStorage.removeItem(LS+k); }catch(e){} wersja++; odswiezZdalnie(); } return; }
       jednostkaAnalizy(id); przyjmijSnapshot(k,ch.doc);
     });
     if(!analizyGotowe){ analizyGotowe=true; Object.values(J).forEach(u=>{ if(!u.klucz.startsWith('a:')||u.pierwszy) return; u.pierwszy=true; if(u.niezsync) wypchnij(u.klucz); }); }
-    pokazSync();
-  },e=>{ console.warn('analizy',e); });
+    pokazSync(); if(UI.tab==='analiza') odswiezZdalnie();
+  },e=>{ console.warn('analizy',e); analizyBlad=e&&e.code==='permission-denied'?'uprawnienia':(e&&e.message)||'błąd'; analizyNasluch=false; if(UI.tab==='analiza') odswiezZdalnie(); });
+}
+// Stan zapisu próbnego doju w chmurze – do paska w zakładce Analiza danych
+function stanChmuryAnalizy(id){
+  if(!fs) return {kl:'lok',t:'Tryb lokalny – dane są tylko na tym urządzeniu (Firebase niepodłączony).'};
+  const u=J['a:'+id];
+  if(analizyBlad==='uprawnienia'||u?.blad==='uprawnienia') return {kl:'zle',t:'Nie zapisano w chmurze – serwer odmówił dostępu. Opublikuj aktualne reguły Firestore (blok „weibloem_analizy”), potem kliknij „Wyślij ponownie”. Do tego czasu ten próbny dój jest tylko na tym urządzeniu.',btn:true};
+  if(analizyBlad||u?.blad) return {kl:'zle',t:'Nie zapisano w chmurze ('+esc(analizyBlad||u.blad)+'). Ten próbny dój jest na razie tylko na tym urządzeniu.',btn:true};
+  if(!navigator.onLine && u?.niezsync) return {kl:'czeka',t:'Brak internetu – próbny dój wyśle się do chmury, gdy wróci połączenie.'};
+  if(u && (u.niezsync||u.wTrakcie||u.timer)) return {kl:'czeka',t:'Wysyłanie do chmury…',btn:!u.wTrakcie&&!u.timer&&analizyGotowe};
+  return {kl:'ok',t:'Zapisane w chmurze – widoczne na wszystkich urządzeniach Twórcy.'};
+}
+function wyslijAnalizyPonownie(){
+  if(!fs) return;
+  Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')){ u.blad=null; u.bladPokazany=false; } });
+  if(analizyBlad||!analizyNasluch){ try{ analizyStop&&analizyStop(); }catch(e){} analizyNasluch=false; analizyGotowe=false; Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')) u.pierwszy=false; }); nasluchAnaliz(); }
+  else Object.values(J).forEach(u=>{ if(u.klucz.startsWith('a:')&&u.niezsync) wypchnij(u.klucz); });
+  toast('Wysyłam analizy do chmury…'); render();
 }
 
 /* --- dni: jeden nasłuch zakresu + pojedyncze dla starszych dat --- */
@@ -2619,6 +2649,8 @@ function zapiszImport(){
   const W=polaczDane(_imp.sol,_imp.dp,$('#an-dpd').value||dzis());
   if(!W.stat.dopasowane){ toast('Żaden numer z DairyPlan nie pasuje do kolczyków z SOL – sprawdź, czy to to samo stado','zly'); return; }
   W.plikSol=_imp.plikSol||'';
+  const kb=JSON.stringify(W).length/1024;
+  if(kb>900 && !confirm(`Ten próbny dój ma ${Math.round(kb)} KB – blisko limitu jednego dokumentu w chmurze (1 MB). Może się nie zapisać na innych urządzeniach. Zapisać mimo to?`)) return;
   AN[W.data]=W; jednostkaAnalizy(W.data); oznaczZmiane('a:'+W.data);
   UI.anId=W.data; UI.anFiltr=null; zamknijModal(); render();
   toast(`Zapisano próbny dój ${dataPL(W.data)} – ${W.stat.dopasowane} krów w grupach`);
@@ -2937,7 +2969,9 @@ R.analiza=()=>{
     ${kafel('Nadwyżka nad paszą',S.iofc!=null?fmt(S.iofc,2)+' zł':'–',`na krowę/dzień · stado ${fmt(S.iofcSuma,0)} zł/d · mleko ${fmt(U.cenaMleka,2)} zł/l`)}</div>`;
   const ust=UI.anUst?panelUstawienAnalizy(anLicz(UI.anId,{lak:'',etap:'',grupy:null})):'';
   const wn=`<div class="panel"><div class="ph"><h2>Wnioski żywieniowe</h2><span class="opis">reguły wg norm z ustawień · kolejność: pobranie i struktura dawki przed zmianą receptury</span></div><div class="pb"><ul class="an-wn">${W.wnioski.map(x=>`<li class="${x.p}">${x.t}</li>`).join('')||'<li class="ok">Brak sygnałów ostrzegawczych.</li>'}</ul></div></div>`;
-  const nag=`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} <button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button></div>`;
+  const sc=stanChmuryAnalizy(UI.anId);
+  const chmura=`<div class="an-chmura ${sc.kl}" data-zawsze><span>${sc.kl==='ok'?'☁ ':sc.kl==='zle'?'⚠ ':''}${sc.t}</span>${sc.btn?`<button class="btn maly" onclick="wyslijAnalizyPonownie()">Wyślij ponownie</button>`:''}</div>`;
+  const nag=chmura+`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} <button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button></div>`;
   if(!W.krowy.length) return gora+nag+panelFiltrowAn(UI.anId)+`<div class="panel"><div class="pusto"><b>Brak krów dla tego wyboru</b>Zmień wybór powyżej albo kliknij „Pokaż wszystkie krowy”.</div></div>`;
   return gora+nag+ust+panelFiltrowAn(UI.anId)+kafle+wn+tabelaGrupAn(W)+
     `<div class="wyk-siatka">${wykresLaktacji(W,L)}${wykresTB(W,L)}${wykresMocznik(W,L)}${wykresBialkoMleko(W,L)}${wykresECM(W,G)}${wykresRozrodu(W,G)}</div>`+
