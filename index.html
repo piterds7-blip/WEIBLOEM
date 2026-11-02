@@ -328,7 +328,7 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 .pl-kafel:hover{filter:brightness(.97)}.pl-kafel:focus-visible{outline:3px solid var(--gl);outline-offset:1px}
 .pl-kafel.przeb{background:repeating-linear-gradient(-45deg,#ECEEEC 0 8px,#E2E5E2 8px 16px)!important;border-style:dashed}
 .pl-kafel.wyb{outline:4px solid var(--gl);outline-offset:-1px}
-.pl-k-g{display:flex;align-items:center;gap:6px}.pl-k-g b{font:700 17px/1.1 var(--font-w)}.pl-k-g .pl-chip{margin-left:auto}
+.pl-k-g{display:flex;align-items:center;gap:4px 6px;flex-wrap:wrap}.pl-k-g b{font:700 17px/1.1 var(--font-w);white-space:nowrap}.pl-k-g .pl-chip{margin-left:auto;font-size:11.5px;padding:0 5px}
 .pl-k-o{font-size:12px;color:#3F4A44;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl-k-l{font-size:13px;font-weight:600}
 .pl-chip{display:inline-block;padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap}
@@ -337,9 +337,15 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 .pl-pom{min-height:30px;border-radius:5px;border:1px dashed #8E978F;background:repeating-linear-gradient(45deg,#DADFDA 0 6px,#E7EAE6 6px 12px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;font:inherit;font-size:12.5px;cursor:pointer}
 .pl-pom span{font-size:11.5px;color:var(--tusz2)}.pl-pom.wyb{outline:4px solid var(--gl)}
 .pl-puste{font-size:12.5px;color:var(--tusz2);padding:6px}
-.pl-budki{display:flex;flex-direction:column;gap:4px}
-.pl-budki.pion{width:44px;flex:none;justify-content:flex-end;align-items:center}
-.pl-b-t{font-size:13px}.pl-budki.pion .pl-b-t{font-size:11px;text-align:center;line-height:1.2;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pl-budki{display:flex;flex-direction:column;gap:4px;border:2px solid;border-radius:7px;padding:6px 8px;font:inherit;color:var(--tusz);text-align:left;cursor:pointer;min-height:44px}
+.pl-budki:hover{filter:brightness(.97)}.pl-budki:focus-visible{outline:3px solid var(--gl);outline-offset:1px}
+.pl-budki.pion{width:58px;flex:none;justify-content:flex-end;align-items:center;padding:5px 3px;align-self:flex-end}
+.pl-b-t{font-size:13px;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center}.pl-budki.pion .pl-b-t{font-size:11px;text-align:center;line-height:1.2;flex-direction:column;flex-wrap:nowrap;gap:2px}
+.pl-b-s{font-size:12px;font-weight:600;color:#24493A}.pl-b-s.zle{color:#7A1A14}.pl-budki.pion .pl-b-s{font-size:10.5px;text-align:center;line-height:1.15}
+.pl-silos-rz{display:flex;gap:10px;flex-wrap:wrap}.pl-silos-rz .pl-budki{flex:1 1 260px}
+.pl-stare{padding:3px 9px;border-radius:6px;background:#FBEFC4;border:1px solid #D9B44A;color:#4F3A00;font-weight:600}
+.pl-niep{margin-top:8px;border-radius:10px;background:#FBEFC4;border:1px solid #D9B44A;padding:10px;display:flex;flex-direction:column;gap:6px}.pl-niep h3{font-size:19px!important;color:#4F3A00}
+.pl-niep-w{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}.pl-niep-w span{flex:1 1 100px;min-width:0}.pl-niep-w select{min-height:40px;max-width:100%}
 .pl-b-kw{display:flex;flex-wrap:wrap;gap:3px}.pl-budki.pion .pl-b-kw{display:grid;grid-template-columns:repeat(2,14px)}
 .pl-b-kw i{width:14px;height:14px;border-radius:3px;background:#fff;border:1px solid #8E978F;box-sizing:border-box;display:block}.pl-b-kw i.z{background:#2E7D4F;border-color:#2E7D4F}
 .pl-silosy{height:32px;border-radius:6px;background:repeating-linear-gradient(90deg,#CFD4CF 0 70px,#BCC3BD 70px 72px);display:flex;align-items:center;padding:0 14px;font-weight:700;color:#2F3A34;letter-spacing:.04em}
@@ -350,12 +356,12 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 /* szczegóły obory */
 .pl-det-wrap{flex:999 1 640px;min-width:0;padding:14px;display:flex;flex-direction:column;gap:8px;margin:0}
 .pl-det{display:flex;gap:8px;min-width:720px;min-height:420px}
-.pl-czp{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pl-czp{display:flex;flex-direction:column;gap:4px;min-width:150px}
 .pl-cz-nag{align-self:flex-start;border:1px solid var(--linia);background:var(--pow);border-radius:6px;padding:3px 9px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;min-height:30px}
 .pl-cz-nag.wyb{background:var(--gl);color:#fff;border-color:var(--gl)}
 .pl-cz-poz{flex:1;display:flex;flex-direction:column;gap:5px;border:2px solid #5D6B63;border-radius:6px;padding:5px;background:#F1F3F0}
 .pl-rz{flex:1;display:flex;gap:5px;min-height:150px}
-.pl-kafel.det{padding:8px 10px;gap:5px;min-width:96px}.pl-kafel.det .pl-k-o,.pl-kafel.det .pl-stol{white-space:normal}.pl-kafel.det .pl-k-g b{font-size:22px}
+.pl-kafel.det{padding:8px 10px;gap:5px;min-width:110px}.pl-kafel.det .pl-k-o,.pl-kafel.det .pl-stol{white-space:normal}.pl-kafel.det .pl-k-g b{font-size:22px}
 .pl-legow{display:flex;flex-wrap:wrap;gap:2px}
 .pl-legow i{display:block;width:9px;height:18px;border-radius:2px;background:#fff;border:1px solid #8E978F;box-sizing:border-box}
 .pl-legow i.z{background:#2E7D4F;border-color:#2E7D4F}
@@ -368,13 +374,14 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
 .pl-rzad .btn{min-height:40px}
 .pl-wynik{border-radius:10px;background:#DCEFE1;border:1px solid #7FB592;padding:9px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .pl-wynik.sr{background:#FBEFC4;border-color:#D9B44A}.pl-wynik.zle{background:#F6D5D1;border-color:#C9645A}
+.litry-lista{display:flex;flex-direction:column;gap:8px}.litry-w{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.litry-w label{display:flex;gap:6px;align-items:center}
 .pl-budki-lista{display:flex;flex-direction:column;gap:8px}
 .pl-budka-ed{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.pl-budka-ed label{display:flex;gap:4px;align-items:center;font-size:13px}
 /* karta sektora */
 .pl-karta{display:flex;flex-direction:column;gap:12px}
 .pl-karta-nag{border:2px solid;border-radius:10px;padding:10px 14px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .pl-karta-nag b{font:700 28px/1 var(--font-w)}.pl-karta-nag small{flex-basis:100%;font-size:13px;color:#3F4A44}
-.pl-kk-r{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pl-kk-r{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .pl-kk{border-radius:10px;padding:8px 10px;background:#fff;border:1px solid var(--linia);display:flex;flex-direction:column;gap:1px}
 .pl-kk span{font-size:12.5px;color:var(--tusz2)}.pl-kk b{font:700 22px/1.1 var(--font-w)}.pl-kk small{font-size:12px;color:var(--tusz2)}
 .pl-kk.zle{background:#F6D5D1;border-color:#C9645A}.pl-kk.sr{background:#FBEFC4;border-color:#D9B44A}.pl-kk.ok{background:#DCEFE1;border-color:#7FB592}.pl-kk.brak{background:#ECEEEC}
@@ -392,7 +399,7 @@ button.nr.ma{border-style:solid;background:var(--gl);border-color:var(--gl);colo
   .pl-ob-nag b{font-size:17px}.pl-ob-op{font-size:11px;min-height:28px}.pl-stol-pas.pion{width:12px}.pl-stol-pas.pion span{font-size:8px}
   .pl-leg{margin-left:0}.pl-boczny{max-width:none}.pl-edycja{max-width:none}
   .pl-kk-r,.pl-4{grid-template-columns:repeat(2,minmax(0,1fr))}.pl-2{grid-template-columns:minmax(0,1fr)}
-  .pl-ob-wrap{flex-direction:column}.pl-budki.pion{width:auto;align-items:flex-start}.pl-budki.pion .pl-b-t{flex-direction:row;flex-wrap:wrap;text-align:left}.pl-budki.pion .pl-b-kw{display:flex}.pl-b-kw i{width:10px;height:10px}
+  .pl-ob-wrap{flex-direction:column}.pl-budki.pion{width:auto;align-items:flex-start;align-self:stretch}.pl-budki.pion .pl-b-s{text-align:left}.pl-budki.pion .pl-b-t{flex-direction:row;flex-wrap:wrap;text-align:left}.pl-budki.pion .pl-b-kw{display:flex}.pl-b-kw i{width:10px;height:10px}
 }
 .m-stopka{padding:10px 16px 14px;display:flex;justify-content:flex-end;gap:8px}
 .lista-wyb{display:grid;gap:6px}
@@ -3336,15 +3343,15 @@ function tabelaGrupAn(W){
   const U=W.U, h=W.grupy.filter(g=>g.nW).map(g=>{
     const pk=(a,b)=>b?`${a} <span class="cichy">/ ${b}</span>`:'–';
     return `<tr class="${g.laktacyjna?'':'cichy'}"><td class="l"><b>gr. ${g.gr}</b> <span class="cichy">${esc(g.nazwa)}</span></td><td class="l">${g.gNazwa?esc(g.gNazwa)+(g.rec?` <span class="cichy">· ${esc(g.rec)}</span>`:''):'<span class="cichy">bez dawki</span>'}</td>
-      <td>${g.nW}${g.n>g.nW?` <span class="cichy">(+${g.n-g.nW})</span>`:''}</td><td>${g.pierw!=null?fmt(g.pierw*100,0)+'%':'–'}</td><td>${fmt(g.dim,0)}</td><td><b>${fmt(g.ml,1)}</b></td><td>${fmt(g.ecm,1)}</td>
+      <td>${litryHTML(g.gr)}</td><td>${g.nW}${g.n>g.nW?` <span class="cichy">(+${g.n-g.nW})</span>`:''}</td><td>${g.pierw!=null?fmt(g.pierw*100,0)+'%':'–'}</td><td>${fmt(g.dim,0)}</td><td><b>${fmt(g.ml,1)}</b></td><td>${fmt(g.ecm,1)}</td>
       <td>${fmt(g.tl,2)}</td><td class="${kl(g.bi,v=>v<U.biNiskie)}">${fmt(g.bi,2)}</td><td class="${kl(g.tb,v=>v<U.tbSara||v>U.tbKet,v=>v<U.tbSara+0.1)}">${fmt(g.tb,2)}</td>
       <td class="${kl(g.mocz,v=>v>U.moczMax||v<U.moczMin,v=>v>U.moczOptMax||v<U.moczOptMin)}">${fmt(g.mocz,0)}</td><td>${fmt(g.lksMed,0)}</td>
       <td>${pk(g.ket,g.nWczesne)}</td><td>${g.sara||'–'}</td><td>${g.moczW||'–'}</td><td>${g.lks||'–'}</td>
       ${g.laktacyjna?`<td>${g.koszt!=null?fmt(g.koszt,2):'–'}</td><td>${fmt(g.przychod,2)}</td><td class="${kl(g.iofc,v=>v<0)}"><b>${g.iofc!=null?fmt(g.iofc,2):'–'}</b></td>`:'<td colspan="3" class="cichy">grupa zasuszona</td>'}</tr>`;
   }).join('');
-  return `<div class="panel"><div class="ph"><h2>Grupy technologiczne</h2><span class="opis">średnie z próbnego doju · koszt paszy wg dawki obliczonej z Dawek (dziś) · nadwyżka = mleko × ${fmt(U.cenaMleka,2)} zł/l − koszt paszy</span></div>
-    <div class="przewin"><table class="t an-t"><thead><tr><th class="l">Grupa DairyPlan</th><th class="l">Grupa żywieniowa · dawka</th><th>Krów z<br>wynikiem</th><th>Pierw.</th><th>DIM</th><th>Mleko<br>kg</th><th>ECM<br>kg</th><th>Tł<br>%</th><th>Bi<br>%</th><th>Tł/bi</th><th>Mocznik<br>mg/l</th><th>LKS<br>mediana</th><th>Ketoza<br>/ ≤${U.dimKet} DIM</th><th>SARA</th><th>Mocz.<br>&gt;${fmt(U.moczMax,0)}</th><th>LKS<br>&gt;${fmt(U.lks,0)}</th><th>Pasza<br>zł/szt/d</th><th>Mleko<br>zł/szt/d</th><th>Nadwyżka<br>zł/szt/d</th></tr></thead><tbody>${h}</tbody>
-    <tfoot><tr class="suma"><td class="l">${anFiltrPusty(W.filtr)?'STADO (w laktacji)':'RAZEM wybrane krowy'}</td><td></td><td>${W.stado.n}</td><td>${W.stado.n?fmt(W.stado.pierw/W.stado.n*100,0)+'%':'–'}</td><td>${fmt(W.stado.dim,0)}</td><td>${fmt(W.stado.ml,1)}</td><td>${fmt(W.stado.ecm,1)}</td><td>${fmt(W.stado.tl,2)}</td><td>${fmt(W.stado.bi,2)}</td><td>${fmt(W.stado.tb,2)}</td><td>${fmt(W.stado.mocz,0)}</td><td>${fmt(W.stado.lksMed,0)}</td><td>${W.stado.ket} / ${W.stado.nWczesne}</td><td>${W.stado.sara}</td><td></td><td></td><td></td><td></td><td>${fmt(W.stado.iofc,2)}</td></tr></tfoot></table></div></div>`;
+  return `<div class="panel"><div class="ph"><h2>Grupy technologiczne</h2><span class="opis">średnie z próbnego doju · koszt paszy wg dawki obliczonej z Dawek (dziś) · nadwyżka = mleko × ${fmt(U.cenaMleka,2)} zł/l − koszt paszy${litryOpis()}</span></div>
+    <div class="przewin"><table class="t an-t"><thead><tr><th class="l">Grupa DairyPlan</th><th class="l">Grupa żywieniowa · dawka</th><th title="Na ile litrów mleka liczona jest dawka – wpisuje żywieniowiec w Ustawieniach">Dawka<br>na l mleka</th><th>Krów z<br>wynikiem</th><th>Pierw.</th><th>DIM</th><th>Mleko<br>kg</th><th>ECM<br>kg</th><th>Tł<br>%</th><th>Bi<br>%</th><th>Tł/bi</th><th>Mocznik<br>mg/l</th><th>LKS<br>mediana</th><th>Ketoza<br>/ ≤${U.dimKet} DIM</th><th>SARA</th><th>Mocz.<br>&gt;${fmt(U.moczMax,0)}</th><th>LKS<br>&gt;${fmt(U.lks,0)}</th><th>Pasza<br>zł/szt/d</th><th>Mleko<br>zł/szt/d</th><th>Nadwyżka<br>zł/szt/d</th></tr></thead><tbody>${h}</tbody>
+    <tfoot><tr class="suma"><td class="l">${anFiltrPusty(W.filtr)?'STADO (w laktacji)':'RAZEM wybrane krowy'}</td><td></td><td></td><td>${W.stado.n}</td><td>${W.stado.n?fmt(W.stado.pierw/W.stado.n*100,0)+'%':'–'}</td><td>${fmt(W.stado.dim,0)}</td><td>${fmt(W.stado.ml,1)}</td><td>${fmt(W.stado.ecm,1)}</td><td>${fmt(W.stado.tl,2)}</td><td>${fmt(W.stado.bi,2)}</td><td>${fmt(W.stado.tb,2)}</td><td>${fmt(W.stado.mocz,0)}</td><td>${fmt(W.stado.lksMed,0)}</td><td>${W.stado.ket} / ${W.stado.nWczesne}</td><td>${W.stado.sara}</td><td></td><td></td><td></td><td></td><td>${fmt(W.stado.iofc,2)}</td></tr></tfoot></table></div></div>`;
 }
 function tabelaOkresow(W){
   const c=(o)=>o.n?`<td>${o.n}</td><td>${fmt(o.ml,1)}</td><td>${fmt(o.bi,2)}</td><td>${fmt(o.tb,2)}</td><td>${fmt(o.mocz,0)}</td>`:'<td>–</td><td></td><td></td><td></td><td></td>';
@@ -3446,9 +3453,14 @@ function drukujAnalize(){
    a gdy sektor planu nie ma grup DP – z połączonego sektora w Dawkach. Pobranie paszy – z sektora w Dawkach.
    ===================================================================== */
 const PL_NORMY=[[60,'dojne 60 cm'],[75,'fresh, porodówka 75 cm'],[45,'jałówki 45 cm']];
+// ściółka: norma powierzchni kojca na sztukę (m²)
+const PL_NORMY_M2=[[6,'dojne, fresh 6 m²'],[10,'porodówka 10 m²'],[3.5,'jałówki 3,5 m²'],[2,'cielęta 2 m²']];
+const plNormaM2=s=>+s.normaM2>0?+s.normaM2:((+s.norma||60)>=60?6:3.5);
 const PL_KOL={ok:{bg:'#DCEFE1',br:'#2E7D4F',ch:'#2E7D4F'},sr:{bg:'#FBEFC4',br:'#A87F12',ch:'#7A5A00'},zle:{bg:'#F6D5D1',br:'#A3261E',ch:'#A3261E'},brak:{bg:'#ECEEEC',br:'#6B746E',ch:'#5B635E'}};
 const plKlasaObs=p=>p==null?'brak':p<=100?'ok':p<=110?'sr':'zle';
 const plKlasaPob=p=>p==null?'brak':(p>=97&&p<=103)?'ok':(p>=90&&p<=110)?'sr':'zle';
+// zadana dziś wobec receptury: zielony 90–110%, pomarańczowy 80–90%, czerwony poniżej 80% i ponad 110%
+const plKlasaZad=p=>p==null?'brak':(p>=90&&p<=110)?'ok':(p>=80&&p<90)?'sr':'zle';
 const plPelny=()=>poziom('plan')>=3;
 function plDP(){ return D.dp&&D.dp.grupy&&Object.keys(D.dp.grupy).length?D.dp:null; }
 function plWszystkieSektory(){ const o=[]; (D.plan.obory||[]).forEach(ob=>(ob.czesci||[]).forEach(cz=>(cz.sektory||[]).forEach(s=>o.push({ob,cz,s})))); return o; }
@@ -3486,37 +3498,63 @@ function plPobranie(sid){
 }
 function plDane(s){
   if(s.pom) return {pom:true};
-  const szt=plSzt(s), m=+s.miejsca||0, norma=+s.norma||60;
+  // legowiska: m = liczba legowisk; ściółka: m = ile sztuk mieści kojec wg normy (m² kojca ÷ m² na sztukę);
+  // ściółka bez wpisanych m² – zostaje dawna „liczba miejsc” (scioStare), aż twórca wpisze powierzchnię
+  const szt=plSzt(s), norma=+s.norma||60, scio=s.typ==='scio', m2=scio?(+s.m2||0):0, nM2=plNormaM2(s);
+  const m=scio?(m2>0?m2/nM2:(+s.miejsca||0)):(+s.miejsca||0), scioStare=scio&&!(m2>0)&&+s.miejsca>0;
+  const m2Szt=m2>0&&szt>0?m2/szt:null;
   const pO=(szt!=null&&m>0&&!s.przebudowa)?Math.round(szt/m*100):null;
   const cm=(+s.stolM>0&&szt>0)?Math.round(s.stolM*100/szt):null, stolZly=cm!=null&&cm<norma;
-  const L=plSektorDawek(s), pob=L&&!s.przebudowa?plPobranie(L.s.id):null;
-  return {szt,m,pO,cm,norma,stolZly,L,pob,pP:pob?pob.pct:null};
+  const L=plSektorDawek(s), Z=L&&!s.przebudowa?plZadDzis(L.s.id):null;
+  return {szt,m,pO,cm,norma,stolZly,L,Z,pZ:Z?Z.pct:null,scio,m2,nM2,m2Szt,scioStare};
+}
+/* Zadana dziś (TMR bez dodatków ręcznych) na sztukę realną wobec receptury grupy (z balotem „na wóz” przeliczonym na sztukę):
+   kg sektora z dzisiejszych wozów; gdy wozów na dziś jeszcze nie ułożono – kg z planu Dawek. */
+let _plZad={},_plZadW=-1;
+function plZadDzis(sid){
+  if(_plZadW!==wersja){ _plZad={}; _plZadW=wersja; }
+  if(sid in _plZad) return _plZad[sid];
+  const C=kontekstBiezacy(), s=C.sektory[sid]; if(!s) return _plZad[sid]=null;
+  const g=C.grupy[s.grupaId]; if(!g||!C.receptury[g.recepturaId]) return _plZad[sid]=null;
+  let kg=0, zWozow=false;
+  (DNI[dzis()]?.kursy||[]).forEach(k=>(k.rozdzial||[]).forEach(r=>{ if(r.sektorId===sid){ kg+=+r.kg||0; zWozow=true; } }));
+  if(!zWozow) kg=planSek(C,sid);
+  const szt=s.sztuki||0, rec=planGrupy(C,s.grupaId).recSzt, zad=szt>0?kg/szt:null;
+  return _plZad[sid]={sid,kg,szt,zad,rec,zWozow,pct:zad!=null&&rec>0?Math.round(zad/rec*100):null};
 }
 function plBudkiSzt(b){ const P=plDP(); return P&&b.dp&&b.dp.length&&b.dp.every(n=>P.grupy[n])?b.dp.reduce((a,n)=>a+(+P.grupy[n].szt||0),0):null; }
+// Obsada obory liczy się tylko z sektorów, które mają i sztuki, i wpisane miejsca (inaczej 100 szt na 10 wpisanych miejscach = 1000%)
 function plStatOb(ob,tryb){
-  let szt=0,m=0,pp=0,po=0;
-  (ob.czesci||[]).forEach(cz=>(cz.sektory||[]).forEach(s=>{ if(s.pom||s.przebudowa) return; const X=plDane(s);
-    if(X.szt!=null){ szt+=X.szt; if(X.m>0) m+=X.m; }
-    if(X.pob&&X.pob.n&&X.szt>0){ pp+=X.pob.pob*X.szt; po+=X.pob.obl*X.szt; } }));
-  const p=tryb==='pobranie'?(po>0?Math.round(pp/po*100):null):(m>0?Math.round(szt/m*100):null);
-  return {szt,m,p};
+  let szt=0,m=0,sztM=0,nS=0,nM=0,kz=0,kr=0; const byl=new Set();
+  (ob.czesci||[]).forEach(cz=>(cz.sektory||[]).forEach(s=>{ if(s.pom||s.przebudowa) return; const X=plDane(s); nS++;
+    if(X.szt!=null){ szt+=X.szt; if(X.m>0){ m+=X.m; sztM+=X.szt; nM++; } }
+    if(X.Z&&X.Z.pct!=null&&!byl.has(X.Z.sid)){ byl.add(X.Z.sid); kz+=X.Z.kg; kr+=X.Z.rec*X.Z.szt; } }));
+  const p=tryb==='pasza'?(kr>0?Math.round(kz/kr*100):null):(m>0?Math.round(sztM/m*100):null);
+  return {szt,m,sztM,nS,nM,p};
 }
 
 /* --- rysowanie planu (pionowo: dół = silosy) --- */
 function plWagaPom(cz){ const z=(cz.sektory||[]).filter(s=>!s.pom).map(s=>plSzt(s)||0); return Math.max(5,z.length?z.reduce((a,b)=>a+b,0)/z.length:10); }
+// sektor bez połączenia z Dawkami: „bez dawki” albo – gdy grupa DairyPlan jest w kilku sektorach Dawek – podpowiedź, że trzeba wybrać sektor
+function plKandydaciDawek(s){ if(!s.dp||!s.dp.length) return []; const o=[]; D.grupy.forEach(g=>g.sektory.forEach(x=>{ if(dpSektoraDawek(g,x).some(n=>s.dp.includes(n))) o.push({g,x}); })); return o; }
+function plBezDawki(s){ return plKandydaciDawek(s).length?'wybierz sektor Dawek':'bez dawki'; }
+function plMiejscaTxt(X,s,krotko){
+  if(X.scio && X.m2>0) return `${X.szt??'?'} szt · ${fmt(X.m2,0)} m²${!krotko&&X.m2Szt!=null?` · ${fmt(X.m2Szt,1)} m²/szt`:''}`;
+  if(X.scio && !X.scioStare) return `${X.szt??'?'} szt · ? m² ściółka`;
+  return `${X.szt??'?'} / ${X.m?Math.round(X.m):'?'} ${X.scio?'ściółka':'leg.'}`;
+}
 function plKafel(ob,cz,s,tryb,detal){
   if(s.pom) return `<button class="pl-pom ${UI.planSek===s.id&&detal?'wyb':''}" style="flex:${plWagaPom(cz)} 1 0" data-zawsze onclick="plKlik('${s.id}',${detal?1:0})"><b>${esc(s.nazwa||'Pomieszczenie')}</b>${s.opis?`<span>${esc(s.opis)}</span>`:''}</button>`;
-  const X=plDane(s), pob=tryb==='pobranie', p=pob?X.pP:X.pO, k=s.przebudowa?'brak':(pob?plKlasaPob(p):plKlasaObs(p)), K=PL_KOL[k];
-  const typ=s.typ==='scio'?'ściółka':'leg.';
-  const linia=s.przebudowa?`w przebudowie${X.m?` · ${X.m} miejsc`:''}`:pob?(X.pob&&X.pob.n?`${fmt(X.pob.pob,1)} / ${fmt(X.pob.obl,1)} kg`:(X.L?'brak danych':'bez dawki')):`${X.szt??'?'} / ${X.m||'?'} ${typ}`;
+  const X=plDane(s), pob=tryb==='pasza', p=pob?X.pZ:X.pO, k=s.przebudowa?'brak':(pob?plKlasaZad(p):plKlasaObs(p)), K=PL_KOL[k];
+  const linia=s.przebudowa?`w przebudowie${X.m?` · ${X.scio&&X.m2?fmt(X.m2,0)+' m²':Math.round(X.m)+' miejsc'}`:''}`:pob?(X.Z&&X.Z.zad!=null?`${fmt(X.Z.zad,1)} / ${fmt(X.Z.rec,1)} kg`:(X.L?'brak danych':plBezDawki(s))):plMiejscaTxt(X,s,!detal);
   const chip=s.przebudowa?`${X.szt||0} szt`:(p==null?(pob?'–':'?'):p+'%');
   const opis=s.opis||plNazwaDP(s);
   const w=Math.max(detal?Math.max(X.m,X.szt||0):(X.szt||0),1);
   let siatka='';
   if(detal && !s.przebudowa && X.m>0){
-    if(s.typ==='scio'){ const pr=Math.min(100,(X.szt||0)/X.m*100); siatka=`<div class="pl-scio" title="ściółka: ${X.szt||0} szt na ${X.m} miejsc"><div style="width:${pr}%"></div></div>`; }
+    if(X.scio){ const pr=Math.min(100,(X.szt||0)/X.m*100); siatka=`<div class="pl-scio" title="ściółka: ${X.szt||0} szt, kojec mieści ${Math.round(X.m)} wg normy"><div style="width:${pr}%"></div></div>`; }
     else if(X.m<=400){ const zaj=Math.min(X.szt||0,X.m); siatka=`<div class="pl-legow">${Array.from({length:X.m},(_,i)=>`<i class="${i<zaj?'z':''}"></i>`).join('')}</div>`; }
-    const nad=(X.szt||0)-X.m; if(nad>0) siatka+=`<span class="pl-nad">+${nad} ${s.typ==='scio'?'ponad miejsca':'bez legowiska'}</span>`;
+    const nad=Math.round((X.szt||0)-X.m); if(nad>0) siatka+=`<span class="pl-nad">+${nad} ${X.scio?'ponad normę powierzchni':'bez legowiska'}</span>`;
   }
   const stol=detal&&!s.przebudowa?(X.cm!=null?`<span class="${X.stolZly?'pl-stol':'pl-k-o'}">stół ${fmt(s.stolM,1)} m · ${X.cm} cm/szt · norma ${X.norma}</span>`:`<span class="pl-k-o">stół: ${s.stolM?fmt(s.stolM,1)+' m':'nie wpisano'}</span>`):(!pob&&X.stolZly?`<span class="pl-stol">STÓŁ ${X.cm} cm (min. ${X.norma})</span>`:'');
   return `<button class="pl-kafel ${detal?'det':''} ${s.przebudowa?'przeb':''} ${UI.planSek===s.id&&detal?'wyb':''}" style="flex:${w} 1 0;background:${s.przebudowa?'':K.bg};border-color:${K.br}" data-zawsze onclick="plKlik('${s.id}',${detal?1:0})" title="${esc(s.nazwa)}${opis?' – '+esc(opis):''}">
@@ -3537,62 +3575,105 @@ function plCzescPion(ob,cz,tryb){
   else w=plStol(cz,true)+kol(ss);
   return `<div class="pl-cz" style="flex:${cz.waga||1} 1 0">${w}</div>`;
 }
-function plBudkiHTML(b,pion){
-  const n=Math.max(0,Math.min(+b.miejsca||0,200)), szt=plBudkiSzt(b), zaj=Math.min(szt||0,n), p=szt!=null&&n>0?Math.round(szt/n*100):null;
-  return `<div class="pl-budki ${pion?'pion':''}" title="${esc(b.nazwa)}"><span class="pl-b-t"><b>${esc(b.nazwa)}</b> ${szt??'?'}/${n||'?'}${p!=null?` · <span class="pl-chip" style="background:${PL_KOL[plKlasaObs(p)].ch}">${p}%</span>`:''}${b.dp&&b.dp.length?` <span class="cichy">gr. ${b.dp.join('+')}</span>`:''}</span>
-    <div class="pl-b-kw">${Array.from({length:n},(_,i)=>`<i class="${i<zaj?'z':''}"></i>`).join('')}</div></div>`;
+/* --- budki dla cieląt: kafel jak sektor (kolor obsady, kwadracik = budka), karta po kliknięciu --- */
+function plBudkiDane(b){ const n=Math.max(0,Math.round(+b.miejsca||0)), szt=plBudkiSzt(b), p=szt!=null&&n>0?Math.round(szt/n*100):null;
+  return {n,szt,p,wolne:szt!=null?Math.max(0,n-szt):null,nad:szt!=null?Math.max(0,szt-n):0}; }
+function plBudkiHTML(b,pion,tryb){
+  const B=plBudkiDane(b), k=plKlasaObs(B.p), K=PL_KOL[tryb==='pasza'?'brak':k], zaj=Math.min(B.szt||0,B.n), ile=Math.min(B.n,200);
+  const stan=B.szt==null?'brak danych z DairyPlan':B.nad>0?`${B.nad} ${B.nad===1?'cielę':'cieląt'} ponad budki`:`wolne: ${B.wolne}`;
+  return `<button class="pl-budki ${pion?'pion':''}" style="background:${K.bg};border-color:${K.br}" data-zawsze onclick="plKartaBudek('${b.id}')" title="${esc(b.nazwa)} – stuknij, żeby zobaczyć kartę">
+    <span class="pl-b-t"><b>${esc(b.nazwa)}</b><span>${B.szt??'?'} / ${B.n||'?'}</span>${B.p!=null?`<span class="pl-chip" style="background:${PL_KOL[k].ch}">${B.p}%</span>`:''}${b.dp&&b.dp.length?`<span class="cichy">gr. ${b.dp.join('+')}</span>`:''}</span>
+    <span class="pl-b-kw">${Array.from({length:ile},(_,i)=>`<i class="${i<zaj?'z':''}"></i>`).join('')}</span>
+    <span class="pl-b-s ${B.nad>0?'zle':''}">${stan}</span></button>`;
+}
+// Grupy z ostatniego „Przeglądu grup”, których nie ma w żadnym sektorze ani budkach planu (i nie oznaczono „pomiń”)
+function plNieprzypisaneDP(){
+  const P=plDP(); if(!P) return [];
+  const uzyte=new Set(); plWszystkieSektory().forEach(x=>(x.s.dp||[]).forEach(n=>uzyte.add(+n))); (D.plan.budki||[]).forEach(b=>(b.dp||[]).forEach(n=>uzyte.add(+n)));
+  const pom=new Set((D.plan.pominDP||[]).map(Number));
+  return Object.entries(P.grupy).map(([nr,g])=>({...g,nr:+nr})).filter(g=>!uzyte.has(g.nr)&&!pom.has(g.nr)).sort((a,b)=>a.nr-b.nr);
+}
+function plPanelNieprzypisanych(){
+  const L=plNieprzypisaneDP(); if(!L.length) return '';
+  const pel=plPelny(), opcje=`<option value="">Przypisz do…</option>${(D.plan.budki||[]).map(b=>`<option value="b:${b.id}">budki: ${esc(b.nazwa)}</option>`).join('')}${plWszystkieSektory().filter(x=>!x.s.pom).map(x=>`<option value="s:${x.s.id}">${esc(x.ob.nazwa)}: ${esc(x.s.nazwa)}</option>`).join('')}<option value="pomin">pomiń – nie pokazuj na planie</option>`;
+  return `<div class="pl-niep"><h3>Grupy DairyPlan bez miejsca na planie</h3><span class="cichy" style="font-size:13px">są w „Przeglądzie grup”, ale nie ma ich w żadnym sektorze ani budkach – ich sztuki nie liczą się na planie</span>
+    ${L.map(g=>`<div class="pl-niep-w"><b>gr. ${g.nr}</b><span>${esc(g.nazwa||'')}</span><b>${g.szt} szt</b>${pel?`<select class="pole" aria-label="Przypisz grupę ${g.nr}" onchange="if(this.value)plPrzypiszDP(${g.nr},this.value)">${opcje}</select>`:''}</div>`).join('')}
+    ${pel?'':'<span class="cichy" style="font-size:12.5px">Przypisać może Twórca.</span>'}</div>`;
+}
+function plPrzypiszDP(nr,cel){
+  if(!plPelny()) return; nr=+nr;
+  if(cel==='pomin'){ D.plan.pominDP=[...new Set([...(D.plan.pominDP||[]).map(Number),nr])]; }
+  else if(cel.startsWith('b:')){ const b=(D.plan.budki||[]).find(x=>x.id===cel.slice(2)); if(!b) return; b.dp=[...new Set([...(b.dp||[]),nr])]; toast(`Gr. ${nr} → ${b.nazwa}`); }
+  else if(cel.startsWith('s:')){ const z=plZnajdz(cel.slice(2)); if(!z?.s) return; z.s.dp=[...new Set([...(z.s.dp||[]),nr])]; toast(`Gr. ${nr} → ${z.s.nazwa}`); }
+  plZapisz();
 }
 function plUwagi(tryb){
   const W=plWszystkieSektory().filter(x=>!x.s.pom&&!x.s.przebudowa).map(x=>({...x,X:plDane(x.s)}));
-  if(tryb==='pobranie'){
-    const a=W.filter(x=>x.X.pP!=null&&(x.X.pP<97||x.X.pP>103)).sort((a,b)=>Math.abs(b.X.pP-100)-Math.abs(a.X.pP-100));
-    return {lista:a.map(x=>({x,p:x.X.pP,k:plKlasaPob(x.X.pP),opis:`pobrano ${fmt(x.X.pob.pob,1)} z ${fmt(x.X.pob.obl,1)} kg/szt · niedojady ${x.X.pob.nd!=null?fmt(x.X.pob.nd,1)+'%':'–'}`})),stol:[],W};
+  if(tryb==='pasza'){
+    const a=W.filter(x=>x.X.pZ!=null&&(x.X.pZ<90||x.X.pZ>110)).sort((a,b)=>Math.abs(b.X.pZ-100)-Math.abs(a.X.pZ-100));
+    return {lista:a.map(x=>({id:x.s.id,nazwa:x.s.nazwa,ob:x.ob.nazwa,p:x.X.pZ,k:plKlasaZad(x.X.pZ),opis:`zadano ${fmt(x.X.Z.zad,1)} z ${fmt(x.X.Z.rec,1)} kg/szt receptury${x.X.Z.zWozow?'':' · wg planu (wozy na dziś nieułożone)'}`})),stol:[],W};
   }
-  const a=W.filter(x=>x.X.pO!=null&&x.X.pO>100).sort((a,b)=>b.X.pO-a.X.pO);
-  return {lista:a.map(x=>({x,p:x.X.pO,k:plKlasaObs(x.X.pO),opis:`${x.X.szt} szt na ${x.X.m} miejscach · ${x.X.szt-x.X.m} ponad miejsca`})),stol:W.filter(x=>x.X.stolZly),W};
+  const a=W.filter(x=>x.X.pO!=null&&x.X.pO>100).map(x=>({id:x.s.id,nazwa:x.s.nazwa,ob:x.ob.nazwa,p:x.X.pO,k:plKlasaObs(x.X.pO),
+    opis:x.X.scio&&x.X.m2>0?`${x.X.szt} szt na ${fmt(x.X.m2,0)} m² · ${fmt(x.X.m2Szt,1)} m²/szt (norma ${fmtIn(x.X.nM2,1)})`:`${x.X.szt} szt na ${Math.round(x.X.m)} miejscach · ${Math.round(x.X.szt-x.X.m)} ponad miejsca`}));
+  (D.plan.budki||[]).forEach(b=>{ const B=plBudkiDane(b); if(B.p!=null&&B.p>100) a.push({budki:true,id:b.id,nazwa:b.nazwa,ob:'budki',p:B.p,k:plKlasaObs(B.p),opis:`${B.szt} cieląt na ${B.n} budkach · ${B.nad} ponad`}); });
+  a.sort((x,y)=>y.p-x.p);
+  return {lista:a,stol:W.filter(x=>x.X.stolZly),W};
 }
 R.plan=()=>{
   if(!D.plan||!Array.isArray(D.plan.obory)) D.plan=normalizujModul('plan',D.plan);
   if(UI.planOb && plZnajdz(UI.planOb)?.ob) return plDetal();
   UI.planOb=null;
-  const tryb=UI.planTryb||'obsada', pob=tryb==='pobranie', P=plDP(), pel=plPelny();
+  const tryb=plTryb(), pob=tryb==='pasza', P=plDP(), pel=plPelny();
   const U=plUwagi(tryb), W=U.W, budki=D.plan.budki||[];
-  const zP=W.filter(x=>x.X.pob&&x.X.pob.n&&x.X.szt>0);
-  const wazP=zP.reduce((a,x)=>a+x.X.pob.pob*x.X.szt,0)/Math.max(1e-9,zP.reduce((a,x)=>a+x.X.pob.obl*x.X.szt,0));
-  const ndKg=zP.reduce((a,x)=>a+(x.X.pob.nd||0)*x.X.szt,0)/Math.max(1,zP.reduce((a,x)=>a+x.X.szt,0));
+  // pasza: średnia ważona sztukami (sektor Dawek wspólny dla kilku sektorów planu liczony raz)
+  const byl=new Set(); let kz=0,kr=0; W.forEach(x=>{ const Z=x.X.Z; if(Z&&Z.pct!=null&&!byl.has(Z.sid)){ byl.add(Z.sid); kz+=Z.kg; kr+=Z.rec*Z.szt; } });
+  const zZ=W.filter(x=>x.X.pZ!=null);
   const sumSzt=W.reduce((a,x)=>a+(x.X.szt||0),0)+budki.reduce((a,b)=>a+(plBudkiSzt(b)||0),0);
-  const sumM=W.reduce((a,x)=>a+(x.X.m||0),0)+budki.reduce((a,b)=>a+(+b.miejsca||0),0);
-  const licz=pob?[['Pobranie – średnio 7 dni',zP.length?Math.round(wazP*100)+'% planu':'brak danych',''],['Niedojady – średnio',zP.length?fmt(ndKg,1)+'% zadanej':'–',''],['Poniżej 90% planu',W.filter(x=>x.X.pP!=null&&x.X.pP<90).length,'zle'],['Poza 97–103% planu',U.lista.length,'sr']]
-    :[['Sztuk na planie',sumSzt,''],['Miejsc (wpisanych)',sumM||'–',''],['Przepełnione sektory',W.filter(x=>x.X.pO!=null&&x.X.pO>110).length,'zle'],['Za krótki stół paszowy',U.stol.length,'sr']];
-  const leg=pob?[['ok','97–103% planu'],['sr','90–97% lub 103–110%'],['zle','poniżej 90% lub ponad 110%'],['brak','bez dawki / brak danych']]:[['ok','do 100% miejsc'],['sr','100–110%'],['zle','ponad 110%'],['brak','brak danych / przebudowa']];
+  const sumM=Math.round(W.reduce((a,x)=>a+(x.X.m||0),0)+budki.reduce((a,b)=>a+(+b.miejsca||0),0));
+  const bezD=W.filter(x=>!x.X.L&&(x.X.szt||0)>0), bezDSzt=bezD.reduce((a,x)=>a+x.X.szt,0)+budki.reduce((a,b)=>a+(plBudkiSzt(b)||0),0);
+  const licz=pob?[['Zadana dziś – średnio',kr>0?Math.round(kz/kr*100)+'% receptury':'brak danych',''],['Poniżej 80%',zZ.filter(x=>x.X.pZ<80).length,'zle'],['80–90%',zZ.filter(x=>x.X.pZ>=80&&x.X.pZ<90).length,'sr'],['Ponad 110%',zZ.filter(x=>x.X.pZ>110).length,'zle']]
+    :[['Sztuk na planie',sumSzt,''],['Miejsc (wpisanych)',sumM||'–',''],['Przepełnione',U.lista.filter(u=>u.p>110).length,'zle'],['Za krótki stół paszowy',U.stol.length,'sr']];
+  const leg=pob?[['ok','90–110% receptury'],['sr','80–90%'],['zle','poniżej 80% lub ponad 110%'],['brak','bez dawki / brak danych']]:[['ok','do 100% miejsc'],['sr','100–110%'],['zle','ponad 110%'],['brak','brak danych / przebudowa']];
   const obory=(D.plan.obory||[]).map(ob=>{
-    const st=plStatOb(ob,tryb), k=pob?plKlasaPob(st.p):plKlasaObs(st.p), b=budki.filter(x=>x.gdzie===ob.id);
+    const st=plStatOb(ob,tryb), k=pob?plKlasaZad(st.p):plKlasaObs(st.p), b=budki.filter(x=>x.gdzie===ob.id);
     return `<div class="pl-ob-wrap"><div class="pl-ob">
       <button class="pl-ob-nag" data-zawsze onclick="plOtworzOb('${ob.id}')" title="Szczegóły obory${pel?', miejsca i stół':''}"><b>${esc(ob.nazwa)}</b>${st.p!=null?`<span class="pl-chip" style="background:${PL_KOL[k].ch}">${st.p}%</span>`:''}<span class="pl-strz">›</span></button>
-      <span class="pl-ob-op">${ob.opis?esc(ob.opis)+' · ':''}${st.szt} szt${st.m?` / ${st.m} miejsc`:''}</span>
+      <span class="pl-ob-op">${ob.opis?esc(ob.opis)+' · ':''}${plOpisObsady(st)}</span>
       <div class="pl-ob-bud">${(ob.czesci||[]).map(cz=>plCzescPion(ob,cz,tryb)).join('')||'<span class="pl-puste">pusta obora</span>'}</div></div>
-      ${b.map(x=>plBudkiHTML(x,true)).join('')}</div>`;
+      ${b.map(x=>plBudkiHTML(x,true,tryb)).join('')}</div>`;
   }).join('');
   const silos=budki.filter(x=>x.gdzie==='silos'||!(D.plan.obory||[]).some(o=>o.id===x.gdzie));
+  const dniDP=P?Math.round((new Date(dzis())-new Date(P.data))/864e5):0;
+  const pusto=pob?(zZ.length?'Wszystkie sektory z dawką w normie (90–110% receptury).':'Żaden sektor planu nie jest połączony z sektorem w Dawkach.')
+    :(W.some(x=>x.X.pO!=null)?'Brak przepełnionych sektorów i budek.':'Nie wpisano jeszcze miejsc ani m² – obsady nie da się policzyć.');
   return `<div class="pl-gora">
       <h2 class="pl-tyt">Plan fermy</h2>
-      <span class="cichy">${P?`sztuki z DairyPlan z ${dataPL(P.data)}${P.ts?', '+new Date(P.ts).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):''}`:'sztuki z Dawek – nie wgrano jeszcze DairyPlan'}</span>
-      <span class="pl-przel" data-zawsze><span>Kolor pokazuje:</span><span class="przel duzy">${[['obsada','Obsada'],['pobranie','Pobranie paszy']].map(([k,t])=>`<button class="${tryb===k?'akt':''}" onclick="UI.planTryb='${k}';render()">${t}</button>`).join('')}</span></span>
+      <span class="${P&&dniDP>7?'pl-stare':'cichy'}">${P?`sztuki z DairyPlan z ${dataPL(P.data)}${P.ts?', '+new Date(P.ts).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):''}${dniDP>7?` – ${dniDP} dni temu, zaktualizuj sztuki`:''}`:'sztuki z Dawek – nie wgrano jeszcze DairyPlan'}</span>
+      <span class="pl-przel" data-zawsze><span>Kolor pokazuje:</span><span class="przel duzy">${PL_TRYBY.map(([k,t])=>`<button class="${tryb===k?'akt':''}" onclick="UI.planTryb='${k}';render()">${t}</button>`).join('')}</span></span>
       <span class="pl-akcje">${poziom('dawki')>=2?`<button class="btn" data-zawsze onclick="modalDP()">⇩ Sztuki z DairyPlan</button>`:''}${pel?`<button class="btn" onclick="plModalBudki()">Budki…</button><button class="btn" onclick="plNowaObora()">+ Obora</button>`:''}<button class="btn glowny" data-zawsze onclick="plDrukuj()">Drukuj plan</button></span></div>
     ${!P?`<div class="baner info"><span>Nie wgrano jeszcze „Przeglądu grup” z DairyPlan – sztuki biorę z Dawek, a cielęta i jałówki bez dawki są bez liczby. ${poziom('dawki')>=2?'Użyj przycisku „Sztuki z DairyPlan”.':''}</span></div>`:''}
     <div class="pl-liczniki">${licz.map(([t,v,k])=>`<div class="pl-licz ${k}"><span>${t}</span><b>${v}</b></div>`).join('')}
       <div class="pl-leg">${leg.map(([k,t])=>`<span><i style="background:${PL_KOL[k].bg};border-color:${PL_KOL[k].br}"></i>${t}</span>`).join('')}${pob?'':'<span><em class="pl-stol">STÓŁ</em>za mało cm na sztukę</span>'}</div></div>
     <div class="pl-uklad">
       <div class="panel pl-mapa"><div class="pl-obory">${obory||'<div class="pusto"><b>Plan jest pusty</b>Dodaj oborę przyciskiem „+ Obora”.</div>'}</div>
-        ${silos.map(x=>plBudkiHTML(x,false)).join('')}
+        <div class="pl-silos-rz">${silos.map(x=>plBudkiHTML(x,false,tryb)).join('')}</div>
         <div class="pl-silosy">SILOSY PASZOWE</div>
-        <span class="cichy" style="font-size:13px">Obory w jednej skali – wielkość sektora = ile w nim sztuk. Stuknij sektor – karta sektora. Stuknij nazwę obory – szczegóły${pel?', miejsca i stół':''}.</span></div>
-      <div class="panel pl-boczny"><h3>Do uwagi</h3><span class="cichy" style="font-size:13px">${pob?'pobranie najdalej od planu (7 dni)':'od najbardziej przepełnionych'}</span>
-        ${U.lista.map(u=>`<button class="pl-uw" data-zawsze onclick="plKarta('${u.x.s.id}')"><span class="pl-chip" style="background:${PL_KOL[u.k].ch}">${u.p}%</span><span><b>${esc(u.x.s.nazwa)} · ${esc(u.x.ob.nazwa)}</b><small>${u.opis}</small></span></button>`).join('')||`<span class="cichy">${pob?'Brak danych o pobraniu albo wszystko w normie.':'Brak przepełnionych sektorów (albo nie wpisano miejsc).'}</span>`}
-        ${!pob?`<h3 style="margin-top:8px">Stół paszowy za krótki</h3>${U.stol.map(x=>`<div class="pl-st-w"><span>${esc(x.s.nazwa)} · ${esc(x.ob.nazwa)}</span><b>${x.X.cm} cm <small>/ min. ${x.X.norma}</small></b></div>`).join('')||'<span class="cichy">Brak – albo nie wpisano metrów stołu.</span>'}`:''}
-        <span class="cichy pl-stopka">${pob?'Pobranie = zadana z wozów − niedojady zebrane następnego dnia, średnio z 7 ostatnich dni (bez dziś), na sztukę realną. Plan = dawka obliczona z Dawek.':'Normy stołu: dojne 60 cm, fresh i okołoporodowe 75 cm, jałówki 45 cm na sztukę. Ściółka = leżą na słomie, miejsca = ile sztuk mieści kojec.'}</span></div>
+        <span class="cichy" style="font-size:13px">Obory w jednej skali – wielkość sektora = ile w nim sztuk. Stuknij sektor albo budki – karta. Stuknij nazwę obory – szczegóły${pel?', miejsca i stół':''}.</span></div>
+      <div class="panel pl-boczny"><h3>Do uwagi</h3><span class="cichy" style="font-size:13px">${pob?'zadana dziś najdalej od receptury':'od najbardziej przepełnionych'}</span>
+        ${U.lista.map(u=>`<button class="pl-uw" data-zawsze onclick="${u.budki?`plKartaBudek('${u.id}')`:`plKarta('${u.id}')`}"><span class="pl-chip" style="background:${PL_KOL[u.k].ch}">${u.p}%</span><span><b>${esc(u.nazwa)} · ${esc(u.ob)}</b><small>${u.opis}</small></span></button>`).join('')||`<span class="cichy">${pusto}</span>`}
+        ${!pob?`<h3 style="margin-top:8px">Stół paszowy za krótki</h3>${U.stol.map(x=>`<div class="pl-st-w"><span>${esc(x.s.nazwa)} · ${esc(x.ob.nazwa)}</span><b>${x.X.cm} cm <small>/ min. ${x.X.norma}</small></b></div>`).join('')||'<span class="cichy">Brak – albo nie wpisano metrów stołu.</span>'}`
+          :(bezDSzt>0?`<h3 style="margin-top:8px">Bez dawki w aplikacji · ${bezDSzt} szt</h3><span class="cichy" style="font-size:13px">tych zwierząt nie liczą Dawki ani wozy: ${[...bezD.map(x=>`${esc(x.s.nazwa)} (${x.X.szt})`),...budki.filter(b=>plBudkiSzt(b)>0).map(b=>`${esc(b.nazwa)} (${plBudkiSzt(b)})`)].join(', ')}</span>`:'')}
+        ${plPanelNieprzypisanych()}
+        <span class="cichy pl-stopka">${pob?'Zadana dziś = kg TMR z dzisiejszych wozów (bez dodatków ręcznych) na sztukę realną; gdy wozów jeszcze nie ułożono – kg z planu Dawek. Porównanie z recepturą grupy (z balotem przeliczonym na sztukę). Pobranie z 7 dni – w karcie sektora.':'Normy stołu: dojne 60 cm, fresh i okołoporodowe 75 cm, jałówki 45 cm na sztukę. Ściółka: obsada = sztuki × norma m² ÷ powierzchnia kojca. Budki: cielęta ÷ budki.'}</span></div>
     </div>`;
 };
+const PL_TRYBY=[['pasza','Zadana pasza dziś'],['obsada','Obsada']];
+// domyślnie widok paszy; stary zapisany wybór „pobranie” = „pasza”
+function plTryb(){ const t=UI.planTryb; return t==='obsada'?'obsada':'pasza'; }
+function plOpisObsady(st){
+  if(!st.m) return `${st.szt} szt`;
+  return `${st.szt} szt · obsada: ${st.sztM} szt / ${Math.round(st.m)} miejsc${st.nM<st.nS?` (wpisane w ${st.nM} z ${st.nS} sektorów)`:''}`;
+}
 function plKlik(id,detal){
   const z=plZnajdz(id); if(!z) return;
   if(detal && plPelny()){ UI.planSek=id; UI.planCz=z.cz.id; render(); return; }
@@ -3602,21 +3683,24 @@ function plKlik(id,detal){
 function plOtworzOb(id){ UI.planOb=id; UI.planSek=null; UI.planCz=null; render(); window.scrollTo({top:0}); }
 
 /* --- szczegóły obory (poziomo: lewa strona = dół planu) + edycja (pełny) --- */
+// waga części w widoku poziomym: części ze zwierzętami – wg miejsc/sztuk; pomieszczenia – stała szerokość 200 px × „wielkość”
+function plWagaCzPoz(cz){ return Math.max(1,(cz.sektory||[]).reduce((a,s)=>a+Math.max(+plDane(s).m||0,plSzt(s)||0,s.pom?10:1),0)); }
 function plCzescPoz(ob,cz,i,tryb){
   const wyb=UI.planCz===cz.id&&!UI.planSek, pel=plPelny();
   const nag=`<button class="pl-cz-nag ${wyb?'wyb':''}" ${pel?`onclick="UI.planCz='${cz.id}';UI.planSek=null;render()"`:'data-zawsze'}>część ${i+1}${i===0?' (dół planu)':''}${cz.typ==='pom'?' · pomieszczenia':''}</button>`;
-  if(cz.typ==='pom') return `<div class="pl-czp" style="flex:${cz.waga||1} 1 0">${nag}<div class="pl-cz-pom duzy"><b>${esc(cz.nazwa||'Pomieszczenia')}</b>${cz.opis?`<span>${esc(cz.opis)}</span>`:''}</div></div>`;
+  if(cz.typ==='pom') return `<div class="pl-czp" style="flex:0 0 ${200*(cz.waga||1)}px">${nag}<div class="pl-cz-pom duzy"><b>${esc(cz.nazwa||'Pomieszczenia')}</b>${cz.opis?`<span>${esc(cz.opis)}</span>`:''}</div></div>`;
   const ss=cz.sektory||[], rz=a=>`<div class="pl-rz">${a.map(s=>plKafel(ob,cz,s,tryb,true)).join('')||'<span class="pl-puste">brak sektorów</span>'}</div>`;
   let w;
   if(cz.stol==='srodek') w=rz(ss.filter(s=>s.strona!=='P'))+plStol(cz,false)+rz(ss.filter(s=>s.strona==='P'));
   else if(cz.stol==='prawo') w=rz(ss)+plStol(cz,false);
   else if(cz.stol==='brak') w=rz(ss);
   else w=plStol(cz,false)+rz(ss);
-  const wagaS=Math.max(1,ss.reduce((a,s)=>a+Math.max(+s.miejsca||0,plSzt(s)||0,s.pom?10:1),0));
-  return `<div class="pl-czp" style="flex:${wagaS} 1 0">${nag}<div class="pl-cz-poz">${w}</div></div>`;
+  // tyle szerokości, żeby żaden kafel nie był ucięty (rząd z największą liczbą sektorów × ~116 px); w razie potrzeby widok przewija się w bok
+  const nRz=Math.max(1,...(cz.stol==='srodek'?[ss.filter(s=>s.strona!=='P').length,ss.filter(s=>s.strona==='P').length]:[ss.length]));
+  return `<div class="pl-czp" style="flex:${plWagaCzPoz(cz)} 1 0;min-width:${nRz*116+14}px">${nag}<div class="pl-cz-poz">${w}</div></div>`;
 }
 function plDetal(){
-  const ob=plZnajdz(UI.planOb).ob, tryb=UI.planTryb||'obsada', pel=plPelny(), st=plStatOb(ob,'obsada'), stP=plStatOb(ob,'pobranie');
+  const ob=plZnajdz(UI.planOb).ob, tryb=plTryb(), pel=plPelny(), st=plStatOb(ob,'obsada'), stP=plStatOb(ob,'pasza');
   const stolM=(ob.czesci||[]).reduce((a,cz)=>a+(cz.sektory||[]).reduce((b,s)=>b+(+s.stolM||0),0),0);
   let panel='';
   if(pel){
@@ -3625,11 +3709,11 @@ function plDetal(){
   }
   return `<div class="pl-gora"><button class="btn" data-zawsze onclick="UI.planOb=null;UI.planSek=null;UI.planCz=null;render()">← Cała ferma</button>
       <h2 class="pl-tyt">${esc(ob.nazwa)}${ob.opis?` · <span style="font-weight:500">${esc(ob.opis)}</span>`:''}</h2>
-      ${st.p!=null?`<span class="pl-chip duzy" style="background:${PL_KOL[plKlasaObs(st.p)].ch}">obsada ${st.p}%</span>`:''}${stP.p!=null?`<span class="pl-chip duzy" style="background:${PL_KOL[plKlasaPob(stP.p)].ch}">pobranie ${stP.p}%</span>`:''}
-      <span class="cichy">${st.szt} szt${st.m?` na ${st.m} miejscach`:''}${stolM?` · stół ${fmt(stolM,1)} m`:''} · widok poziomy: lewa strona = dół planu</span>
-      <span class="pl-akcje"><span class="przel duzy" data-zawsze>${[['obsada','Obsada'],['pobranie','Pobranie']].map(([k,t])=>`<button class="${tryb===k?'akt':''}" onclick="UI.planTryb='${k}';render()">${t}</button>`).join('')}</span></span></div>
+      ${st.p!=null?`<span class="pl-chip duzy" style="background:${PL_KOL[plKlasaObs(st.p)].ch}">obsada ${st.p}%</span>`:''}${stP.p!=null?`<span class="pl-chip duzy" style="background:${PL_KOL[plKlasaZad(stP.p)].ch}">pasza dziś ${stP.p}%</span>`:''}
+      <span class="cichy">${plOpisObsady(st)}${stolM?` · stół ${fmt(stolM,1)} m`:''} · widok poziomy: lewa strona = dół planu</span>
+      <span class="pl-akcje"><span class="przel duzy" data-zawsze>${PL_TRYBY.map(([k,t])=>`<button class="${tryb===k?'akt':''}" onclick="UI.planTryb='${k}';render()">${t}</button>`).join('')}</span></span></div>
     <div class="pl-uklad"><div class="panel pl-det-wrap"><div class="przewin"><div class="pl-det">${(ob.czesci||[]).map((cz,i)=>plCzescPoz(ob,cz,i,tryb)).join('')||'<span class="pl-puste">Obora nie ma jeszcze części – dodaj ją w panelu obok.</span>'}</div></div>
-      <span class="cichy" style="font-size:13px">${pel?'Stuknij sektor albo „część”, żeby ją ustawić. ':'Stuknij sektor – karta sektora. '}Legowiska: kwadracik = jedno miejsce (zielony zajęte, biały wolne). Ściółka: pasek = zapełnienie kojca.</span></div>${panel}</div>`;
+      <span class="cichy" style="font-size:13px">${pel?'Stuknij sektor albo „część”, żeby ją ustawić. ':'Stuknij sektor – karta sektora. '}Legowiska: kwadracik = jedno miejsce (zielony zajęte, biały wolne). Ściółka: pasek = zapełnienie kojca wg normy m² na sztukę.</span></div>${panel}</div>`;
 }
 const plIn=(lab,id,val,on,opc='')=>`<div><label class="et" for="${id}">${lab}</label><input class="pole szer" id="${id}" data-fid="${id}" value="${esc(val??'')}" onchange="${on}" ${opc}></div>`;
 function plFormOb(ob){
@@ -3663,15 +3747,19 @@ function plFormSek(z){
     ${cz.stol==='srodek'?`<div><label class="et">Strona stołu</label><span class="przel duzy">${b('po lewej',s.strona!=='P',`plUstawSek('${s.id}','strona','L')`)}${b('po prawej',s.strona==='P',`plUstawSek('${s.id}','strona','P')`)}</span></div>`:''}${nav}${stopka}`;
   const L=X.L, dawki=D.grupy.flatMap(g=>g.sektory.map(x=>({g,x})));
   const wynik=s.przebudowa?'<div class="baner info"><span>W przebudowie – sektor nie liczy się do obsady.</span></div>'
-    :`<div class="pl-wynik ${X.pO!=null&&X.pO>110||X.stolZly?'zle':X.pO!=null&&X.pO>100?'sr':''}">${X.pO!=null?`<span><b>${X.pO}% miejsc</b>${X.szt>X.m?` – ${X.szt-X.m} szt ponad miejsca`:` – wolnych ${X.m-X.szt}`}</span>`:'<span>Wpisz liczbę miejsc, żeby policzyć obsadę.</span>'}
+    :`<div class="pl-wynik ${X.pO!=null&&X.pO>110||X.stolZly?'zle':X.pO!=null&&X.pO>100?'sr':''}">${X.pO==null?`<span>${X.scio?'Wpisz powierzchnię kojca (m²), żeby policzyć obsadę.':'Wpisz liczbę miejsc, żeby policzyć obsadę.'}</span>`
+        :X.scio&&X.m2>0?`<span><b>${X.pO}% normy powierzchni</b> – ${X.szt} szt na ${fmt(X.m2,0)} m² = <b>${fmt(X.m2Szt,1)} m²/szt</b> (norma ${fmtIn(X.nM2,1)}; kojec mieści ${Math.floor(X.m)} szt)</span>`
+        :`<span><b>${X.pO}% miejsc</b>${X.szt>X.m?` – ${Math.round(X.szt-X.m)} szt ponad miejsca`:` – wolnych ${Math.round(X.m-X.szt)}`}${X.scioStare?' (dawna liczba miejsc – wpisz m² kojca)':''}</span>`}
       ${X.cm!=null?`<span><b>${X.cm} cm stołu na sztukę</b>${X.stolZly?` – brakuje ${X.norma-X.cm} cm do normy (przy ${X.szt} szt potrzeba ${fmt(X.szt*X.norma/100,1)} m)`:' – w normie'}</span>`:'<span>Wpisz metry stołu, żeby policzyć cm na sztukę.</span>'}</div>`;
   return `<h3>Sektor ${esc(s.nazwa)}</h3><span class="cichy">zmiany zapisują się od razu</span>
     <div class="pl-2">${plIn('Nazwa na planie','pls_n',s.nazwa,`plUstawSek('${s.id}','nazwa',this.value)`)}${plIn('Opis','pls_o',s.opis,`plUstawSek('${s.id}','opis',this.value)`,`placeholder="${esc(plNazwaDP(s))}"`)}</div>
     <div class="pl-2">${plIn('Grupy DairyPlan','pls_dp',(s.dp||[]).join('+'),`plUstawSek('${s.id}','dp',this.value)`,'placeholder="np. 22+23"')}
       <div><label class="et" for="pls_dw">Sektor w Dawkach</label><select class="pole szer" id="pls_dw" onchange="plUstawSek('${s.id}','sektorId',this.value)"><option value="">${!s.sektorId&&L?'auto: '+esc(L.g.nazwa+' – '+L.s.nazwa):'— automatycznie —'}</option>${dawki.map(({g,x})=>`<option value="${x.id}" ${s.sektorId===x.id?'selected':''}>${esc(g.nazwa+' – '+x.nazwa)}</option>`).join('')}</select></div></div>
     <span class="cichy" style="font-size:12.5px;margin-top:-6px">${s.dp&&s.dp.length?(P?(s.dp.every(n=>P.grupy[n])?`Sztuki z DairyPlan: <b>${X.szt}</b> (${esc(plNazwaDP(s))})`:`Brak w DairyPlan: ${s.dp.filter(n=>!P.grupy[n]).join(', ')}${L&&X.szt!=null?` – sztuki z Dawek: ${X.szt}`:''}`):`DairyPlan nie wgrany${L&&X.szt!=null?` – sztuki z Dawek: ${X.szt}`:''}`):(L&&X.szt!=null?`Sztuki z Dawek: ${X.szt}`:'Wpisz grupę DairyPlan albo wybierz sektor w Dawkach')} ${L?'· pobranie paszy z: '+esc(L.s.nazwa):''}</span>
-    <div><label class="et">Rodzaj miejsc</label><span class="przel duzy">${b('legowiska',s.typ!=='scio',`plUstawSek('${s.id}','typ','leg')`)}${b('ściółka',s.typ==='scio',`plUstawSek('${s.id}','typ','scio')`)}</span>${s.typ==='scio'?'<div class="cichy" style="font-size:12.5px">ściółka = leżą na słomie bez legowisk; miejsca = ile sztuk mieści kojec</div>':''}</div>
-    <div class="pl-2">${plIn('Liczba miejsc','pls_m',s.miejsca,`plUstawSek('${s.id}','miejsca',this.value)`,'inputmode="numeric"')}${plIn('Stół paszowy (m)','pls_st',s.stolM!=null?fmtIn(s.stolM,1):'',`plUstawSek('${s.id}','stolM',this.value)`,'inputmode="decimal"')}</div>
+    <div><label class="et">Rodzaj miejsc</label><span class="przel duzy">${b('legowiska',s.typ!=='scio',`plUstawSek('${s.id}','typ','leg')`)}${b('ściółka',s.typ==='scio',`plUstawSek('${s.id}','typ','scio')`)}</span><div class="cichy" style="font-size:12.5px">${s.typ==='scio'?'ściółka = kojec na słomie bez legowisk – wpisz powierzchnię kojca w m²':'legowiska = wydzielone miejsca do leżenia – wpisz ich liczbę'}</div></div>
+    <div class="pl-2">${s.typ==='scio'?plIn('Powierzchnia kojca (m²)','pls_m2',+s.m2>0?fmtIn(s.m2,1):'',`plUstawSek('${s.id}','m2',this.value)`,`inputmode="decimal" ${X.scioStare?`placeholder="dawniej ${s.miejsca} miejsc"`:''}`)
+      :plIn('Liczba legowisk','pls_m',s.miejsca,`plUstawSek('${s.id}','miejsca',this.value)`,'inputmode="numeric"')}${plIn('Stół paszowy (m)','pls_st',s.stolM!=null?fmtIn(s.stolM,1):'',`plUstawSek('${s.id}','stolM',this.value)`,'inputmode="decimal"')}</div>
+    ${s.typ==='scio'?`<div><label class="et">Norma powierzchni na sztukę</label><div class="pl-rzad">${PL_NORMY_M2.map(([v,t])=>`<button class="btn ${X.nM2===v?'glowny':''}" onclick="plUstawSek('${s.id}','normaM2',${v})">${t}</button>`).join('')}<span style="white-space:nowrap"><input class="pole krotkie num" data-fid="pls_nm2" value="${fmtIn(X.nM2,1)}" inputmode="decimal" onchange="plUstawSek('${s.id}','normaM2',this.value)" aria-label="Norma m² na sztukę"> m²</span></div></div>`:''}
     <div><label class="et">Norma stołu na sztukę</label><div class="pl-rzad">${PL_NORMY.map(([v,t])=>`<button class="btn ${+s.norma===v?'glowny':''}" onclick="plUstawSek('${s.id}','norma',${v})">${t}</button>`).join('')}<input class="pole krotkie num" data-fid="pls_nr" value="${s.norma??60}" inputmode="numeric" onchange="plUstawSek('${s.id}','norma',this.value)" aria-label="Norma cm na sztukę"> cm</div></div>
     ${cz.stol==='srodek'?`<div><label class="et">Strona stołu</label><span class="przel duzy">${b('po lewej',s.strona!=='P',`plUstawSek('${s.id}','strona','L')`)}${b('po prawej',s.strona==='P',`plUstawSek('${s.id}','strona','P')`)}</span></div>`:''}
     <label class="cichy" style="display:flex;gap:6px;align-items:center"><input type="checkbox" ${s.przebudowa?'checked':''} onchange="plUstawSek('${s.id}','przebudowa',this.checked)"> w przebudowie (nie liczy się do obsady)</label>
@@ -3691,6 +3779,8 @@ function plUstawSek(id,pole,v){
   else if(pole==='miejsca'){ const t=String(v).trim(); if(t===''){ s.miejsca=null; } else { const n=Math.round(liczba(t,-1)); if(n<0){ toast('Liczba miejsc: wpisz liczbę','zly'); render(); return; } s.miejsca=n; } }
   else if(pole==='stolM'){ const t=String(v).trim(); if(t===''){ s.stolM=null; } else { const n=liczba(t,-1); if(n<0){ toast('Stół: wpisz metry','zly'); render(); return; } s.stolM=Math.round(n*10)/10; } }
   else if(pole==='norma'){ const n=Math.round(liczba(String(v),-1)); if(!(n>0)){ toast('Norma: wpisz cm na sztukę','zly'); render(); return; } s.norma=n; }
+  else if(pole==='m2'){ const t=String(v).trim(); if(t===''){ s.m2=null; } else { const n=liczba(t,-1); if(!(n>0)){ toast('Powierzchnia: wpisz m² kojca','zly'); render(); return; } s.m2=Math.round(n*10)/10; } }
+  else if(pole==='normaM2'){ const n=liczba(String(v),-1); if(!(n>0)||n>50){ toast('Norma: wpisz m² na sztukę','zly'); render(); return; } s.normaM2=Math.round(n*10)/10; }
   else s[pole]=typeof v==='string'?v.trim():v;
   plZapisz();
 }
@@ -3716,24 +3806,65 @@ function plModalBudki(){
     <button class="btn ikona usun" onclick="plUsunBudki('${b.id}')" aria-label="Usuń">✕</button></div>`).join('');
   modal('Budki dla cieląt',`<p class="cichy" style="margin:0">Każdy wiersz to grupa budek. Sztuki biorą się z grup DairyPlan. Zmiany zapisują się od razu.</p><div id="pl-budki-lista" class="pl-budki-lista">${wiersze||'<span class="cichy">Brak budek.</span>'}</div><div><button class="btn" onclick="plDodajBudki()">+ Budki</button></div>`,[{t:'Gotowe',k:'glowny'}]);
 }
-function plUstawBudki(id,pole,v){ const b=(D.plan.budki||[]).find(x=>x.id===id); if(!b) return; if(pole==='dp') b.dp=numeryDP(v); else if(pole==='miejsca') b.miejsca=Math.max(0,Math.round(liczba(v))); else b[pole]=String(v).trim(); saveModule('plan'); }
-function plDodajBudki(){ D.plan.budki.push({id:uid('pl'),nazwa:'Budki',gdzie:'silos',miejsca:20,dp:[]}); saveModule('plan'); plModalBudki(); render(); }
-function plUsunBudki(id){ D.plan.budki=D.plan.budki.filter(x=>x.id!==id); saveModule('plan'); plModalBudki(); render(); }
+function plUstawBudki(id,pole,v,karta){ if(!plPelny()) return; const b=(D.plan.budki||[]).find(x=>x.id===id); if(!b) return;
+  if(pole==='dp') b.dp=numeryDP(v);
+  else if(pole==='miejsca') b.miejsca=Math.max(0,Math.round(liczba(v)));
+  else if(pole==='nazwa'){ v=String(v).trim(); if(!v){ toast('Nazwa nie może być pusta','zly'); if(karta) plKartaBudek(id); return; } b.nazwa=v; }
+  else b[pole]=String(v).trim();
+  saveModule('plan'); render(); if(karta) plKartaBudek(id); }
+function plDodajBudki(){ if(!plPelny()) return; D.plan.budki.push({id:uid('pl'),nazwa:'Budki',gdzie:'silos',miejsca:20,dp:[]}); saveModule('plan'); plModalBudki(); render(); }
+function plUsunBudki(id,karta){ if(!plPelny()) return; const b=(D.plan.budki||[]).find(x=>x.id===id); if(karta&&!confirm(`Usunąć „${b?.nazwa||'budki'}” z planu?`)) return;
+  D.plan.budki=D.plan.budki.filter(x=>x.id!==id); saveModule('plan'); render(); if(karta) zamknijModal(); else plModalBudki(); }
+// kolejność budek w tym samym miejscu (np. kilka rzędów przy silosach)
+function plPrzesunBudki(id,dir){ if(!plPelny()) return; const a=D.plan.budki, b=a.find(x=>x.id===id); if(!b) return;
+  const tu=a.filter(x=>x.gdzie===b.gdzie), i=tu.indexOf(b), c=tu[i+dir]; if(!c) return;
+  const ia=a.indexOf(b), ic=a.indexOf(c); [a[ia],a[ic]]=[a[ic],a[ia]]; saveModule('plan'); render(); plKartaBudek(id); }
+/* --- karta budek --- */
+function plKartaBudek(id){
+  const b=(D.plan.budki||[]).find(x=>x.id===id); if(!b) return;
+  const B=plBudkiDane(b), P=plDP(), k=plKlasaObs(B.p), pel=plPelny(), kafel=(kl,t,v,o)=>`<div class="pl-kk ${kl}"><span>${t}</span><b>${v}</b><small>${o}</small></div>`;
+  const gdzie=b.gdzie==='silos'||!(D.plan.obory||[]).some(o=>o.id===b.gdzie)?'rząd przy silosach':'przy: '+esc(D.plan.obory.find(o=>o.id===b.gdzie).nazwa);
+  const inne=(D.plan.budki||[]).filter(x=>x!==b).map(x=>({x,B:plBudkiDane(x)})).filter(y=>y.B.wolne>0);
+  const kafle=kafel(k,'Obsada',B.szt!=null&&B.n?`${B.szt} / ${B.n} · ${B.p}%`:`${B.szt??'?'} cieląt`,B.szt==null?'brak sztuk z DairyPlan':!B.n?'nie wpisano liczby budek':B.nad>0?`${B.nad} ${B.nad===1?'cielę':'cieląt'} ponad liczbę budek`:'cieląt / budek')
+    +kafel(B.wolne===0?'sr':'','Wolne budki',B.wolne??'–',inne.length?'gdzie indziej: '+inne.map(y=>`${esc(y.x.nazwa)} ${y.B.wolne}`).join(', '):'w innych budkach brak wolnych')
+    +kafel('','Sztuki z DairyPlan',P?dataPL(P.data):'–',P?`Przegląd grup${P.ts?', '+new Date(P.ts).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):''}`:'nie wgrano');
+  const grupy=(b.dp||[]).map(n=>{ const g=P?.grupy[n]; return `<tr><td class="l"><b>${n}</b></td><td class="l">${g?esc(g.nazwa||''):'<span class="cichy">brak w DairyPlan</span>'}</td><td>${g?g.szt:'–'}</td></tr>`; }).join('');
+  const blokGr=`<div class="pl-blok"><b>Cielęta w tych budkach (grupy DairyPlan)</b>${grupy?`<div class="przewin"><table class="t"><thead><tr><th class="l">Grupa</th><th class="l">Nazwa w DairyPlan</th><th>Szt</th></tr></thead><tbody>${grupy}</tbody></table></div>`:'<span class="cichy">Nie przypisano grup DairyPlan.</span>'}</div>`;
+  const tu=(D.plan.budki||[]).filter(x=>x.gdzie===b.gdzie), i=tu.indexOf(b);
+  const ust=pel?`<div class="pl-blok"><div class="pl-blok-n"><b>Ustawienia budek</b><span class="cichy" style="font-size:13px">zmiany zapisują się od razu</span></div>
+    <div class="pl-2"><div><label class="et" for="plb_n">Nazwa na planie</label><input class="pole szer" id="plb_n" value="${esc(b.nazwa)}" onchange="plUstawBudki('${b.id}','nazwa',this.value,1)"></div>
+      <div><label class="et" for="plb_g">Gdzie stoją</label><select class="pole szer" id="plb_g" onchange="plUstawBudki('${b.id}','gdzie',this.value,1)"><option value="silos" ${b.gdzie==='silos'?'selected':''}>przy silosach (rząd na dole)</option>${D.plan.obory.map(o=>`<option value="${o.id}" ${b.gdzie===o.id?'selected':''}>przy: ${esc(o.nazwa)}</option>`).join('')}</select></div>
+      <div><label class="et" for="plb_dp">Grupy DairyPlan</label><input class="pole szer" id="plb_dp" value="${(b.dp||[]).join('+')}" placeholder="np. 31" onchange="plUstawBudki('${b.id}','dp',this.value,1)"></div>
+      <div><label class="et" for="plb_m">Liczba budek (1 cielę w budce)</label><input class="pole szer num" id="plb_m" inputmode="numeric" value="${b.miejsca??''}" onchange="plUstawBudki('${b.id}','miejsca',this.value,1)"></div></div>
+    <div class="pl-rzad">${tu.length>1?`<button class="btn" ${i<=0?'disabled':''} onclick="plPrzesunBudki('${b.id}',-1)">◀ wcześniej</button><button class="btn" ${i>=tu.length-1?'disabled':''} onclick="plPrzesunBudki('${b.id}',1)">dalej ▶</button>`:''}<button class="btn usun" onclick="plUsunBudki('${b.id}',1)">Usuń z planu</button></div></div>`:'';
+  const naglowek=`<div class="pl-karta-nag" style="background:${PL_KOL[k].bg};border-color:${PL_KOL[k].br}"><b>${esc(b.nazwa)}</b><span>${(b.dp||[]).length?'grupa DairyPlan '+b.dp.join('+'):''}</span><small>${gdzie} · budki pojedyncze</small></div>`;
+  modal('Budki dla cieląt',`<div class="pl-karta">${naglowek}<div class="pl-kk-r">${kafle}</div>${blokGr}${ust}</div>`,[{t:'Zamknij',k:'glowny'}]);
+  $('#modal .m-okno').classList.add('szeroki');
+}
 /* --- karta sektora --- */
 function plKarta(id){
   const z=plZnajdz(id); if(!z?.s||z.s.pom) return;
   const {ob,s}=z, X=plDane(s), L=X.L;
   const k=s.przebudowa?'brak':plKlasaObs(X.pO), kafel=(kl,t,v,o)=>`<div class="pl-kk ${kl}"><span>${t}</span><b>${v}</b><small>${o}</small></div>`;
-  let rec='', koszt='';
-  if(L){ const C=kontekstBiezacy(), G=C.grupy[L.g.id], Pg=planGrupy(C,L.g.id), A=analizaDnia(dzis(),{plan:true}).sek[L.s.id];
-    rec=kafel('','Receptura',`${fmt(A?A.obl:Pg.recSzt,1)} kg/szt`,`${esc(C.receptury[G?.recepturaId]?.nazwa||'bez receptury')} · ${G?.zadania||1}× dziennie`);
+  let rec='', koszt='', zad='';
+  if(L){ const C=kontekstBiezacy(), G=C.grupy[L.g.id], Pg=planGrupy(C,L.g.id), A=analizaDnia(dzis(),{plan:true}).sek[L.s.id], Z=X.Z;
+    rec=kafel('','Receptura',`${fmt(Pg.recSzt,1)} kg/szt`,`${esc(C.receptury[G?.recepturaId]?.nazwa||'bez receptury')} · ${G?.zadania||1}× dziennie${A&&Math.abs(A.obl-Pg.recSzt)>0.05?` · skoryg. ${fmt(A.obl,1)}`:''}`);
+    zad=kafel(Z&&Z.pct!=null?plKlasaZad(Z.pct):'brak','Zadana dziś',Z&&Z.zad!=null?`${fmt(Z.zad,1)} kg/szt · ${Z.pct}%`:'–',Z&&Z.zad!=null?`${fmt(Z.kg,0)} kg TMR na ${Z.szt} szt · ${Z.zWozow?'z dzisiejszych wozów':'wg planu (wozy nieułożone)'}`:'brak sztuk w Dawkach');
     koszt=kafel('','Koszt paszy',A&&A.sztuki>0?`${fmt(A.koszt/A.sztuki,2)} zł`:'–','na sztukę dziennie (plan)'); }
-  else { rec=kafel('','Receptura','–','sektor nie jest połączony z Dawkami'); }
-  const kafle=kafel(k,'Obsada',X.pO!=null?`${X.szt} / ${X.m} · ${X.pO}%`:`${X.szt??'?'} szt`,X.pO!=null?(X.szt>X.m?`${X.szt-X.m} szt ponad miejsca`:`wolnych ${X.m-X.szt}`):'nie wpisano miejsc')
-    +kafel(X.stolZly?'sr':'','Stół paszowy',X.cm!=null?`${X.cm} cm / szt`:'–',X.cm!=null?`${fmt(s.stolM,1)} m · norma ${X.norma} cm`:'nie wpisano metrów')+rec+koszt;
-  // pobranie
+  else { rec=kafel('','Receptura','–',plKandydaciDawek(s).length?'wybierz sektor Dawek w szczegółach obory':'sektor nie jest połączony z Dawkami'); }
+  const obs=X.pO==null?[`${X.szt??'?'} szt`,X.scio?'nie wpisano m² kojca':'nie wpisano miejsc']
+    :X.scio&&X.m2>0?[`${X.szt} szt · ${fmt(X.m2,0)} m² · ${X.pO}%`,`${fmt(X.m2Szt,1)} m²/szt · norma ${fmtIn(X.nM2,1)} m²`]
+    :[`${X.szt} / ${Math.round(X.m)} · ${X.pO}%`,X.szt>X.m?`${Math.round(X.szt-X.m)} szt ponad miejsca`:`wolnych ${Math.round(X.m-X.szt)}`];
+  const kafle=kafel(k,'Obsada',obs[0],obs[1])
+    +kafel(X.stolZly?'sr':'','Stół paszowy',X.cm!=null?`${X.cm} cm / szt`:'–',X.cm!=null?`${fmt(s.stolM,1)} m · norma ${X.norma} cm`:'nie wpisano metrów')+rec+zad+koszt;
+  // zgodność sztuk: DairyPlan a Dawki (sektor Dawek tylko tego sektora planu)
+  const P0=plDP(); let zgod='';
+  if(L&&!L.czesc&&P0&&s.dp&&s.dp.length&&s.dp.every(n=>P0.grupy[n])&&X.szt!==(L.s.sztuki||0))
+    zgod=`<div class="baner info"><span>DairyPlan: <b>${X.szt} szt</b> · Dawki („${esc(L.s.nazwa)}”): <b>${L.s.sztuki||0} szt</b> – ${poziom('dawki')>=2?'wgraj sztuki do Dawek przyciskiem „Sztuki z DairyPlan”.':'sztuki w Dawkach są inne niż w DairyPlan.'}</span></div>`;
+  // pobranie (7 dni)
   let pob='';
-  if(X.pob){ const P=X.pob, maks=Math.max(1,...P.dni.map(d=>Math.max(d.pob||0,d.obl||0)))*1.1, kl=plKlasaPob(P.pct);
+  const P7=L&&!s.przebudowa?plPobranie(L.s.id):null;
+  if(P7){ const P=P7, maks=Math.max(1,...P.dni.map(d=>Math.max(d.pob||0,d.obl||0)))*1.1, kl=plKlasaPob(P.pct);
     const H=110, sl=P.dni.map(d=>`<div class="pl-sl"><span>${d.pob!=null?fmt(d.pob,1):'–'}</span><i style="height:${d.pob!=null?Math.round(d.pob/maks*H):3}px;background:${d.pob==null?'#ECEEEC':PL_KOL[plKlasaPob(d.obl>0?Math.round(d.pob/d.obl*100):null)].ch}"></i><small>${dataPL(d.d).slice(0,5)}</small></div>`).join('');
     const linia=P.obl?`<div class="pl-sl-plan" style="bottom:${18+Math.round(P.obl/maks*H)}px"><span>plan ${fmt(P.obl,1)}</span></div>`:'';
     let wn='';
@@ -3761,7 +3892,7 @@ function plKarta(id){
     } else if(!id) mleko=`<div class="pl-blok"><b>Mleko</b><span class="cichy">Brak wgranego próbnego udoju w Analizie danych.</span></div>`;
   }
   const naglowek=`<div class="pl-karta-nag" style="background:${PL_KOL[k].bg};border-color:${PL_KOL[k].br}"><b>${esc(s.nazwa)}</b><span>${esc(s.opis||plNazwaDP(s))}</span><small>${esc(ob.nazwa)}${L?' · '+esc(L.s.nazwa)+' w Dawkach':''}${s.dp&&s.dp.length?' · grupa DairyPlan '+s.dp.join('+'):''} · ${s.typ==='scio'?'ściółka':'legowiska'}</small></div>`;
-  _plKartaHTML={tyt:s.nazwa+' – '+ob.nazwa,html:`${naglowek}<div class="pl-kk-r">${kafle}</div>${pob}${mleko}`};
+  _plKartaHTML={tyt:s.nazwa+' – '+ob.nazwa,html:`${naglowek}${zgod}<div class="pl-kk-r">${kafle}</div>${pob}${mleko}`};
   modal('Karta sektora',`<div class="pl-karta">${_plKartaHTML.html}</div>`,[
     ...(poziom('analiza')>=1&&anProby().length&&(s.dp||[]).length?[{t:'Otwórz w Analizie danych',f:()=>{ UI.anId=anProby()[0]; UI.anFiltr=(s.dp||[]).map(Number); pokazZakladke('analiza'); }}]:[]),
     {t:'Drukuj kartę',f:()=>{ plDrukujKarte(); return false; }},
@@ -3791,14 +3922,14 @@ function plDrukuj(){
       return `<div style="flex:${c.waga||1} 1 0;display:flex;gap:2px;min-height:0">${w}</div>`; }).join('');
     return `<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><b style="text-align:center;font-size:12px">${esc(ob.nazwa)}${st.p!=null?' · '+st.p+'%':''}</b><div style="height:380px;display:flex;flex-direction:column;gap:2px;border:2px solid #111;padding:2px">${cz}</div></div>`;
   }).join('');
-  const budki=(D.plan.budki||[]).map(b=>{ const s=plBudkiSzt(b); return `${esc(b.nazwa)}: ${s??'?'}/${b.miejsca||'?'}`; }).join(' · ');
-  const wiersze=W.map(({ob,s,X})=>`<tr><td class="l">${esc(ob.nazwa)}</td><td class="l">${esc(s.nazwa)}${s.opis||plNazwaDP(s)?' <span style="color:#555">'+esc(s.opis||plNazwaDP(s))+'</span>':''}</td><td>${X.szt??'?'}</td><td>${X.m||'–'}</td><td style="${X.pO>110?'font-weight:700':''}">${X.pO!=null?X.pO+'%':'–'}</td><td style="${X.stolZly?'font-weight:700':''}">${X.cm??'–'}</td><td>${X.pP!=null?X.pP+'%':'–'}</td></tr>`).join('');
+  const budki=(D.plan.budki||[]).map(b=>{ const B=plBudkiDane(b); return `${esc(b.nazwa)}: ${B.szt??'?'}/${B.n||'?'}${B.p!=null?' · '+B.p+'%':''}${B.wolne!=null?' · wolne '+B.wolne:''}`; }).join(' · ');
+  const wiersze=W.map(({ob,s,X})=>`<tr><td class="l">${esc(ob.nazwa)}</td><td class="l">${esc(s.nazwa)}${s.opis||plNazwaDP(s)?' <span style="color:#555">'+esc(s.opis||plNazwaDP(s))+'</span>':''}</td><td>${X.szt??'?'}</td><td>${X.scio&&X.m2>0?fmt(X.m2,0)+' m²':(X.m?Math.round(X.m):'–')}</td><td style="${X.pO>110?'font-weight:700':''}">${X.pO!=null?X.pO+'%':'–'}</td><td style="${X.stolZly?'font-weight:700':''}">${X.cm??'–'}</td><td style="${X.pZ!=null&&(X.pZ<80||X.pZ>110)?'font-weight:700':''}">${X.pZ!=null?X.pZ+'%':'–'}</td></tr>`).join('');
   const html=`<div style="-webkit-print-color-adjust:exact;print-color-adjust:exact">${naglowekDruku('Plan fermy – obsada',dzis())}<div class="meta">${P?'sztuki z DairyPlan: '+dataPL(P.data):'sztuki z Dawek'}</div>
     <div style="display:flex;gap:14px;align-items:flex-start"><div style="width:48%"><div style="display:flex;gap:6px">${obHTML}</div>
       <div style="border:1px solid #111;padding:2px 6px;margin-top:4px;font-size:10px">${budki||'Budki: –'}</div><div style="border:1px solid #111;margin-top:3px;padding:2px 6px;font-size:10px;font-weight:700;background:repeating-linear-gradient(90deg,#fff 0 30px,#bbb 30px 32px)">SILOSY PASZOWE</div>
       <div style="font-size:9.5px;margin-top:4px">Wzór: biały – do 100% miejsc · kreskowany – 100–110% · szary z grubą ramką – ponad 110% · przerywana ramka – brak danych / przebudowa</div></div>
-    <div style="flex:1"><table><thead><tr><th class="l">Obora</th><th class="l">Sektor</th><th>Szt</th><th>Miejsc</th><th>Obsada</th><th>Stół cm/szt</th><th>Pobranie</th></tr></thead><tbody>${wiersze}</tbody></table>
-      <div style="font-size:9.5px;margin-top:4px">Pogrubione: przepełnienie ponad 110% albo stół poniżej normy (dojne 60, fresh i porodówka 75, jałówki 45 cm). Pobranie = % planu, średnio z 7 dni.</div></div></div></div>`;
+    <div style="flex:1"><table><thead><tr><th class="l">Obora</th><th class="l">Sektor</th><th>Szt</th><th>Miejsc / m²</th><th>Obsada</th><th>Stół cm/szt</th><th>Pasza dziś</th></tr></thead><tbody>${wiersze}</tbody></table>
+      <div style="font-size:9.5px;margin-top:4px">Pogrubione: przepełnienie ponad 110% albo stół poniżej normy (dojne 60, fresh i porodówka 75, jałówki 45 cm). Ściółka: obsada wg normy m² na sztukę. Pasza dziś = zadany TMR na sztukę jako % receptury (pogrubione poniżej 80% lub ponad 110%).</div></div></div></div>`;
   drukuj('Plan fermy '+dzis(),html,true);
 }
 
@@ -3807,6 +3938,33 @@ R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div cla
 /* =====================================================================
    17. ZAKŁADKA: USTAWIENIA
    ===================================================================== */
+/* Dawka liczona na … l mleka – wpisuje żywieniowiec (Twórca) w Ustawieniach, czyta się w Analizie danych.
+   Wiersz = grupy DairyPlan jednej dawki (np. 6+8+9: jedna dawka, jeden wóz). Jedna aktualna wartość, zmieniana przy przeliczeniu dawki. */
+const LITRY_DOMYSLNE=[[1],[2],[3],[4],[6,8,9]];
+function litryWiersze(){ const a=D.ustawienia.litry; return Array.isArray(a)?a:LITRY_DOMYSLNE.map(dp=>({dp,l:null,ts:null})); }
+function litryGrupy(gr){ return litryWiersze().find(x=>(x.dp||[]).map(Number).includes(+gr)&&+x.l>0)||null; }
+function litryHTML(gr){ const x=litryGrupy(gr); return x?`<b>${fmtIn(x.l,1)} l</b>`:'<span class="cichy">–</span>'; }
+function litryOpis(){ const t=litryWiersze().filter(x=>+x.l>0).map(x=>x.ts||0); return t.length?` · dawka na l mleka wg żywieniowca (zmiana ${dataPL(new Date(Math.max(...t)).toISOString().slice(0,10))})`:''; }
+function panelLitrow(){
+  if(PROFIL?.rola!=='tworca') return '';
+  const w=litryWiersze();
+  return `<div class="panel"><div class="ph"><h2>Dawka liczona na … l mleka</h2><span class="opis">widzi tylko Twórca · pokazuje się w Analizie danych (tabela „Grupy technologiczne” i wydruk)</span></div><div class="pb">
+    <div class="litry-lista">${w.map((x,i)=>`<div class="litry-w"><label>grupy DairyPlan <input class="pole krotkie" style="width:110px" data-fid="lit_g${i}" value="${(x.dp||[]).join('+')}" placeholder="np. 6+8+9" onchange="ustawLitry(${i},'dp',this.value)"></label>
+      <label>dawka na <input class="pole krotkie num" data-fid="lit_l${i}" inputmode="decimal" value="${+x.l>0?fmtIn(x.l,1):''}" onchange="ustawLitry(${i},'l',this.value)"> l mleka</label>
+      <span class="cichy">${x.ts&&+x.l>0?'zmieniono '+dataPL(new Date(x.ts).toISOString().slice(0,10)):''}</span>
+      <button class="btn ikona usun" onclick="usunLitry(${i})" aria-label="Usuń wiersz">✕</button></div>`).join('')}</div>
+    <div style="margin-top:8px"><button class="btn" onclick="dodajLitry()">+ Wiersz</button></div>
+    <div class="cichy" style="margin-top:6px">Kilka grup na jednej dawce wpisz razem, np. 6+8+9. Puste pole = w Analizie kreska.</div></div></div>`;
+}
+function zapiszLitry(w){ D.ustawienia.litry=w; saveModule('ustawienia'); render(); }
+function ustawLitry(i,pole,v){
+  if(PROFIL?.rola!=='tworca') return; const w=klon(litryWiersze()); if(!w[i]) return;
+  if(pole==='dp') w[i].dp=numeryDP(v);
+  else { const t=String(v).trim(); if(t===''){ w[i].l=null; } else { const n=parseFloatPL(t); if(!Number.isFinite(n)||n<=0||n>100){ toast('Wpisz litry mleka, np. 38','zly'); render(); return; } w[i].l=Math.round(n*10)/10; } w[i].ts=Date.now(); }
+  zapiszLitry(w);
+}
+function dodajLitry(){ if(PROFIL?.rola!=='tworca') return; const w=klon(litryWiersze()); w.push({dp:[],l:null,ts:null}); zapiszLitry(w); }
+function usunLitry(i){ if(PROFIL?.rola!=='tworca') return; const w=klon(litryWiersze()); w.splice(i,1); zapiszLitry(w); }
 R.ustawienia=()=>{
   const u=D.ustawienia;
   return `<div class="panel"><div class="ph"><h2>Gospodarstwo</h2></div><div class="pb"><div class="wiersz">
@@ -3816,6 +3974,7 @@ R.ustawienia=()=>{
       <div style="max-width:260px"><label class="et">Pojemność wozu (kg) · 0 = bez limitu</label><input class="pole szer num" inputmode="numeric" data-fid="u_poj" value="${pojemnoscWozu()}" onchange="ustawPojemnosc(this.value)"></div>
       <div style="max-width:260px"><label class="et">Tara wiadra do dodatków (kg)</label><input class="pole szer num" inputmode="decimal" data-fid="u_tara" value="${fmtIn(taraWiadra(),2)}" onchange="ustawTare(this.value)"></div></div>
       <div class="cichy" style="margin-top:6px">Pojemność dzieli dużą grupę na dwa wozy przy „Ułóż wozy wg planu” i ostrzega o przeładowaniu.</div></div></div>
+    ${panelLitrow()}
     ${panelInstalacji()}
     <div class="panel"><div class="ph"><h2>Synchronizacja</h2></div><div class="pb cichy">
       Firebase: <b>${FB_CONFIG?'skonfigurowany':'brak konfiguracji – dane tylko na tym urządzeniu'}</b> · urządzenie <code>${DEV}</code> · wersja danych ${WERSJA_DANYCH}
