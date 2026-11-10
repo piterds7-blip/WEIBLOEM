@@ -4249,7 +4249,7 @@ function dpZbuduj(pliki,ts){
   (E['000008']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00005106']); if(!nr||!d) return;
     const ml=dpLiczba(r['00005101'],dec('000008','00005101'));
     (doje[nr]=doje[nr]||[]).push({d,ml,tl:dpLiczba(r['00005151'],dec('000008','00005151')),bi:dpLiczba(r['00005152'],dec('000008','00005152')),
-      lks:dpLiczba(r['00005154'],dec('000008','00005154')),mocz:r['00005153']!=null?dpLiczba(r['00005153'],dec('000008','00005153')):null}); });
+      lks:dpLiczba(r['00005154'],dec('000008','00005154')),mocz:dpLiczba(r['00005158'],dec('000008','00005158'))||null}); });
   Object.values(doje).forEach(a=>a.sort((x,y)=>y.d<x.d?-1:1));
   (E['000003']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00003101']); if(!nr||!d) return;
     const n=r['00003109']||''; (zd[nr]=zd[nr]||[]).push({d,n,r:dpRodzaj(n),plus:(r['00033002']||'').includes('+'),k:r['00003104']||'',k2:r['00003108']||''}); });
