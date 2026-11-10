@@ -603,6 +603,65 @@ table.an-krowy td,table.an-krowy th{padding:4px 7px;font-size:13px}
 @media(max-width:600px){.ukr-tel{display:none}.kafel{min-width:0;flex-basis:40%}.kafel b{font-size:21px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:600px){main{padding:12px 10px 60px}.gora{padding:8px 12px 2px}.firma-nag{display:none}}
+/* ===== DAIRYPLAN + ROZRÓD ===== */
+#dpBtn{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:rgba(255,255,255,.1);color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+#dpBtn:hover{background:rgba(255,255,255,.2)}
+#dpBtn.pracuje{background:rgba(232,190,90,.35);animation:dpPuls 1.4s ease-in-out infinite}
+@keyframes dpPuls{50%{background:rgba(232,190,90,.12)}}
+.dp-kroki{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.dp-krok{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--tusz2)}
+.dp-kr-z{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--linia);display:inline-flex;align-items:center;justify-content:center;font-weight:700;background:#fff}
+.dp-krok.ok{color:var(--tusz)}.dp-krok.ok .dp-kr-z{background:var(--ok);border-color:var(--ok);color:#fff}
+.dp-krok.akt{color:var(--tusz);font-weight:600}.dp-krok.akt .dp-kr-z{border-color:var(--zolty);border-top-color:transparent;animation:dpKrec 1s linear infinite}
+@keyframes dpKrec{to{transform:rotate(360deg)}}
+.roz-gora{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;margin-bottom:10px}.roz-gora .pl-tyt{margin:0}
+.roz-gora .btn{min-height:42px}.roz-gora>.btn:first-of-type{margin-left:auto}
+.roz-zakl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.roz-zakl button{min-height:44px;padding:0 14px;border:1px solid var(--linia);border-radius:22px;background:var(--pow);font-weight:600;cursor:pointer}
+.roz-zakl button.akt{background:var(--gl);border-color:var(--gl);color:#fff}
+.roz-licz{display:inline-block;min-width:22px;padding:0 6px;border-radius:10px;background:var(--pow2);color:var(--tusz);font-size:13px;font-weight:700;text-align:center}
+.roz-zakl button.akt .roz-licz{background:rgba(255,255,255,.22);color:#fff}
+.roz-panel{padding:12px 14px}.roz-opis{margin:0 0 10px}
+.roz-kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:12px}
+.roz-kafel{background:#fff;border:1px solid var(--linia);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+.roz-kafel>b:first-child{font:700 17px/1.1 var(--font-w)}
+.roz-duza{font:700 28px/1.1 var(--font-w)!important}
+.roz-k-c{background:#DCEFE1;border-color:#8FC3A0;color:#1C5A36}.roz-k-i{background:#FBEFC4;border-color:#D9B44A;color:#4F3A00}.roz-k-n{background:#F6D5D1;border-color:#C9645A;color:#5E1712}
+.roz-zle{color:#A3261E;font-weight:700}.roz-sr{color:#7A5A00;font-weight:700}
+.roz-st{display:inline-block;padding:2px 8px;border-radius:5px;font-size:13px;font-weight:700;white-space:nowrap}
+.roz-c{background:#DCEFE1;color:#1C5A36}.roz-i{background:#FBEFC4;color:#4F3A00}.roz-n{background:#F6D5D1;color:#7A1A14}.roz-z.roz-st,.roz-st.roz-z{background:#DCE9F5;color:#1F4E79}
+.roz-t td,.roz-t th{font-size:14px}.roz-t td.roz-zd{font-size:13px;color:var(--tusz2);white-space:normal;min-width:220px}
+.roz-nr{border:0;background:none;padding:2px 0;font-weight:700;font-size:15px;color:var(--gl);text-decoration:underline;cursor:pointer}
+.roz-leg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.roz-z{display:inline-block;padding:4px 10px;border-radius:6px;font-size:13.5px;font-weight:600;border:1px solid transparent;cursor:pointer;text-align:left}
+span.roz-z{cursor:default}
+.roz-z-p{background:#DCE9F5;color:#1F4E79}.roz-z-z{background:#FBEFC4;color:#4F3A00}.roz-z-k{background:#E8DDF3;color:#4B2A73}.roz-z-s{background:#DCEFE1;color:#1C5A36}.roz-z-r{background:#FCE1E8;color:#8A1D3F;border:1px dashed #C24A70}
+.roz-dzien{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;border-top:1px solid var(--linia);padding:8px 0}
+.roz-dzien>div:first-child{display:flex;flex-direction:column}.roz-dzien>div:first-child b{font-size:16px}.roz-dzien small{color:var(--tusz2)}
+.roz-dzien.zal>div:first-child b,.roz-dzien.zal small{color:var(--zly)}
+.roz-dz-l{display:flex;flex-wrap:wrap;gap:6px}
+.druk-tylko{display:none}
+.dpk-nag{display:flex;flex-direction:column;gap:2px;background:#DCEFE1;border-bottom:2px solid var(--ok);margin:-4px -4px 12px;padding:10px 12px;border-radius:8px}
+.dpk-nag>b{font:700 26px/1 var(--font-w)}.dpk-nag>span{font-size:14px}.dpk-nag>small{font-size:13.5px;color:#1C5A36}
+.dpk{display:flex;flex-direction:column}
+.dpk-wyk{background:#fff;border:1px solid var(--linia);border-radius:10px;padding:10px;margin-bottom:12px}
+.dpk-par{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.dpk-par button{min-height:38px;padding:0 12px;border:1px solid var(--linia);border-radius:19px;background:var(--pow2);font-weight:600;cursor:pointer}
+.dpk-par button.akt{background:var(--gl);border-color:var(--gl);color:#fff}
+.dpk-sl-w{display:flex;align-items:flex-end;gap:6px;height:210px;border-left:1px solid var(--linia);border-bottom:1px solid var(--linia);padding:0 6px;overflow-x:auto}
+.dpk-sl{flex:1 1 0;min-width:30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%}
+.dpk-sl span{font-size:11.5px;font-weight:600}.dpk-sl small{font-size:11px;color:var(--tusz2)}
+.dpk-sl i{display:block;width:100%;min-height:3px;border-radius:4px 4px 0 0;background:var(--gl2)}
+.dpk-sl i.zle{background:#C9645A}.dpk-sl i.brak{background:#E3E7E2}
+.dpk-bok{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px}
+.dpk-blok{background:#fff;border:1px solid var(--linia);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.dpk-blok>b{font:600 18px/1 var(--font-w)}
+.dpk-sc{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.dpk-g{padding:3px 9px;border-radius:6px;background:#E3E9E3;font-weight:700}.dpk-g.akt{background:var(--gl);color:#fff}
+.dpk-zd{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto;font-size:13.5px}
+.dpk-zd span{border-top:1px solid #E3E7E2;padding-top:3px}.dpk-zd small{color:var(--tusz2)}
+@media (max-width:760px){ #dpBtn{font-size:0;gap:0;padding:0 10px;min-height:38px} #dpBtn svg{width:18px;height:18px}
+  .roz-zakl button{flex:1 1 auto;padding:0 10px;font-size:14px} .roz-gora>.btn:first-of-type{margin-left:0} .dpk-bok{grid-template-columns:1fr} .roz-dzien{grid-template-columns:64px minmax(0,1fr)} }
 </style>
 </head>
 <body>
@@ -610,6 +669,7 @@ table.an-krowy td,table.an-krowy th{padding:4px 7px;font-size:13px}
   <div class="gora">
     <div class="marka"><b>Weibloem</b><span>żywienie stada</span></div>
     <div class="firma-nag" id="firmaNag"></div>
+    <button id="dpBtn" hidden onclick="dpPobierz()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M12 4v12M6 11l6 6 6-6M4 20h16"/></svg>DairyPlan</button>
     <div id="sync" title="Stan synchronizacji" onclick="toast(this.textContent)">…</div>
     <button id="konto" hidden onclick="modalKonto()"></button>
   </div>
@@ -1257,7 +1317,7 @@ function procKlasa(p){ if(p==null||!Number.isFinite(p)) return ''; const r=Math.
 /* =====================================================================
    8. POWŁOKA INTERFEJSU
    ===================================================================== */
-const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['analiza','Analiza danych'],['plan','Plan fermy'],['notatki','Notatki'],['suchytmr','Suchy TMR'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
+const ZAKLADKI=[['woz','Wóz paszowy'],['dawki','Dawki'],['surowce','Surowce'],['koszty','Koszty'],['raporty','Raporty'],['analiza','Analiza danych'],['plan','Plan fermy'],['rozrod','Rozród'],['notatki','Notatki'],['suchytmr','Suchy TMR'],['cielaki','Cielaki'],['ustawienia','Ustawienia'],['uzytkownicy','Użytkownicy']];
 const UI={stmrKg:null,stmrData:null,tab:localStorage.getItem('wb_tab')||'woz',data:dzis(),numerRec:null,rozwDost:{},podstawa:'zadana',rapTyp:'dawki',rapOd:dzis().slice(0,8)+'01',rapDo:dzis(),swiezy:null};
 const R={};   // renderery zakładek
 let odroczonyRender=false;
@@ -1762,7 +1822,7 @@ function numeryDP(txt){ return [...new Set((String(txt||'').match(/\d+/g)||[]).m
 function dpSektoraDawek(g,s){ if(Array.isArray(s.dpGr)) return s.dpGr; const z=numeryDP(s.nazwa); return z.length?z:(g.sektory.length===1?numeryDP(g.nazwa):[]); }
 function mapaSektoraDP(g,s){ if(_dp.mapa[s.id]!=null) return numeryDP(_dp.mapa[s.id]); return dpSektoraDawek(g,s); }
 function wierszeDP(){
-  const G=parsujPrzegladGrup(_dp.tekst), uzycie={}, w=[];
+  const G=_dp.G||parsujPrzegladGrup(_dp.tekst), uzycie={}, w=[];
   D.grupy.forEach(g=>g.sektory.forEach(s=>{
     const mapa=mapaSektoraDP(g,s), brak=mapa.filter(n=>!G.has(n)), kgM=g.tryb==='kg';
     mapa.forEach(n=>(uzycie[n]=uzycie[n]||[]).push(s.nazwa));
@@ -1774,8 +1834,12 @@ function wierszeDP(){
   const pominiete=[...G.values()].filter(x=>!uzycie[x.nr]);
   return {G,w,pominiete};
 }
-function modalDP(){
+function modalDP(G){
   if(poziom('dawki')<2) return;
+  if(G instanceof Map&&G.size){ _dp={tekst:'',mapa:{},G};
+    modal('Sztuki z DairyPlan',`<p class="cichy" style="margin:0">Sztuki z eksportu DairyPlan (${DPX?dpKiedy(DPX.ts):''}). Zmienią się dopiero po kliknięciu „Zapisz”. Sztuki wirtualne zostają bez zmian.</p><div id="dp-podglad"></div>`,
+      [{t:'Anuluj'},{t:'Zapisz zmiany',k:'glowny',f:()=>zapiszDP()}]);
+    $('#modal .m-okno').classList.add('szeroki'); rysujDP(); return; }
   _dp={tekst:_dp.tekst||'',mapa:{}};
   modal('Sztuki z DairyPlan',`<p class="cichy" style="margin:0">W DairyPlan otwórz <b>Przegląd grup</b>, zaznacz tabelę i skopiuj (Ctrl+C), potem wklej tutaj (Ctrl+V). Sztuki realne w sektorach zmienią się dopiero po kliknięciu „Zapisz”. Sztuki wirtualne zostają bez zmian.</p>
     <textarea class="pole" id="dp-txt" rows="5" style="font-family:monospace;font-size:13px" placeholder="  1   Krowy wysoko ml   108   87   35 …" oninput="_dp.tekst=this.value;rysujDP()">${esc(_dp.tekst)}</textarea>
@@ -4129,6 +4193,381 @@ function notZalatwione(id,tak){ const ts=Date.now(), j=notJa();
   notZmien(id,tak?{zal:true,zalTs:ts,zalImie:notImie(),zm:ts,ostKto:j,['czyt.'+j]:ts}:{zal:false,zalTs:null,zalImie:'',zm:ts,ostKto:j,['czyt.'+j]:ts});
   toast(tak?'Załatwione – wpis jest w „Załatwione”':'Otwarty ponownie'); }
 
+/* =====================================================================
+   16d. DANE Z DAIRYPLAN (agent na komputerze w oborze) + ZAKŁADKA ROZRÓD
+   Przepływ: przycisk „DairyPlan” → weibloem_dp/prosba {stan:'czeka'} → agent (PowerShell) uruchamia
+   DPRequest (tylko odczyt, eksport ADIS) → wysyła pliki .adf spakowane gzip+base64 do weibloem_dp/dane_N
+   i opis do weibloem_dp/dane → każde urządzenie pobiera, rozpakowuje i liczy raporty u siebie.
+   Pliki ADIS: wiersz DN = opis pól (DDI 8 cyfr, długość 2, miejsca po przecinku 1), wiersz VN = wartości o stałej szerokości.
+   ===================================================================== */
+const KOL_DP='weibloem_dp';
+let DPX=null;                          // sparsowane dane: {ts, zw:{nr:zwierzę}, doje:{nr:[…]}, zd:{nr:[…]}, liczby}
+let DPS={prosba:null,agent:null,dane:null,blad:null}, dpNasluchOn=false, _dpRaw=null;
+const DP_LS='dp:raw';
+const ROZ_DOMYSLNE={zas:60,c1:35,c2:70,c3:45,mlekoC3:15,dimOvs:35,jalMies:16,jalGr:'12,13,14,21,22,23',grLakt:'1,2,3,4,5,6',spadekKg:5,lks:400};
+function rozUst(){ return {...ROZ_DOMYSLNE,...(D.ustawienia.rozrod||{})}; }
+const dpNrList=s=>String(s||'').split(/[^\d]+/).filter(Boolean).map(Number);
+
+/* --- parser ADIS --- */
+function dpParsujAdis(txt){
+  const E={}; let def={};
+  String(txt||'').split(/\r?\n/).forEach(l=>{
+    const typ=l.slice(0,2);
+    if(typ==='DN'){ const ent=l.slice(2,8), s=l.slice(8).trim(), it=[];
+      for(let i=0;i+11<=s.length;i+=11) it.push({ddi:s.slice(i,i+8),len:+s.slice(i+8,i+10),dec:+s[i+10]});
+      def[ent]=it; (E[ent]=E[ent]||{cols:it,rows:[]}).cols=it; }
+    else if(typ==='VN'){ const ent=l.slice(2,8), it=def[ent]; if(!it) return; let x=l.slice(8); const r={};
+      it.forEach(c=>{ const v=x.slice(0,c.len); x=x.slice(c.len); if(!(c.ddi in r)) r[c.ddi]=/^\?*$/.test(v.trim())&&v.includes('?')?null:v.trim(); });
+      (E[ent]=E[ent]||{cols:it,rows:[]}).rows.push(r); }
+  });
+  return E;
+}
+const dpData=v=>v&&/^\d{8}$/.test(v)?`${v.slice(0,4)}-${v.slice(4,6)}-${v.slice(6,8)}`:null;
+const dpLiczba=(v,dec)=>{ if(v==null||v==='') return null; const n=parseInt(v,10); return Number.isFinite(n)?n/Math.pow(10,dec||0):null; };
+// nazwa zdarzenia bez polskich znaków (w plikach mogą przyjść różnie zakodowane): „CIĄŻA?” → „CI..A?”
+const dpKod=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9 .?>\-+]/g,'.');
+function dpRodzaj(nazwa){
+  const k=dpKod(nazwa);
+  if(/^INSEM/.test(k)) return 'ins';
+  if(/^CI..A\?/.test(k)||/CIELN/.test(k)) return 'kc';
+  if(/^SYNCHRON|OVSYNCH/.test(k)) return 'ovs';
+  if(/^RUJA/.test(k)) return 'ruja';
+  if(/^POR.D/.test(k)) return 'porod';
+  if(/^ZASUSZ/.test(k)) return 'zas';
+  if(/^ZMIANA GR/.test(k)) return 'grupa';
+  if(/^PORONIEN/.test(k)) return 'poron';
+  return '';
+}
+function dpZbuduj(pliki,ts){
+  const E={}; Object.values(pliki||{}).forEach(t=>{ const e=dpParsujAdis(t); Object.entries(e).forEach(([k,v])=>{ if(!E[k]) E[k]=v; else E[k].rows.push(...v.rows); }); });
+  const dec=(ent,ddi)=>(E[ent]?.cols.find(c=>c.ddi===ddi)||{}).dec||0;
+  const zw={}, doje={}, zd={};
+  (E['000001']?.rows||[]).forEach(r=>{ const nr=+r['00002001']; if(!nr) return;
+    zw[nr]={nr,kol:r['00002002']||'',im:r['00002003']||'',st:r['00002107']||'',gr:+r['00002021']||0,bir:dpData(r['00003111']),
+      clv:dpData(r['00033030']),srv:dpData(r['00033040']),sire:r['00033020']||'',clvP:dpData(r['00033908']),
+      lak:+r['00002007']||0,tins:+r['00002018']||0,avml:dpLiczba(r['00004221'],dec('000001','00004221'))}; });
+  (E['000008']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00005106']); if(!nr||!d) return;
+    const ml=dpLiczba(r['00005101'],dec('000008','00005101'));
+    (doje[nr]=doje[nr]||[]).push({d,ml,tl:dpLiczba(r['00005151'],dec('000008','00005151')),bi:dpLiczba(r['00005152'],dec('000008','00005152')),
+      lks:dpLiczba(r['00005154'],dec('000008','00005154')),mocz:r['00005153']!=null?dpLiczba(r['00005153'],dec('000008','00005153')):null}); });
+  Object.values(doje).forEach(a=>a.sort((x,y)=>y.d<x.d?-1:1));
+  (E['000003']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00003101']); if(!nr||!d) return;
+    const n=r['00003109']||''; (zd[nr]=zd[nr]||[]).push({d,n,r:dpRodzaj(n),plus:(r['00033002']||'').includes('+'),k:r['00003104']||'',k2:r['00003108']||''}); });
+  Object.values(zd).forEach(a=>a.sort((x,y)=>y.d<x.d?-1:y.d>x.d?1:0));
+  return {ts:ts||Date.now(),zw,doje,zd,liczby:{zw:Object.keys(zw).length,doje:Object.values(doje).reduce((a,x)=>a+x.length,0),zd:Object.values(zd).reduce((a,x)=>a+x.length,0)}};
+}
+
+/* --- rozpakowanie (gzip+base64 z agenta) --- */
+async function dpRozpakuj(b64){
+  const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const txt=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  return JSON.parse(txt);
+}
+async function dpUstawSurowe(b64,ts,zapisz){
+  const o=await dpRozpakuj(b64); DPX=dpZbuduj(o.pliki,ts); DPX.zrodlo=o.komputer||''; _dpRaw={b64,ts};
+  if(zapisz){ try{ localStorage.setItem(LS+DP_LS,JSON.stringify(_dpRaw)); }catch(e){ console.warn('dp cache',e); } }
+  wersja++;
+}
+async function dpStartLokalny(){
+  if(DPX) return; let c=null; try{ c=JSON.parse(localStorage.getItem(LS+DP_LS)||'null'); }catch(e){}
+  if(c&&c.b64){ try{ await dpUstawSurowe(c.b64,c.ts,false); rysujZakladki(); if(['rozrod','dawki'].includes(UI.tab)) render(); }catch(e){ console.warn('dp cache',e); } }
+}
+
+/* --- chmura: nasłuch prośby, agenta i danych --- */
+function nasluchDP(){
+  if(!fs||dpNasluchOn||!PROFIL?.uid) return; dpNasluchOn=true;
+  const ref=id=>fs.collection(KOL_DP).doc(id);
+  ref('prosba').onSnapshot(s=>{ DPS.prosba=s.exists?s.data():null; dpOdswiezPostep(); dpPrzycisk(); },e=>{ DPS.blad=e.code||'błąd'; dpPrzycisk(); });
+  ref('agent').onSnapshot(s=>{ DPS.agent=s.exists?s.data():null; dpOdswiezPostep(); },()=>{});
+  ref('dane').onSnapshot(s=>{ DPS.dane=s.exists?s.data():null; if(DPS.dane&&(!DPX||DPX.ts<DPS.dane.ts)) dpPobierzDane(DPS.dane); },()=>{});
+}
+let _dpPobieram=false, _dpCzekam=null;
+async function dpPobierzDane(m){
+  if(_dpPobieram) return; _dpPobieram=true; dpOdswiezPostep();
+  try{
+    const cz=[]; for(let i=0;i<(m.czesci||1);i++){ const s=await fs.collection(KOL_DP).doc('dane_'+i).get(); if(!s.exists) throw new Error('brak części '+i); cz.push(s.data().b64||''); }
+    await dpUstawSurowe(cz.join(''),m.ts,true);
+    dpPoImporcie();
+  }catch(e){ console.warn('dp dane',e); toast('Nie udało się odczytać danych z DairyPlan: '+(e.message||e),'zly'); }
+  _dpPobieram=false; dpOdswiezPostep(); rysujZakladki(); if(['rozrod','dawki','plan','analiza'].includes(UI.tab)) render();
+}
+// sztuki w grupach DairyPlan (wszystkie zwierzęta z eksportu)
+function dpGrupyMapa(){
+  const M=new Map(); if(!DPX) return M;
+  Object.values(DPX.zw).forEach(a=>{ if(!a.gr) return; const x=M.get(a.gr)||{nr:a.gr,nazwa:D.dp?.grupy?.[a.gr]?.nazwa||'',szt:0}; x.szt++; M.set(a.gr,x); });
+  return M;
+}
+function dpRozniceDawek(){
+  const G=dpGrupyMapa(), w=[]; if(!G.size) return w;
+  D.grupy.forEach(g=>g.sektory.forEach(s=>{ const m=dpSektoraDawek(g,s); if(!m.length||m.some(n=>!G.has(n))) return;
+    const nowe=m.reduce((a,n)=>a+G.get(n).szt,0); if(nowe!==s.sztuki) w.push({g,s,nowe,pr:s.sztuki>0?Math.abs(nowe-s.sztuki)/s.sztuki*100:100}); }));
+  return w;
+}
+function dpPoImporcie(){
+  if(!DPX) return;
+  // migawka grup dla Planu fermy
+  if(mozeZapisacModul('dp') && (D.dp?.ts||0)<DPX.ts){
+    const gr={}; dpGrupyMapa().forEach(x=>gr[x.nr]={nazwa:x.nazwa,szt:x.szt}); D.dp={data:dzis(),ts:DPX.ts,grupy:gr,zrodlo:'DairyPlan'}; saveModule('dp');
+  }
+  // próbny dój do Analizy danych (gdy tego dnia jeszcze nie ma)
+  if(poziom('analiza')>=3){ const W=dpAnaliza(); if(W&&!AN[W.data]){ AN[W.data]=W; if(typeof jednostkaAnalizy==='function'){ jednostkaAnalizy(W.data); oznaczZmiane('a:'+W.data); } toast(`Analiza danych: dodano próbny dój ${dataPL(W.data)} z DairyPlan`); } }
+  // podsumowanie dla osoby, która kliknęła
+  const P=DPS.prosba; if(P&&P.uid===PROFIL?.uid&&P.stan==='gotowe'&&(P.ts||0)<=DPX.ts&&_dpCzekam===P.ts){ _dpCzekam=null; dpPodsumowanie(); }
+}
+// wpis Analizy danych z ostatniego próbnego doju w DairyPlan
+function dpAnaliza(){
+  const T=dzis(), licz={};
+  Object.values(DPX.doje).forEach(a=>{ const d=a[0]?.d; if(d&&roznicaDni(d,T)<=60) licz[d]=(licz[d]||0)+1; });
+  const data=Object.entries(licz).sort((a,b)=>b[1]-a[1])[0]?.[0]; if(!data) return null;
+  const krowy=[], grT=new Set();
+  Object.values(DPX.zw).forEach(a=>{ const t=(DPX.doje[a.nr]||[]).find(x=>x.d===data); if(!t) return; grT.add(a.gr);
+    krowy.push(dpKrowaAn(a,t,data)); });
+  Object.values(DPX.zw).forEach(a=>{ if(!grT.has(a.gr)||krowy.some(k=>k.nr===a.nr)) return; krowy.push(dpKrowaAn(a,null,data)); });
+  const grupy={}; grT.forEach(g=>grupy[g]={nazwa:D.dp?.grupy?.[g]?.nazwa||''});
+  const n=krowy.filter(k=>k.ml!=null).length;
+  return {data,dpData:dzis(),ts:Date.now(),zrodlo:'DairyPlan',krowy,grupy,stat:{sol:n,dp:krowy.length,dopasowane:n,bezGrupy:0,zwierzatDP:krowy.length-n}};
+}
+function dpKrowaAn(a,t,data){
+  const o={nr:a.nr,gr:a.gr,st:a.st,k:a.kol,n:a.im,lak:a.lak,lakDP:a.lak,wyc:a.clv,wycDP:a.clv,il:a.tins,dins:a.srv};
+  if(t){ o.dim=a.clv?roznicaDni(a.clv,data):null; o.ml=t.ml; o.tl=t.tl; o.bi=t.bi; o.lks=t.lks; if(t.mocz!=null) o.mocz=t.mocz; if(t.tl&&t.bi) o.tb=Math.round(t.tl/t.bi*100)/100; }
+  Object.keys(o).forEach(k=>{ if(o[k]==null||o[k]==='') delete o[k]; });
+  return o;
+}
+
+/* --- przycisk i postęp --- */
+function dpPrzycisk(){
+  const b=$('#dpBtn'); if(!b) return;
+  b.hidden=!(fs&&PROFIL&&!PROFIL.lokalny&&ROLE[PROFIL.rola]&&PROFIL.rola!=='agent');
+  const P=DPS.prosba, pracuje=P&&(P.stan==='czeka'||P.stan==='pracuje')&&Date.now()-(P.ts||0)<600000;
+  b.classList.toggle('pracuje',!!pracuje); b.title=DPX?`Dane z DairyPlan: ${dpKiedy(DPX.ts)} · kliknij, żeby pobrać nowe`:'Pobierz dane z DairyPlan (komputer w oborze)';
+}
+function dpKiedy(ts){ if(!ts) return '–'; return notCzas?notCzas(ts):new Date(ts).toLocaleString('pl-PL'); }
+async function dpPobierz(){
+  if(!fs||!PROFIL?.uid) { toast('Pobieranie z DairyPlan działa po zalogowaniu w chmurze','zly'); return; }
+  const P=DPS.prosba;
+  if(P&&(P.stan==='czeka'||P.stan==='pracuje')&&Date.now()-(P.ts||0)<120000){ dpModalPostep(); return; }
+  const ts=Date.now(); _dpCzekam=ts;
+  try{ await fs.collection(KOL_DP).doc('prosba').set({ts,uid:PROFIL.uid,imie:notImie(),stan:'czeka',zmiana:ts,info:''}); }
+  catch(e){ _dpCzekam=null; toast(e.code==='permission-denied'?'Serwer odmówił – opublikuj reguły Firestore (blok „weibloem_dp”)':'Nie udało się wysłać prośby – sprawdź internet','zly'); return; }
+  DPS.prosba={ts,uid:PROFIL.uid,stan:'czeka'}; dpModalPostep();
+}
+function dpModalPostep(){
+  modal('Pobieranie z DairyPlan','<div id="dp-postep"></div>',[{t:'Zamknij',k:'glowny'}]);
+  dpOdswiezPostep();
+  clearInterval(window._dpTik); window._dpTik=setInterval(()=>{ if(!$('#dp-postep')){ clearInterval(window._dpTik); return; } dpOdswiezPostep(); },5000);
+}
+function dpOdswiezPostep(){
+  const el=$('#dp-postep'); if(!el) return;
+  const P=DPS.prosba||{}, A=DPS.agent, st=P.stan, ileS=Math.round((Date.now()-(P.ts||0))/1000);
+  const gotowe=st==='gotowe'&&DPX&&DPX.ts>=(P.ts||0)&&!_dpPobieram;
+  const krok=(ok,t,akt)=>`<div class="dp-krok ${ok?'ok':akt?'akt':''}"><span class="dp-kr-z">${ok?'✓':''}</span><span>${t}</span></div>`;
+  const agentTxt=A?.ts?`komputer w oborze ostatnio widziany ${dpKiedy(A.ts)}`:'komputer w oborze jeszcze się nie zgłosił';
+  let txt='';
+  if(st==='blad') txt=`<div class="baner uwaga"><span><b>Błąd na komputerze w oborze:</b> ${esc(P.info||'nieznany')}</span></div>`;
+  else if(st==='czeka'&&ileS>120) txt=`<div class="baner uwaga"><span><b>Komputer w oborze nie odpowiada.</b> Sprawdź, czy jest włączony, ma internet i czy działa agent („Weibloem – agent DP”). ${esc(agentTxt)}.</span></div>`;
+  el.innerHTML=`<div class="dp-kroki">
+      ${krok(!!st,'Prośba wysłana')}
+      ${krok(st==='pracuje'||st==='gotowe',`Komputer w oborze odebrał${P.odebrano?' ('+new Date(P.odebrano).toLocaleTimeString('pl-PL')+')':''}`,st==='czeka')}
+      ${krok(st==='gotowe',`DairyPlan wypisał dane${P.info&&st==='gotowe'?' · '+esc(P.info):''}`,st==='pracuje')}
+      ${krok(gotowe,'Zapisuję w aplikacji',st==='gotowe'&&!gotowe)}</div>
+    ${txt}
+    ${gotowe?dpPodsumowanieHTML():txt?'':`<p class="cichy" style="margin:0;font-size:13px">${esc(agentTxt)}. Zwykle trwa to około minuty. Okno można zamknąć – dane pojawią się same.</p>`}`;
+}
+function dpPodsumowanieHTML(){
+  if(!DPX) return '';
+  const R=dpRozniceDawek(), duze=R.filter(x=>x.pr>5);
+  return `<div class="baner info"><span>Pobrano ${dpKiedy(DPX.ts)}: <b>${DPX.liczby.zw}</b> zwierząt · ${DPX.liczby.doje} wyników próbnych dojów · ${DPX.liczby.zd} zdarzeń.</span></div>
+    ${R.length?`<p style="margin:0">W Dawkach różnią się sztuki w <b>${R.length}</b> ${odm(R.length,'sektorze','sektorach','sektorach')}${duze.length?` (o ponad 5%: ${duze.map(x=>esc(x.s.nazwa)).join(', ')})`:''}.</p>
+      ${poziom('dawki')>=2?`<button class="btn glowny" onclick="zamknijModal();modalDP(dpGrupyMapa())">Sztuki w Dawkach – zatwierdź zmiany</button>`:''}`:'<p class="cichy" style="margin:0">Sztuki w Dawkach zgadzają się z DairyPlan.</p>'}
+    ${poziom('rozrod')>=1?`<button class="btn" onclick="zamknijModal();pokazZakladke('rozrod')">Otwórz Rozród</button>`:''}`;
+}
+function dpPodsumowanie(){ if($('#dp-postep')) dpOdswiezPostep(); else if(dpRozniceDawek().length) dpModalPostep(); else toast(`Pobrano dane z DairyPlan: ${DPX.liczby.zw} zwierząt`); }
+// ręczne wczytanie plików .adf (bez agenta, np. skopiowanych z pendrive'a)
+async function dpWczytajPliki(inp){
+  const f=[...(inp.files||[])]; if(!f.length) return; const pliki={};
+  for(const x of f){ pliki[x.name]=await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(String(rd.result||'')); rd.readAsText(x,'windows-1250'); }); }
+  const json=JSON.stringify({pliki,komputer:'ręcznie'});
+  const gz=await new Response(new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+  let s=''; const u=new Uint8Array(gz); for(let i=0;i<u.length;i+=0x8000) s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
+  await dpUstawSurowe(btoa(s),Date.now(),true);
+  if(!DPX.liczby.zw){ toast('W plikach nie znaleziono zwierząt (potrzebny wb-basic.adf)','zly'); return; }
+  dpPoImporcie(); rysujZakladki(); render(); toast(`Wczytano z plików: ${DPX.liczby.zw} zwierząt`);
+}
+
+/* --- obliczenia rozrodu --- */
+function dpRepro(a,T){
+  const E=DPX.zd[a.nr]||[], od=a.clv||'0000';
+  const ins=E.filter(e=>e.r==='ins'&&e.d>=od).map(e=>e.d); if(a.srv&&a.srv>=od) ins.push(a.srv);
+  const srv=ins.sort().pop()||null;
+  const ovs=E.some(e=>e.r==='ovs'&&e.d>=od);
+  const kc=srv?E.filter(e=>e.r==='kc'&&e.d>srv).sort((x,y)=>x.d<y.d?-1:1):[];
+  let stan='brak', nPos=0;
+  if(srv){ stan='insem'; if(kc.length){ const ost=kc[kc.length-1]; if(ost.plus){ nPos=kc.filter(e=>e.plus).length; stan='C'+Math.min(nPos,3); } else stan='pusta'; } }
+  // status zwierzęcia w DairyPlan ma pierwszeństwo przed wyliczeniem ze zdarzeń
+  // CIĄŻA = cielna (1. potwierdzenie), CIĄŻ2 = cielna po 2. potwierdzeniu, ZASUS = zasuszona,
+  // INSEM = inseminowana, JAŁOW(A) = niecielna, GOTOW/WCZES/SIARA = jeszcze nie kryta, N.INS = nie inseminować
+  const k=dpKod(a.st), nins=/^N.INS/.test(k);
+  if(/^CI..2/.test(k)){ if(stan!=='C3') stan='C2'; }
+  else if(/^CI..A/.test(k)){ if(!/^C/.test(stan)) stan='C1'; }
+  else if(/^JA.OW/.test(k)){ if(srv) stan='pusta'; }
+  else if(/^(GOTOW|WCZES|SIARA)/.test(k)){ if(/^C|insem/.test(stan)) stan=srv?'pusta':'brak'; }
+  else if(nins&&/^C/.test(stan)) stan='pusta';
+  const zas=/^ZASUS/.test(k)||E.some(e=>e.r==='zas'&&srv&&e.d>srv);
+  const ciel=/^C/.test(stan)||zas&&stan!=='pusta';
+  // planowany poród: z DairyPlan, a gdy go brak – krycie + 280 dni (szacunek)
+  const U=rozUst(), clvP=a.clvP||(ciel&&srv?dataPlus(srv,280):null), clvPszac=!a.clvP&&!!clvP, dryP=clvP?dataPlus(clvP,-U.zas):null;
+  const ruja=E.find(e=>e.r==='ruja'&&e.d>=od)?.d||null;
+  return {srv,ovs,stan,nPos,kc,zas,nins,clvP,clvPszac,dryP,ruja,dSrv:srv?roznicaDni(srv,T):null,dim:a.clv?roznicaDni(a.clv,T):null,ciel};
+}
+function dpMleko(a,T){ const t=(DPX.doje[a.nr]||[])[0]; if(t&&t.ml!=null&&roznicaDni(t.d,T)<=60) return t.ml; return a.avml; }
+function dpWiekMies(a,T){ return a.bir?roznicaDni(a.bir,T)/30.44:null; }
+let _dpRap=null,_dpRapW=-1;
+function dpRaporty(){
+  if(!DPX) return null;
+  if(_dpRapW===wersja&&_dpRap) return _dpRap;
+  const T=dzis(), U=rozUst(), grL=dpNrList(U.grLakt), grJ=dpNrList(U.jalGr);
+  const Z=Object.values(DPX.zw).map(a=>({a,R:dpRepro(a,T)}));
+  const lakt=Z.filter(x=>grL.includes(x.a.gr)&&x.a.clv&&!x.R.zas);
+  const ovs=lakt.filter(x=>x.R.dim>U.dimOvs&&!x.R.ovs&&!x.R.srv&&!x.R.ciel&&!x.R.nins).sort((p,q)=>q.R.dim-p.R.dim);
+  const c1=Z.filter(x=>x.R.srv&&x.R.stan==='insem'&&x.R.dSrv>U.c1&&!x.R.zas&&!x.R.nins).sort((p,q)=>q.R.dSrv-p.R.dSrv);
+  const c2=Z.filter(x=>x.R.stan==='C1'&&x.R.dSrv>U.c2&&!x.R.zas).sort((p,q)=>q.R.dSrv-p.R.dSrv);
+  const c3=Z.filter(x=>x.R.stan==='C2'&&!x.R.zas&&((x.R.dryP&&roznicaDni(T,x.R.dryP)<=U.c3)||((dpMleko(x.a,T)??99)<U.mlekoC3&&x.a.clv)))
+    .map(x=>({...x,nisko:!(x.R.dryP&&roznicaDni(T,x.R.dryP)<=U.c3)})).sort((p,q)=>(p.R.dryP||'9')<(q.R.dryP||'9')?-1:1);
+  const jal=Z.filter(x=>grJ.includes(x.a.gr)&&(dpWiekMies(x.a,T)||0)>U.jalMies).sort((p,q)=>(p.a.bir||'')<(q.a.bir||'')?-1:1);
+  // kalendarz 14 dni (+ zaległe do 7 dni wstecz)
+  const kal={}, dod=(d,t,k,nr)=>{ const r=roznicaDni(T,d); if(r<-7||r>14) return; (kal[d]=kal[d]||[]).push({t,k,nr}); };
+  Z.forEach(({a,R})=>{
+    const n=`${a.nr}${a.im?' '+a.im:''}`;
+    if(R.clvP&&R.ciel) dod(R.clvP,'Poród'+(R.clvPszac?' (szac.)':'')+': '+n,'p',a.nr);
+    if(R.dryP&&R.ciel&&!R.zas&&a.clv) dod(R.dryP,'Zasuszenie: '+n,'z',a.nr);
+    if(R.stan==='insem'&&R.srv) dod(dataPlus(R.srv,U.c1),'Kontrola C1: '+n,'k',a.nr);
+    if(R.stan==='C1'&&R.srv) dod(dataPlus(R.srv,U.c2),'Kontrola C2: '+n,'k',a.nr);
+    if(R.stan==='C2'&&R.dryP&&a.clv) dod(dataPlus(R.dryP,-U.c3),'Kontrola C3: '+n,'k',a.nr);
+    if(!R.ciel&&!R.zas&&!R.nins){ const ost=R.ruja&&(!R.srv||R.ruja>R.srv)?R.ruja:null; if(ost){ let p=dataPlus(ost,21); if(roznicaDni(T,p)<-2) p=dataPlus(p,21);
+      if(roznicaDni(T,p)>=-2) dod(p,`Ruja?: ${n} (${R.ruja===ost?'ruja':'ins.'} ${dataPL(ost).slice(0,5)}) · ${dataPL(dataPlus(p,-2)).slice(0,5)}–${dataPL(dataPlus(p,2)).slice(0,5)}`,'r',a.nr); } }
+  });
+  // spadki między dwoma ostatnimi próbnymi dojami
+  const spadki=[];
+  Z.forEach(({a})=>{ const d=DPX.doje[a.nr]||[]; if(d.length<2||!grL.includes(a.gr)) return; const [t,p]=d; if(roznicaDni(t.d,T)>60) return;
+    const pow=[]; if(t.ml!=null&&p.ml!=null&&p.ml-t.ml>=U.spadekKg) pow.push(`mleko −${fmt(p.ml-t.ml,1)} kg`);
+    if(t.lks!=null&&t.lks>U.lks&&(p.lks==null||p.lks<=U.lks)) pow.push(`LKS ponad ${U.lks}`);
+    else if(t.lks!=null&&p.lks!=null&&t.lks>U.lks&&t.lks-p.lks>=U.lks) pow.push(`LKS +${fmt(t.lks-p.lks,0)}`);
+    if(pow.length) spadki.push({a,t,p,pow,zle:pow.length>1||(p.ml-t.ml)>=2*U.spadekKg}); });
+  spadki.sort((x,y)=>(y.p.ml-y.t.ml)-(x.p.ml-x.t.ml));
+  // wskaźniki grup
+  const kpi=grL.map(g=>{ const W=lakt.filter(x=>x.a.gr===g); if(!W.length) return null;
+    const C=W.filter(x=>x.R.ciel), dz=C.filter(x=>x.R.srv&&x.a.clv).map(x=>roznicaDni(x.a.clv,x.R.srv)), ins=C.map(x=>x.a.tins).filter(x=>x>0);
+    return {g,n:W.length,ciel:C.length,dz:srednia(dz),ins:srednia(ins),pozno:W.filter(x=>!x.R.ciel&&x.R.dim>150).length,nazwa:D.dp?.grupy?.[g]?.nazwa||''}; }).filter(Boolean);
+  _dpRap={T,ovs,c1,c2,c3,jal,kal,spadki,kpi}; _dpRapW=wersja; return _dpRap;
+}
+
+/* --- zakładka Rozród --- */
+const ROZ_ZAKL=[['ovs','Po 35. dniu bez OVS'],['c1','Kontrola C1'],['c2','Kontrola C2'],['c3','Kontrola C3'],['jal','Jałówki'],['kal','Kalendarz 14 dni'],['spad','Spadki mleka i LKS']];
+const ROZ_ST={brak:['bez ins.','n'],insem:['inseminowana','i'],pusta:['niecielna','n'],C1:['cielna C1','c'],C2:['cielna C2','c'],C3:['cielna C3','c']};
+function rozStatus(R){ const s=R.zas?['zasuszona','z']:R.nins?['nie inseminować','n']:ROZ_ST[R.stan]||['–','n']; return `<span class="roz-st roz-${s[1]}">${s[0]}</span>`; }
+function rozZdarzenia(nr,ile,tylkoRozrod){ return (DPX.zd[nr]||[]).filter(e=>!tylkoRozrod||['ins','kc','ovs','ruja','porod','zas','poron'].includes(e.r)).slice(0,ile)
+  .map(e=>`${esc(e.n)}${e.plus?' +':''} ${dataPL(e.d).slice(0,5)}${e.k?' ('+esc(e.k)+')':''}`).join(' · '); }
+const rozNr=a=>`<button class="roz-nr" data-zawsze onclick="dpKarta(${a.nr})">${a.nr}</button>`;
+function rozTabela(nag,wiersze,pusto){
+  return wiersze.length?`<div class="przewin"><table class="t roz-t"><thead><tr>${nag.map(h=>`<th class="${h[1]||''}">${h[0]}</th>`).join('')}</tr></thead><tbody>${wiersze.join('')}</tbody></table></div>`
+    :`<div class="pusto"><b>${pusto}</b></div>`;
+}
+R.rozrod=()=>{
+  if(!DPX) return `<div class="panel"><div class="pusto"><b>Brak danych z DairyPlan</b>${fs?'Kliknij „DairyPlan” u góry ekranu, żeby pobrać dane z komputera w oborze.':''}
+    <div style="margin-top:10px"><label class="btn" style="cursor:pointer">Wczytaj pliki .adf z DairyPlan<input type="file" multiple accept=".adf,.ads,.txt" style="display:none" onchange="dpWczytajPliki(this)"></label></div></div></div>`;
+  const P=dpRaporty(), U=rozUst(), z=UI.rozZ||'ovs', T=P.T;
+  const licz={ovs:P.ovs.length,c1:P.c1.length,c2:P.c2.length,c3:P.c3.length,jal:P.jal.length,kal:Object.values(P.kal).reduce((a,x)=>a+x.length,0),spad:P.spadki.length};
+  let tresc='', opis='';
+  if(z==='ovs'){
+    opis=`Grupy ${U.grLakt} · ponad ${U.dimOvs} dni od wycielenia · bez rozpoczętego OVS (SYNCHRONIZACJA / OVSYNCH) · bez inseminacji w tej laktacji · bez krów cielnych i zasuszonych.`;
+    tresc=`<div class="roz-kpi">${P.kpi.map(k=>`<div class="roz-kafel"><b>Gr. ${k.g}${k.nazwa?' '+esc(k.nazwa):''}</b><span>${k.n} krów · cielne: <b>${k.n?Math.round(k.ciel/k.n*100):0}%</b></span>
+        <span>dni do zacielenia: <b>${k.dz!=null?Math.round(k.dz):'–'}</b></span><span>inseminacji / ciążę: <b>${k.ins!=null?fmt(k.ins,1):'–'}</b></span>
+        <span class="${k.pozno>2?'roz-zle':''}">${k.pozno} niezacielonych ponad 150 dni</span></div>`).join('')}</div>`
+      +rozTabela([['Nr DP','l'],['Kolczyk','l'],['Imię','l'],['Gr.'],['Lakt.'],['Dni'],['Wycielenie'],['Ostatnie zdarzenie','l'],['Mleko'],['Decyzja','l druk-tylko']],
+        P.ovs.map(({a,R})=>`<tr><td class="l">${rozNr(a)}</td><td class="l">${esc(a.kol)}</td><td class="l">${esc(a.im)}</td><td>${a.gr}</td><td>${a.lak}</td><td class="${R.dim>100?'roz-zle':R.dim>60?'roz-sr':''}"><b>${R.dim}</b></td>
+          <td>${dataPL(a.clv)}</td><td class="l roz-zd">${rozZdarzenia(a.nr,1)}</td><td>${dpMleko(a,T)!=null?fmt(dpMleko(a,T),1):'–'}</td><td class="l druk-tylko"></td></tr>`),'Brak krów na tej liście');
+  } else if(z==='c1'||z==='c2'||z==='c3'){
+    const L=P[z], dni=z==='c1'?U.c1:U.c2;
+    opis=z==='c1'?`Inseminowane ponad ${U.c1} dni temu, bez kontroli cielności po tej inseminacji (krowy i jałówki).`
+      :z==='c2'?`Po pierwszym potwierdzeniu cielności (C1), ponad ${U.c2} dni od krycia – drugie potwierdzenie (C2).`
+      :`Po C2: ${U.c3} dni przed planowanym zasuszeniem (poród wg DairyPlan − ${U.zas} dni) – trzecie potwierdzenie (C3). Także krowy po C2 z wydajnością poniżej ${U.mlekoC3} l/dobę (wcześniejsze zasuszenie). Gdy DairyPlan nie podaje terminu porodu, liczę krycie + 280 dni.`;
+    tresc=rozTabela([['Nr DP','l'],['Kolczyk','l'],['Imię','l'],['Gr.'],['Status','l'],['Krycie'],['Dni od krycia'],['Buhaj','l'],z==='c3'?['Plan. zasuszenie']:['Ins.'],z==='c3'?['Mleko']:['Ostatnie zdarzenia','l'],['Wynik','l druk-tylko']],
+      L.map(x=>{ const {a,R}=x, ml=dpMleko(a,T); return `<tr><td class="l">${rozNr(a)}</td><td class="l">${esc(a.kol)}</td><td class="l">${esc(a.im)}</td><td>${a.gr}</td><td class="l">${rozStatus(R)}</td>
+        <td>${dataPL(R.srv)}</td><td><b>${R.dSrv}</b></td><td class="l">${esc(a.sire||'')}</td>
+        ${z==='c3'?`<td>${R.dryP?dataPL(R.dryP):'–'}</td><td class="${x.nisko?'roz-zle':''}">${ml!=null?fmt(ml,1):'–'}${x.nisko?' · niska wydajność':''}</td>`:`<td>${a.tins||'–'}</td><td class="l roz-zd">${rozZdarzenia(a.nr,2,true)}</td>`}
+        <td class="l druk-tylko"></td></tr>`; }),'Brak sztuk do kontroli');
+  } else if(z==='jal'){
+    const J=P.jal, nC=J.filter(x=>x.R.ciel).length, nI=J.filter(x=>x.R.stan==='insem').length, nN=J.length-nC-nI, n18=J.filter(x=>!x.R.ciel&&x.R.stan!=='insem'&&dpWiekMies(x.a,T)>18).length;
+    opis=`Jałówki z grup ${U.jalGr} powyżej ${U.jalMies}. miesiąca życia. Status według DairyPlan. * = poród szacowany (krycie + 280 dni), bo DairyPlan nie podał terminu.`;
+    tresc=`<div class="roz-kpi">${[['Jałówek',J.length,''],['Cielne',nC,'c'],['Inseminowane, czekają na kontrolę',nI,'i'],[`Niecielne (w tym ponad 18 mies.: ${n18})`,nN,'n']].map(([t,v,k])=>`<div class="roz-kafel roz-k-${k}"><span>${t}</span><b class="roz-duza">${v}</b></div>`).join('')}</div>`
+      +rozTabela([['Nr DP','l'],['Kolczyk','l'],['Gr.'],['Urodzona'],['Wiek'],['Status','l'],['Ins.'],['Zdarzenia (od najnowszego)','l'],['Planowany poród'],['Decyzja','l druk-tylko']],
+        J.map(({a,R})=>`<tr><td class="l">${rozNr(a)}</td><td class="l">${esc(a.kol)}</td><td>${a.gr}</td><td>${dataPL(a.bir)}</td><td><b>${fmt(dpWiekMies(a,T),1)} mies.</b></td><td class="l">${rozStatus(R)}</td><td>${a.tins||'–'}</td>
+          <td class="l roz-zd">${rozZdarzenia(a.nr,3,true)||'–'}</td><td>${R.ciel&&R.clvP?dataPL(R.clvP)+(R.clvPszac?' *':''):'–'}</td><td class="l druk-tylko"></td></tr>`),'Brak jałówek powyżej '+U.jalMies+' miesięcy');
+  } else if(z==='kal'){
+    opis=`Porody i zasuszenia (poród wg DairyPlan − ${U.zas} dni), kontrole cielności C1/C2/C3 i przewidywane ruje (21 dni od ostatniej rui wpisanej w DairyPlan, okno ±2 dni). Ruje wpisuje się w DairyPlan – pojawią się po kolejnym pobraniu.`;
+    const dni=Object.keys(P.kal).sort();
+    tresc=`<div class="roz-leg"><span class="roz-z roz-z-p">poród</span><span class="roz-z roz-z-z">zasuszenie</span><span class="roz-z roz-z-k">kontrola cielności</span><span class="roz-z roz-z-r">ruja przewidywana</span></div>`
+      +(dni.length?dni.map(d=>{ const r=roznicaDni(T,d); return `<div class="roz-dzien ${r<0?'zal':''}"><div><b>${dataPL(d).slice(0,5)}</b><small>${r<0?'zaległe':r===0?'dziś':r===1?'jutro':['nd','pn','wt','śr','czw','pt','sob'][new Date(d).getDay()]}</small></div>
+        <div class="roz-dz-l">${P.kal[d].map(x=>`<button class="roz-z roz-z-${x.k}" data-zawsze onclick="dpKarta(${x.nr})">${esc(x.t)}</button>`).join('')}</div></div>`; }).join(''):'<div class="pusto"><b>Nic w najbliższych 14 dniach</b></div>');
+  } else if(z==='spad'){
+    opis=`Dwa ostatnie próbne doje: mleko spadło o ${U.spadekKg} kg lub więcej albo LKS przekroczyła ${U.lks} tys.`;
+    tresc=rozTabela([['Nr DP','l'],['Imię','l'],['Gr.'],['Dni'],['Doje'],['Mleko'],['LKS'],['Dlaczego','l']],
+      P.spadki.map(({a,t,p,pow,zle})=>`<tr><td class="l">${rozNr(a)}</td><td class="l">${esc(a.im)}</td><td>${a.gr}</td><td>${a.clv?roznicaDni(a.clv,T):'–'}</td><td>${dataPL(p.d).slice(0,5)} → ${dataPL(t.d).slice(0,5)}</td>
+        <td>${fmt(p.ml,1)} → <b>${fmt(t.ml,1)}</b></td><td>${p.lks??'–'} → <b>${t.lks??'–'}</b></td><td class="l"><span class="roz-st ${zle?'roz-n':'roz-i'}">${pow.join(' · ')}</span></td></tr>`),'Brak wyraźnych spadków');
+  }
+  return `<div class="roz-gora"><h2 class="pl-tyt">Rozród</h2><span class="cichy">dane z DairyPlan: ${dpKiedy(DPX.ts)} · ${DPX.liczby.zw} zwierząt</span>
+      <span class="pl-akcje">${PROFIL?.rola==='tworca'?`<button class="btn" onclick="rozModalUst()">Ustawienia</button>`:''}<button class="btn glowny" data-zawsze onclick="rozDrukuj()">Drukuj</button></span></div>
+    <div class="roz-zakl" data-zawsze>${ROZ_ZAKL.map(([k,t])=>`<button class="${z===k?'akt':''}" onclick="UI.rozZ='${k}';render()">${t} <span class="roz-licz">${licz[k]}</span></button>`).join('')}</div>
+    <div class="panel roz-panel"><p class="cichy roz-opis">${opis}</p>${tresc}</div>`;
+};
+function rozDrukuj(){
+  const z=UI.rozZ||'ovs', tyt=(ROZ_ZAKL.find(x=>x[0]===z)||[])[1]||'Rozród', p=$('.roz-panel'); if(!p) return;
+  const w=window.open('','_blank'); if(!w){ toast('Przeglądarka zablokowała okno wydruku','zly'); return; }
+  w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>${esc(tyt)}</title><style>
+    body{font:12.5px/1.35 Arial,sans-serif;margin:14mm 10mm;color:#111}h1{font-size:19px;margin:0 0 4px}.m{margin:0 0 10px;font-size:12px}
+    table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:3px 5px;text-align:right;vertical-align:top}th{background:#eee}.l{text-align:left}
+    .druk-tylko{min-width:90px}button{all:unset;font-weight:700}.roz-kpi,.roz-leg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.roz-kafel{border:1px solid #999;padding:4px 8px;display:flex;flex-direction:column}
+    .roz-dzien{display:flex;gap:10px;border-top:1px solid #999;padding:4px 0}.roz-dzien>div:first-child{width:70px;display:flex;flex-direction:column}.roz-z{display:inline-block;border:1px solid #777;padding:1px 5px;margin:1px}
+    @page{size:A4 ${z==='kal'?'portrait':'landscape'};margin:10mm}</style></head><body>
+    <h1>${esc(tyt)} – Dochowo Dairy „Weibloem”</h1><p class="m">Dane z DairyPlan: ${dpKiedy(DPX.ts)} · wydrukowano ${dataPL(dzis())}</p>${p.innerHTML}</body></html>`);
+  w.document.close(); setTimeout(()=>w.print(),300);
+}
+function rozModalUst(){
+  if(PROFIL?.rola!=='tworca') return; const U=rozUst();
+  const p=(id,t,v,o='')=>`<div><label class="et" for="ru-${id}">${t}</label><input class="pole szer" id="ru-${id}" value="${esc(String(v))}" ${o}></div>`;
+  modal('Ustawienia rozrodu',`<div class="pl-2">${p('grLakt','Grupy krów w laktacji',U.grLakt)}${p('jalGr','Grupy jałówek',U.jalGr)}${p('dimOvs','Lista OVS: po ilu dniach od wycielenia',U.dimOvs,'inputmode="numeric"')}${p('jalMies','Jałówki od miesiąca życia',U.jalMies,'inputmode="numeric"')}
+    ${p('c1','C1: dni po inseminacji',U.c1,'inputmode="numeric"')}${p('c2','C2: dni od krycia',U.c2,'inputmode="numeric"')}${p('c3','C3: dni przed zasuszeniem',U.c3,'inputmode="numeric"')}${p('zas','Okres zasuszenia (dni przed porodem)',U.zas,'inputmode="numeric"')}
+    ${p('mlekoC3','C3: wydajność poniżej (l/dobę)',U.mlekoC3,'inputmode="decimal"')}${p('spadekKg','Spadek mleka od (kg)',U.spadekKg,'inputmode="decimal"')}${p('lks','LKS ponad (tys.)',U.lks,'inputmode="numeric"')}</div>`,
+  [{t:'Anuluj'},{t:'Zapisz',k:'glowny',f:()=>{ const o={}; let zle=null; Object.keys(ROZ_DOMYSLNE).forEach(k=>{ const v=mv('ru-'+k).trim();
+      if(typeof ROZ_DOMYSLNE[k]==='number'){ const n=parseFloatPL(v); if(!Number.isFinite(n)||n<0) zle=zle||k; else o[k]=n; } else o[k]=dpNrList(v).join(','); });
+      if(zle){ toast('Wpisz liczbę w polu: '+$('label[for="ru-'+zle+'"]').textContent,'zly'); return false; }
+      D.ustawienia.rozrod=o; saveModule('ustawienia'); wersja++; render(); toast('Zapisano ustawienia rozrodu'); }}]);
+  $('#modal .m-okno').classList.add('szeroki');
+}
+
+/* --- karta krowy z DairyPlan --- */
+function dpKarta(nr){
+  if(!DPX||!DPX.zw[nr]) return; const a=DPX.zw[nr], T=dzis(), R=dpRepro(a,T), par=UI.dpPar||'ml';
+  const D12=(DPX.doje[nr]||[]).filter(x=>roznicaDni(x.d,T)<=366).slice().reverse();
+  const PAR={ml:['mleko kg',1],tl:['tłuszcz %',2],bi:['białko %',2],lks:['LKS tys.',0],mocz:['mocznik',0]};
+  const w=D12.map(x=>x[par]), mx=Math.max(1,...w.filter(v=>v!=null)), H=180;
+  const sl=D12.map((x,i)=>{ const v=x[par], h=v!=null?Math.max(3,Math.round(v/mx*H)):3, zle=par==='lks'?v>rozUst().lks:par==='ml'&&i>0&&D12[i-1].ml!=null&&v!=null&&D12[i-1].ml-v>=rozUst().spadekKg;
+    return `<div class="dpk-sl"><span>${v!=null?fmt(v,PAR[par][1]):'–'}</span><i style="height:${h}px" class="${v==null?'brak':zle?'zle':''}"></i><small>${dataPL(x.d).slice(3)}</small></div>`; }).join('');
+  const G=(DPX.zd[nr]||[]).filter(e=>e.r==='grupa').slice().reverse(), sciezka=[];
+  G.forEach(e=>{ const m=String(e.k2||e.k).match(/(\d+)\s*-+>\s*(\d+)/); if(m){ if(!sciezka.length) sciezka.push({g:m[1]}); sciezka.push({g:m[2],d:e.d}); } });
+  const ost=D12[D12.length-1];
+  modal('Karta krowy – DairyPlan',`<div class="dpk">
+    <div class="dpk-nag"><b>${a.nr}${a.im?' '+esc(a.im):''}</b><span>${esc(a.kol)}</span><small>gr. ${a.gr} · laktacja ${a.lak} · ${R.dim!=null?R.dim+' dni · ':''}${rozStatus(R)}${R.srv?' · krycie '+dataPL(R.srv)+(a.sire?' ('+esc(a.sire)+')':''):''}${R.ciel&&R.clvP?' · poród '+dataPL(R.clvP)+(R.clvPszac?' (szacunek: krycie + 280 dni)':''):''}${a.bir?' · ur. '+dataPL(a.bir):''}</small></div>
+    <div class="dpk-wyk"><div class="dpk-par" data-zawsze>${Object.entries(PAR).map(([k,[t]])=>`<button class="${par===k?'akt':''}" onclick="UI.dpPar='${k}';dpKarta(${nr})">${t}</button>`).join('')}</div>
+      ${D12.length?`<div class="dpk-sl-w">${sl}</div>`:'<div class="cichy">Brak próbnych dojów w ostatnim roku.</div>'}
+      ${ost?`<p style="margin:0;font-size:13.5px">Ostatni dój ${dataPL(ost.d)}: <b>${fmt(ost.ml,1)} kg · tł. ${fmt(ost.tl,2)} · bia. ${fmt(ost.bi,2)}${ost.tl&&ost.bi?' · T/B '+fmt(ost.tl/ost.bi,2):''} · LKS ${ost.lks??'–'}${ost.mocz!=null?' · mocznik '+ost.mocz:''}</b></p>`:''}</div>
+    <div class="dpk-bok"><div class="dpk-blok"><b>Przegrupowania</b><div class="dpk-sc">${sciezka.length?sciezka.map((s,i)=>`${i?'<span>→</span>':''}<span class="dpk-g ${i===sciezka.length-1?'akt':''}" title="${s.d?dataPL(s.d):''}">${s.g}</span>`).join(''):'<span class="cichy">brak zmian grupy w tej laktacji</span>'}</div>
+      ${G.length?`<small class="cichy">${G.map(e=>`${dataPL(e.d).slice(0,5)} ${esc(e.k2||e.k)}`).join(' · ')}</small>`:''}</div>
+      <div class="dpk-blok"><b>Zdarzenia w tej laktacji</b><div class="dpk-zd">${(DPX.zd[nr]||[]).slice(0,30).map(e=>`<span><b>${dataPL(e.d).slice(0,5)}</b> ${esc(e.n)}${e.plus?' +':''} <small>${esc([e.k,e.k2].filter(Boolean).join(' · '))}</small></span>`).join('')||'<span class="cichy">brak</span>'}</div></div></div>
+  </div>`,[{t:'Zamknij',k:'glowny'}]);
+  $('#modal .m-okno').classList.add('szeroki');
+}
+
 R.cielaki=()=>`<div class="panel"><div class="ph"><h2>Cielaki</h2></div><div class="pusto"><b>Moduł w przygotowaniu</b>Żywienie cieląt (rozchód Suchego TMR z zakładki Suchy TMR, preparat mlekozastępczy) dodamy w kolejnym etapie.</div></div>`;
 
 /* =====================================================================
@@ -4190,10 +4629,10 @@ function eksport(){
    Macierz siedzi w Firestore (weibloem_admin/uprawnienia) i czytają ją też reguły
    bezpieczeństwa – to, czego rola nie może zapisać, odrzuci serwer, nie tylko interfejs.
    ===================================================================== */
-const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'}};
+const ROLE={tworca:{n:'Twórca',kol:'#24493A'},szef:{n:'Szef',kol:'#3D6FA3'},zootechnik:{n:'Zootechnik',kol:'#C0773A'},pracownik:{n:'Pracownik',kol:'#7A5BA6'},agent:{n:'Agent DP (komputer w oborze)',kol:'#5C6B63'}};
 const POZIOMY=['brak','podgląd','wpis','pełny'];
 // które poziomy mają sens w danej zakładce
-const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,2,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,1,3],plan:[0,1,3],notatki:[0,1,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
+const POZ_ZAKL={woz:[0,1,2,3],surowce:[0,1,2,3],dawki:[0,1,2,3],koszty:[0,1,3],raporty:[0,1],analiza:[0,1,3],plan:[0,1,3],rozrod:[0,1],notatki:[0,1,3],suchytmr:[0,1,2,3],cielaki:[0,1,3],ustawienia:[0,1,3],uzytkownicy:[0,1,3]};
 const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ wozów ustala zootechnik',surowce:'przyjmujesz dostawy i robisz spis; nazwy i ceny zmienia zootechnik',
   dawki:'zmieniasz tylko liczby sztuk (realnych i wirtualnych) albo kg TMR na sektor; receptury, dodatki ręczne i ustawienia grup zmienia szef',
   suchytmr:'dodajesz nowe partie produkcji; recepturę zmienia szef, a zapisane partie poprawia lub usuwa szef'};
@@ -4201,9 +4640,9 @@ const OPIS_WPISU={woz:'wpisujesz zadane kilogramy, niedojady i uwagi; układ woz
 function nazwaPoziomu(tab,v){ return tab==='dawki'&&v===2?'sztuki':POZIOMY[v]; }
 const WER_UPR=2;   // wersja macierzy w chmurze – przy zmianie domyślnych zasad twórca jednorazowo ją aktualizuje
 const DOMYSLNE_UPR={
-  szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,suchytmr:3,cielaki:3,ustawienia:3,uzytkownicy:3,notatki:3},
-  zootechnik:{woz:3,dawki:2,surowce:3,koszty:1,raporty:1,suchytmr:2,cielaki:3,ustawienia:1,uzytkownicy:0,notatki:0},
-  pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,suchytmr:1,cielaki:1,ustawienia:0,uzytkownicy:0,notatki:0}
+  szef:      {woz:3,dawki:3,surowce:3,koszty:3,raporty:1,suchytmr:3,cielaki:3,ustawienia:3,uzytkownicy:3,notatki:3,rozrod:1},
+  zootechnik:{woz:3,dawki:2,surowce:3,koszty:1,raporty:1,suchytmr:2,cielaki:3,ustawienia:1,uzytkownicy:0,notatki:0,rozrod:1},
+  pracownik: {woz:2,dawki:1,surowce:2,koszty:0,raporty:1,suchytmr:1,cielaki:1,ustawienia:0,uzytkownicy:0,notatki:0,rozrod:0}
 };
 let PROFIL=null;     // {uid, login, imie, rola, aktywny}
 let UPR=lsCzytaj('uprawnienia')||klon(DOMYSLNE_UPR);
@@ -4225,7 +4664,7 @@ function banerPoziomu(tab){
 // Po narysowaniu zakładki blokuje to, czego rola nie może. data-zawsze = nawigacja/druk, data-wpis = dozwolone od poziomu „wpis”.
 function zastosujPoziom(w,tab){
   const p=poziom(tab); if(p>=3) return;
-  if(tab==='analiza'||tab==='plan'||tab==='notatki') return;   // Notatki same nie rysują przycisków zapisu dla podglądu   // Analiza danych i Plan fermy same nie rysują edycji dla podglądu; Analiza danych sama nie rysuje przycisków edycji dla podglądu – filtry, sortowanie i karty krów działają
+  if(tab==='analiza'||tab==='plan'||tab==='notatki'||tab==='rozrod') return;   // Notatki same nie rysują przycisków zapisu dla podglądu   // Analiza danych i Plan fermy same nie rysują edycji dla podglądu; Analiza danych sama nie rysuje przycisków edycji dla podglądu – filtry, sortowanie i karty krów działają
   const wolno=el=>el.closest('[data-zawsze]') || (p===2 && el.closest('[data-wpis]'));
   $$('input,select,textarea,button',w).forEach(el=>{
     if(wolno(el)) return;
@@ -4307,7 +4746,7 @@ function pokazAplikacje(){
   odswiezPrzyciskKonta();
   if(!Object.keys(NT).length) notStartLokalny();
   rysujZakladki(); render(); pokazSync();
-  aplikacjaWidoczna=true; notFab();
+  aplikacjaWidoczna=true; notFab(); dpPrzycisk(); dpStartLokalny();
   odswiezInstalacje();
 }
 function startAplikacji(){
@@ -4363,7 +4802,7 @@ function migrujUprawnienia(m,odWer){
 }
 let adminNasluch=false;
 function nasluchAdmin(){
-  nasluchAnaliz(); nasluchNotatek();
+  nasluchAnaliz(); nasluchNotatek(); nasluchDP(); dpPrzycisk();
   if(!adminNasluch){
     adminNasluch=true;
     fs.collection(KOL_ADMIN).doc('uprawnienia').onSnapshot(s=>{
@@ -4380,7 +4819,7 @@ function nasluchAdmin(){
         }
       }
       else if(PROFIL?.rola==='tworca') fs.collection(KOL_ADMIN).doc('uprawnienia').set({m:DOMYSLNE_UPR,ts:Date.now(),wer:WER_UPR}).catch(()=>{});
-      rysujZakladki(); nasluchAnaliz(); nasluchNotatek(); odswiezZdalnie();
+      rysujZakladki(); nasluchAnaliz(); nasluchNotatek(); nasluchDP(); dpPrzycisk(); odswiezZdalnie();
     },e=>console.warn('uprawnienia',e));
   }
   if(!uzytNasluch && poziom('uzytkownicy')>=1){
@@ -4425,7 +4864,7 @@ function mogeZarzadzac(u){
   if(PROFIL.rola==='tworca') return true;
   return poziom('uzytkownicy')>=3 && ['zootechnik','pracownik'].includes(u.rola);
 }
-function roleDoNadania(){ return PROFIL?.rola==='tworca'?['szef','zootechnik','pracownik']:['zootechnik','pracownik']; }
+function roleDoNadania(){ return PROFIL?.rola==='tworca'?['szef','zootechnik','pracownik','agent']:['zootechnik','pracownik']; }
 R.uzytkownicy=()=>{
   if(!PROFIL||PROFIL.lokalny) return `<div class="panel"><div class="pusto"><b>Konta działają po podłączeniu Firebase</b>Wpisz konfigurację w pliku firebase-config.js i włącz logowanie e-mail/hasło w konsoli Firebase.</div></div>`;
   const kol=['tworca','szef','zootechnik','pracownik'];
