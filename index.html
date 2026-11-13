@@ -3436,7 +3436,7 @@ R.analiza=()=>{
   const wn=`<div class="panel"><div class="ph"><h2>Wnioski żywieniowe</h2><span class="opis">reguły wg norm z ustawień · kolejność: pobranie i struktura dawki przed zmianą receptury</span></div><div class="pb"><ul class="an-wn">${W.wnioski.map(x=>`<li class="${x.p}">${x.t}</li>`).join('')||'<li class="ok">Brak sygnałów ostrzegawczych.</li>'}</ul></div></div>`;
   const sc=stanChmuryAnalizy(UI.anId);
   const chmura=`<div class="an-chmura ${sc.kl}" data-zawsze><span>${sc.kl==='ok'?'☁ ':sc.kl==='zle'?'⚠ ':''}${sc.t}</span>${sc.btn&&pelny?`<button class="btn maly" onclick="wyslijAnalizyPonownie()">Wyślij ponownie</button>`:''}</div>`;
-  const nag=chmura+`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (SOL${P.plikSol?': '+esc(P.plikSol):''}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} ${pelny?`<button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button>`:''}</div>`;
+  const nag=chmura+`<div class="baner info">Próbny dój <b>${dataPL(P.data)}</b> (${P.zrodlo==='DairyPlan'?'z DairyPlan':'SOL'+(P.plikSol?': '+esc(P.plikSol):'')}) · grupy z DairyPlan z ${dataPL(P.dpData)} · ${P.stat?`dopasowano ${P.stat.dopasowane} z ${P.stat.sol} krów, bez grupy pominięto ${P.stat.bezGrupy}`:''} ${pelny?`<button class="btn maly usun" style="margin-left:8px" onclick="usunAnalize('${P.data}')">Usuń ten dój</button>`:''}</div>`;
   if(!W.krowy.length) return gora+nag+panelFiltrowAn(UI.anId)+`<div class="panel"><div class="pusto"><b>Brak krów dla tego wyboru</b>Zmień wybór powyżej albo kliknij „Pokaż wszystkie krowy”.</div></div>`;
   return gora+nag+ust+panelFiltrowAn(UI.anId)+kafle+wn+tabelaGrupAn(W)+
     `<div class="wyk-siatka">${wykresLaktacji(W,L)}${wykresTB(W,L)}${wykresMocznik(W,L)}${wykresBialkoMleko(W,L)}${wykresECM(W,G)}${wykresRozrodu(W,G)}</div>`+
@@ -4247,9 +4247,8 @@ function dpZbuduj(pliki,ts){
       clv:dpData(r['00033030']),srv:dpData(r['00033040']),sire:r['00033020']||'',clvP:dpData(r['00033908']),
       lak:+r['00002007']||0,tins:+r['00002018']||0,avml:dpLiczba(r['00004221'],dec('000001','00004221'))}; });
   (E['000008']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00005106']); if(!nr||!d) return;
-    const ml=dpLiczba(r['00005101'],dec('000008','00005101'));
-    (doje[nr]=doje[nr]||[]).push({d,ml,tl:dpLiczba(r['00005151'],dec('000008','00005151')),bi:dpLiczba(r['00005152'],dec('000008','00005152')),
-      lks:dpLiczba(r['00005154'],dec('000008','00005154')),mocz:dpLiczba(r['00005158'],dec('000008','00005158'))||null}); });
+    const w=ddi=>dpLiczba(r[ddi],dec('000008',ddi))||null;   // 0 w DairyPlan = wynik niewpisany
+    (doje[nr]=doje[nr]||[]).push({d,ml:w('00005101'),tl:w('00005151'),bi:w('00005152'),lks:w('00005154'),mocz:w('00005158')}); });
   Object.values(doje).forEach(a=>a.sort((x,y)=>y.d<x.d?-1:1));
   (E['000003']?.rows||[]).forEach(r=>{ const nr=+r['00002001'], d=dpData(r['00003101']); if(!nr||!d) return;
     const n=r['00003109']||''; (zd[nr]=zd[nr]||[]).push({d,n,r:dpRodzaj(n),plus:(r['00033002']||'').includes('+'),k:r['00003104']||'',k2:r['00003108']||''}); });
@@ -4310,7 +4309,9 @@ function dpPoImporcie(){
     const gr={}; dpGrupyMapa().forEach(x=>gr[x.nr]={nazwa:x.nazwa,szt:x.szt}); D.dp={data:dzis(),ts:DPX.ts,grupy:gr,zrodlo:'DairyPlan'}; saveModule('dp');
   }
   // próbny dój do Analizy danych (gdy tego dnia jeszcze nie ma)
-  if(poziom('analiza')>=3){ const W=dpAnaliza(); if(W&&!AN[W.data]){ AN[W.data]=W; if(typeof jednostkaAnalizy==='function'){ jednostkaAnalizy(W.data); oznaczZmiane('a:'+W.data); } toast(`Analiza danych: dodano próbny dój ${dataPL(W.data)} z DairyPlan`); } }
+  if(poziom('analiza')>=3){ const W=dpAnaliza(); const S=W&&AN[W.data];
+    // nowy dzień – dodaj; dzień już pobrany z DairyPlan – odśwież nowszymi danymi (np. dopisane wyniki); dzień z SOL – nie ruszaj
+    if(W&&(!S||(S.zrodlo==='DairyPlan'&&(S.dpTs||0)<DPX.ts))){ AN[W.data]=W; if(typeof jednostkaAnalizy==='function'){ jednostkaAnalizy(W.data); oznaczZmiane('a:'+W.data); } toast(`Analiza danych: ${S?'odświeżono':'dodano'} próbny dój ${dataPL(W.data)} z DairyPlan`); } }
   // podsumowanie dla osoby, która kliknęła
   const P=DPS.prosba; if(P&&P.uid===PROFIL?.uid&&P.stan==='gotowe'&&(P.ts||0)<=DPX.ts&&_dpCzekam===P.ts){ _dpCzekam=null; dpPodsumowanie(); }
 }
@@ -4325,7 +4326,7 @@ function dpAnaliza(){
   Object.values(DPX.zw).forEach(a=>{ if(!grT.has(a.gr)||krowy.some(k=>k.nr===a.nr)) return; krowy.push(dpKrowaAn(a,null,data)); });
   const grupy={}; grT.forEach(g=>grupy[g]={nazwa:D.dp?.grupy?.[g]?.nazwa||''});
   const n=krowy.filter(k=>k.ml!=null).length;
-  return {data,dpData:dzis(),ts:Date.now(),zrodlo:'DairyPlan',krowy,grupy,stat:{sol:n,dp:krowy.length,dopasowane:n,bezGrupy:0,zwierzatDP:krowy.length-n}};
+  return {data,dpData:dzis(),ts:Date.now(),dpTs:DPX.ts,zrodlo:'DairyPlan',krowy,grupy,stat:{sol:n,dp:krowy.length,dopasowane:n,bezGrupy:0,zwierzatDP:krowy.length-n}};
 }
 function dpKrowaAn(a,t,data){
   const o={nr:a.nr,gr:a.gr,st:a.st,k:a.kol,n:a.im,lak:a.lak,lakDP:a.lak,wyc:a.clv,wycDP:a.clv,il:a.tins,dins:a.srv};
