@@ -627,6 +627,10 @@ table.an-krowy td,table.an-krowy th{padding:4px 7px;font-size:13px}
 .nd-licz>span.zost{background:#D9822B;border-color:#D9822B;color:#fff}
 .ndk{border-color:#D9822B;background:#FFE7C7}
 .ndk.uzyte{background:#fff;border-style:dashed;opacity:.85}
+#dpAlarm{display:flex;align-items:center;gap:10px;padding:8px 16px;background:#FBEFC4;border-bottom:2px solid #D9B44A;color:#4F3A00;font-size:14px}
+#dpAlarm[hidden]{display:none}
+#dpAlarm span{flex:1}
+#dpAlarm button{flex:none;min-width:40px;min-height:40px;border:1px solid #D9B44A;border-radius:8px;background:#fff;font-weight:700;cursor:pointer}
 /* ===== RAPORTY: kategorie ===== */
 .rap-kategorie{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
 .rap-kat{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 8px;border-radius:10px;border:1px solid}
@@ -705,6 +709,7 @@ span.roz-z{cursor:default}
     <button id="konto" hidden onclick="modalKonto()"></button>
   </div>
   <nav id="zakladki"></nav>
+  <div id="dpAlarm" hidden></div>
 </header>
 <div id="instal" hidden></div>
 <main id="widok"></main>
@@ -4268,7 +4273,7 @@ function nasluchDP(){
   if(!fs||dpNasluchOn||!PROFIL?.uid) return; dpNasluchOn=true;
   const ref=id=>fs.collection(KOL_DP).doc(id);
   ref('prosba').onSnapshot(s=>{ DPS.prosba=s.exists?s.data():null; dpOdswiezPostep(); dpPrzycisk(); },e=>{ DPS.blad=e.code||'błąd'; dpPrzycisk(); });
-  ref('agent').onSnapshot(s=>{ DPS.agent=s.exists?s.data():null; dpOdswiezPostep(); },()=>{});
+  ref('agent').onSnapshot(s=>{ DPS.agent=s.exists?s.data():null; dpOdswiezPostep(); dpAlarm(); },()=>{});
   ref('dane').onSnapshot(s=>{ DPS.dane=s.exists?s.data():null; if(DPS.dane&&(!DPX||DPX.ts<DPS.dane.ts)) dpPobierzDane(DPS.dane); },()=>{});
 }
 let _dpPobieram=false, _dpCzekam=null;
@@ -4406,6 +4411,16 @@ function dpPrzycisk(){
   b.hidden=!(fs&&PROFIL&&!PROFIL.lokalny&&ROLE[PROFIL.rola]&&PROFIL.rola!=='agent');
   const P=DPS.prosba, pracuje=P&&(P.stan==='czeka'||P.stan==='pracuje')&&Date.now()-(P.ts||0)<600000;
   b.classList.toggle('pracuje',!!pracuje); b.title=DPX?`Dane z DairyPlan: ${dpKiedy(DPX.ts)} · kliknij, żeby pobrać nowe`:'Pobierz dane z DairyPlan (komputer w oborze)';
+}
+// żółty pasek: komputer w oborze (agent) nie odezwał się od ponad godziny (puls co 5 min)
+let _dpAlarmSchowany=false, _dpAlarmT=null;
+function dpAlarm(){
+  const el=$('#dpAlarm'); if(!el) return;
+  clearTimeout(_dpAlarmT); _dpAlarmT=setTimeout(dpAlarm,5*60000);
+  const A=DPS.agent, kto=PROFIL&&!PROFIL.lokalny&&(PROFIL.rola==='tworca'||poziom('rozrod')>=1||poziom('dawki')>=2);
+  const stary=fs&&kto&&A&&A.ts&&Date.now()-A.ts>3600000;
+  el.hidden=!stary||_dpAlarmSchowany;
+  if(stary) el.innerHTML=`<span><b>Komputer w oborze nie odpowiada</b> od ${dpKiedy(A.ts)} – przycisk „DairyPlan” teraz nie zadziała. Sprawdź, czy komputer jest włączony i zalogowany; w razie potrzeby kliknij tam <b>start-agent.cmd</b> (folder C:\\WeibloemAgent).</span><button onclick="_dpAlarmSchowany=true;dpAlarm()" aria-label="Ukryj">✕</button>`;
 }
 function dpKiedy(ts){ if(!ts) return '–'; return notCzas?notCzas(ts):new Date(ts).toLocaleString('pl-PL'); }
 async function dpPobierz(){
@@ -4814,7 +4829,7 @@ function pokazAplikacje(){
   odswiezPrzyciskKonta();
   if(!Object.keys(NT).length) notStartLokalny();
   rysujZakladki(); render(); pokazSync();
-  aplikacjaWidoczna=true; notFab(); dpPrzycisk(); dpStartLokalny();
+  aplikacjaWidoczna=true; notFab(); dpPrzycisk(); dpStartLokalny(); dpAlarm();
   odswiezInstalacje();
 }
 function startAplikacji(){
