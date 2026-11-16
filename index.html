@@ -1147,7 +1147,14 @@ function kontekstBiezacy(){
     if(kgTryb) grupy[g.id].tryb='kg';
     (g.sektory||[]).forEach((s,j)=>{ sektory[s.id]={nazwa:s.nazwa,sztuki:s.sztuki||0,grupaId:g.id,kolejnosc:j};
       if(kgTryb){ const kg=Math.max(0,+s.kgWoz||0); sektory[s.id].kgWoz=kg; sektory[s.id].wirt=recKg>0?Math.round(kg*(g.zadania||1)/recKg*10000)/10000:0; }
-      else if(s.wirt!=null&&s.wirt!=='') sektory[s.id].wirt=+s.wirt; });
+      else {
+        if(s.wirt!=null&&s.wirt!=='') sektory[s.id].wirt=+s.wirt;
+        // 2× dziennie: osobne sztuki wirtualne na wóz rano i po południu (puste = połowa sztuk wirt./realnych); razem = sztuki na dobę
+        if((g.zadania||1)===2 && (wirtJest(s.wirtR)||wirtJest(s.wirtP))){
+          const pol=efSzt(sektory[s.id])/2, r=wirtJest(s.wirtR)?+s.wirtR:pol, p=wirtJest(s.wirtP)?+s.wirtP:pol;
+          sektory[s.id].wirt=Math.round((r+p)*10000)/10000; sektory[s.id].udzR=r+p>0?Math.round(r/(r+p)*10000)/10000:0.5;
+        }
+      } });
     const dod=(g.dodatki||[]).filter(x=>x.s&&sur[x.s]).filter(x=>!x.cel||(g.sektory||[]).some(s=>s.id===x.cel))
       .map(x=>x.tryb==='worek'?{id:x.id,s:x.s,cel:x.cel||'',tryb:'worek',worki:+x.worki||0,worekKg:+x.worekKg||0}:{id:x.id,s:x.s,cel:x.cel||'',tryb:'kg',kg:+x.kg||0});
     if(dod.length) grupy[g.id].dodatki=dod;
@@ -1158,6 +1165,7 @@ function kontekstBiezacy(){
 // Dziś i dni przyszłe liczą się zawsze z bieżących Dawek; dni minione – z kopii zamrożonej w dokumencie dnia.
 function kontekst(data){ const d=DNI[data]; return (data<dzis() && d && d.snap)?d.snap:kontekstBiezacy(); }
 // Wirtualne sztuki: na tyle sztuk liczy się dawkę sektora (puste = tyle co realnych)
+function wirtJest(v){ return v!=null&&v!==''; }
 function efSzt(s){ return s?((s.wirt!=null&&s.wirt!=='')?+s.wirt:(s.sztuki||0)):0; }
 function snapRozni(data){ if(data>=dzis()) return false; const d=DNI[data]; if(!d||!d.snap) return false; const {ts,...s}=d.snap; return stabilny(s)!==stabilny(kontekstBiezacy()); }
 function grupyC(C){ return Object.entries(C.grupy).map(([id,g])=>({id,...g})).sort((a,b)=>a.kolejnosc-b.kolejnosc); }
@@ -1190,6 +1198,22 @@ function planSek(C,sid){
   const st=statRec(C,g?.recepturaId);
   return st.kg*efSzt(s)+(st.balot>0?st.balot*z*udzialWGrupie(C,sid):0);
 }
+// Plan sektora na jeden wóz zadania z (1 = rano, 2 = po południu): przy 2× dziennie z osobnymi sztukami wirtualnymi
+// część z receptury dzieli się wg nich, a balot – po równo; w pozostałych przypadkach plan dobowy / ile razy dziennie
+function planSekZad(C,sid,z){
+  const s=C.sektory[sid]; if(!s) return 0; const g=C.grupy[s.grupaId], n=g?.zadania||1, d=planSek(C,sid);
+  if(n!==2||s.udzR==null||s.kgWoz!=null) return d/n;
+  const rec=statRec(C,g?.recepturaId).kg*efSzt(s), bal=Math.max(0,d-rec);
+  return rec*(z===2?1-s.udzR:s.udzR)+bal/2;
+}
+// Które zadanie (1 rano / 2 po południu) wiezie sektor w danym wozie: z ułożenia wozów (zadanie 1/2);
+// gdy wszystkie wozy z tym sektorem mają zadanie 1 (dodane ręcznie) – pierwszy wóz = rano, kolejny = po południu
+function zadSektora(d,k,sid){
+  const L=kursyWKolejnosci(d).filter(x=>x.rozdzial.some(r=>r.sektorId===sid));
+  if(L.some(x=>(x.zadanie||1)>1)) return k.zadanie||1;
+  const i=L.indexOf(k); return i<0?(L.length?2:1):(i===0?1:2);
+}
+function planWozuSektora(C,d,k,sid){ return planSekZad(C,sid,zadSektora(d,k,sid)); }
 // Plan grupy na dobę: kg, balot w tym, koszt TMR i dawka receptury na sztukę (z balotem przeliczonym na sztuki realne)
 function planGrupy(C,gid){
   const g=C.grupy[gid], st=statRec(C,g?.recepturaId), z=g?.zadania||1; let plan=0,szt=0;
@@ -1565,10 +1589,19 @@ R.dawki=()=>{
       :'<div class="pusto"><b>Brak receptur</b>Utwórz pierwszą recepturę przyciskiem „+ Receptura”.</div>'}</div></div>`
   +R._grupy(C);
 };
+// 2× dziennie, liczone na sztuki: dwa pola sztuk wirtualnych – wóz rano i wóz po południu
+function wirtRanoPop(g,s){
+  const pol=((s.wirt!=null&&s.wirt!=='')?+s.wirt:(s.sztuki||0))/2, r=wirtJest(s.wirtR)?+s.wirtR:pol, p=wirtJest(s.wirtP)?+s.wirtP:pol, ust=wirtJest(s.wirtR)||wirtJest(s.wirtP);
+  const pole=(k,et,tyt)=>`<input class="pole krotkie num wirt" data-wpis inputmode="decimal" data-fid="sw${k}_${s.id}" value="${wirtJest(s['wirt'+k])?fmtIn(s['wirt'+k],1):''}" placeholder="${fmtIn(pol,1)}" title="${tyt}" onchange="ustawSektor('${g.id}','${s.id}','wirt${k}',this.value)" aria-label="${tyt}"> ${et}`;
+  return pole('R','rano','Wirtualne sztuki na wóz rano. Puste = połowa sztuk na dobę.')+' '+pole('P','po poł.','Wirtualne sztuki na wóz po południu. Puste = połowa sztuk na dobę.')
+    +(ust&&s.sztuki>0?` <span class="znacznik" title="razem rano + po południu = ${fmt(r+p,1)} szt na dobę – ${fmt((r+p)/s.sztuki*100,0)}% dawki liczonej na realne sztuki">${fmt((r+p)/s.sztuki*100,0)}%</span>`:'');
+}
 R._grupy=C=>{
   const lista=D.grupy.map((g,i)=>{
     const st=statRec(C,g.recepturaId), szt=g.sektory.reduce((a,s)=>a+(s.sztuki||0),0), ef=g.sektory.reduce((a,s)=>a+efSzt(C.sektory[s.id]||s),0), kgM=g.tryb==='kg', P=planGrupy(C,g.id);
-    const kgWozu=kgM?g.sektory.reduce((a,s)=>a+(+s.kgWoz||0),0):0;
+    const kgWozu=kgM?g.sektory.reduce((a,s)=>a+(+s.kgWoz||0),0):0, dwa=!kgM&&(g.zadania||1)===2;
+    const rp=dwa&&g.sektory.some(s=>C.sektory[s.id]?.udzR!=null)?[1,2].map(z=>g.sektory.reduce((a,s)=>a+planSekZad(C,s.id,z),0)):null;
+    const kgSektora=s=>{ const kg=(+s.kgWoz||0)*(g.zadania||1), na=s.sztuki>0?kg/s.sztuki:null; return na==null||!(kg>0)?'':` <span class="znacznik" title="kg TMR na sztukę na dobę i % dawki obliczonej z receptury (${fmt(P.recSzt,1,2)} kg/szt); bez dodatków ręcznych">${fmt(na,1)} kg/szt${P.recSzt>0?` · ${fmt(na/P.recSzt*100,0)}%`:''}</span>`; };
     let dodKg=0, dodZl=0; g.sektory.forEach(s=>Object.entries(dodatkiPlanSektora(C,s.id)).forEach(([sid,kg])=>{ dodKg+=kg; dodZl+=kg*(C.ceny[sid]||0)/1000; }));
     return `<div class="grupa" data-drop="grp" data-accept="grp" data-id="${g.id}"><div class="kol" style="background:${g.kolor}" title="Zmień kolor" onclick="kolorGrupy('${g.id}')"></div><div class="tresc">
       <div><div class="g-gora"><span class="uchwyt" data-drag="grp" data-id="${g.id}" data-duch-tekst="${esc(g.nazwa)}" title="Przeciągnij, żeby przestawić grupę">⋮⋮</span><span class="strz"><button ${i===0?'disabled':''} onclick="przesunGrupe('${g.id}',-1)">▲</button><button ${i===D.grupy.length-1?'disabled':''} onclick="przesunGrupe('${g.id}',1)">▼</button></span>
@@ -1579,18 +1612,19 @@ R._grupy=C=>{
         <div class="g-gora" style="margin-top:8px"><span class="przel" title="Ile razy dziennie zadawana – dawka dobowa dzieli się na tyle wozów">${[1,2].map(z=>`<button class="${(g.zadania||1)===z?'akt':''}" onclick="ustawGrupe('${g.id}','zadania',${z})">${z}× dziennie</button>`).join('')}</span>
           <label class="cichy" style="display:flex;gap:5px;align-items:center"><input type="checkbox" ${g.dojna?'checked':''} onchange="ustawGrupe('${g.id}','dojna',this.checked)"> krowy dojne</label></div>
         <div class="g-gora" style="margin-top:8px"><span class="cichy" style="font-weight:600">Liczymy na:</span><span class="przel" title="sztuki: ilość TMR = receptura × sztuki (wirtualne) · kg: na każdy wóz wpisujesz kg TMR dla sektora"><button class="${kgM?'':'akt'}" onclick="ustawTryb('${g.id}','szt')">sztuki</button><button class="${kgM?'akt':''}" onclick="ustawTryb('${g.id}','kg')">kg TMR na sektor</button></span></div></div>
-      <div><label class="et">${kgM?'Sektory · sztuki realne · kg TMR na jeden wóz (stałe – nie zmieniają się ze sztukami)':'Sektory · sztuki realne · wirt. = na ile sztuk liczyć dawkę (puste = jak realne)'}</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
+      <div><label class="et">${kgM?'Sektory · sztuki realne · kg TMR na jeden wóz (stałe – nie zmieniają się ze sztukami)':dwa?'Sektory · sztuki realne · wirt. rano / po południu = na ile sztuk liczyć każdy wóz (razem = sztuki na dobę; puste = po połowie)':'Sektory · sztuki realne · wirt. = na ile sztuk liczyć dawkę (puste = jak realne)'}</label><div class="sektory">${g.sektory.map(s=>`<span class="sektor-ed"><input class="pole" style="width:120px" data-fid="sen_${s.id}" value="${esc(s.nazwa)}" onchange="ustawSektor('${g.id}','${s.id}','nazwa',this.value)">
           <input class="pole krotkie num" data-wpis inputmode="numeric" data-fid="ss_${s.id}" value="${s.sztuki}" onchange="ustawSektor('${g.id}','${s.id}','sztuki',this.value)"> szt
-          ${kgM?`<input class="pole num kgw" data-wpis inputmode="numeric" data-fid="skg_${s.id}" value="${s.kgWoz??''}" placeholder="kg" title="kg TMR dla tego sektora na każdy wóz" onchange="ustawSektor('${g.id}','${s.id}','kgWoz',this.value)" aria-label="kg TMR na wóz"> kg/wóz`
+          ${kgM?`<input class="pole num kgw" data-wpis inputmode="numeric" data-fid="skg_${s.id}" value="${s.kgWoz??''}" placeholder="kg" title="kg TMR dla tego sektora na każdy wóz" onchange="ustawSektor('${g.id}','${s.id}','kgWoz',this.value)" aria-label="kg TMR na wóz"> kg/wóz${kgSektora(s)}`
+          :dwa?wirtRanoPop(g,s)
           :`<input class="pole krotkie num wirt" data-wpis inputmode="numeric" data-fid="sw_${s.id}" value="${s.wirt??''}" placeholder="${s.sztuki}" title="Wirtualne sztuki – na ile sztuk liczyć dawkę tego sektora. Puste = tyle co realnych." onchange="ustawSektor('${g.id}','${s.id}','wirt',this.value)"> wirt.${s.wirt!=null&&s.sztuki>0?` <span class="znacznik" title="sektor dostaje ${fmt(s.wirt/s.sztuki*100,0)}% dawki liczonej na realne sztuki">${fmt(s.wirt/s.sztuki*100,0)}%</span>`:''}`}
           <button class="btn ikona usun" onclick="usunSektor('${g.id}','${s.id}')">✕</button></span>`).join('')}
           <button class="btn maly" onclick="dodajSektor('${g.id}')">+ Sektor</button></div>
         ${dodatkiGrupyHTML(g)}
         <label class="et" style="margin-top:8px">Uwagi do grupy (trafiają do raportu kosztów)</label><textarea class="pole" rows="1" data-fid="gu_${g.id}" onchange="ustawGrupe('${g.id}','uwagi',this.value)">${esc(g.uwagi||'')}</textarea></div>
-      <div class="liczby-g"><span>Sztuk razem</span><b>${szt}${!kgM&&ef!==szt?` <span class="cichy" style="font-weight:600">· wirt. ${fmt(ef,0)}</span>`:''}</b>${kgM?`<span>Liczone</span><b>w kg na sektor</b>`:`<span>Dawka obliczona</span><b>${fmt(P.recSzt,1,2)} kg/szt</b>`}
+      <div class="liczby-g"><span>Sztuk razem</span><b>${szt}${!kgM&&ef!==szt?` <span class="cichy" style="font-weight:600">· wirt. ${fmt(ef,0)}</span>`:''}</b>${kgM?`<span>Liczone</span><b>w kg na sektor</b><span>Dawka z receptury</span><b>${fmt(P.recSzt,1,2)} kg/szt</b>${szt>0&&P.plan>0?`<span>Wychodzi</span><b>${fmt(P.plan/szt,1,2)} kg/szt${P.recSzt>0?` · ${fmt(P.plan/szt/P.recSzt*100,0)}%`:''}</b>`:''}`:`<span>Dawka obliczona</span><b>${fmt(P.recSzt,1,2)} kg/szt</b>`}
         ${st.balot>0?`<span>🌾 Na wóz ${fmt(st.balot,0)} kg</span><b>≈ ${fmt(P.balSzt,2)} kg/szt</b>`:''}
         ${!kgM&&ef!==szt&&szt>0?`<span>Skorygowana</span><b>${fmt(P.plan/szt,1,2)} kg/szt</b>`:''}
-        <span>Plan na dobę</span><b>${fmt(P.plan,0)} kg</b><span>Na jeden wóz</span><b>${fmt(P.plan/(g.zadania||1),0)} kg</b>
+        <span>Plan na dobę</span><b>${fmt(P.plan,0)} kg</b>${rp?`<span>Wóz rano</span><b>${fmt(rp[0],0)} kg</b><span>Wóz po południu</span><b>${fmt(rp[1],0)} kg</b>`:`<span>Na jeden wóz</span><b>${fmt(P.plan/(g.zadania||1),0)} kg</b>`}
         ${dodKg>0?`<span>Dodatki ręczne</span><b>${fmt(dodKg,1)} kg/d</b>`:''}
         <span>Koszt</span><b>${fmt(szt>0?(P.koszt+dodZl)/szt:st.koszt,2)} zł/szt/d</b><span>Koszt grupy</span><b>${fmt(P.koszt+dodZl,0)} zł/d</b></div>
     </div></div>`;
@@ -1750,7 +1784,7 @@ async function podgladPrzywrocenia(){
   if(!z){ info.className='baner uwaga'; info.innerHTML=`Nie ma zapisu z ${dataPL(data)} ani z wcześniejszych dni.`; return; }
   const S=z.dz.snap, C=kontekstBiezacy();
   const szt=K=>Object.values(K.sektory).reduce((a,s)=>a+(s.sztuki||0),0);
-  const zm=Object.entries(S.sektory).filter(([id,s])=>{ const c=C.sektory[id]; return !c||c.sztuki!==s.sztuki||(c.wirt??null)!==(s.wirt??null); }).length;
+  const zm=Object.entries(S.sektory).filter(([id,s])=>{ const c=C.sektory[id]; return !c||c.sztuki!==s.sztuki||(c.wirt??null)!==(s.wirt??null)||(c.udzR??null)!==(s.udzR??null); }).length;
   const zmRec=Object.entries(S.receptury).filter(([id,r])=>!C.receptury[id]||stabilny(r.sk)!==stabilny(C.receptury[id].sk)||stabilny(r.wz||[])!==stabilny(C.receptury[id].wz||[])).length;
   const nowe=D.grupy.filter(g=>!S.grupy[g.id]).map(g=>g.nazwa);
   const kursy=z.dz.kursy||[];
@@ -1780,7 +1814,7 @@ function przywrocDawki(S,kursyZ){
   // grupy w kolejności z zapisu, potem grupy dodane później
   const zZapisu=grupyC(S).map(g=>{
     const G=grupa(g.id)||{id:g.id,uwagi:''};
-    const sektory=sektoryGrupyC(S,g.id).map(s=>{ const o={id:s.id,nazwa:s.nazwa,sztuki:s.sztuki||0}; const bylo=(G.sektory||[]).find(x=>x.id===s.id); if(bylo&&Array.isArray(bylo.dpGr)) o.dpGr=bylo.dpGr; if(s.kgWoz!=null) o.kgWoz=s.kgWoz; else if(s.wirt!=null) o.wirt=s.wirt; return o; });
+    const sektory=sektoryGrupyC(S,g.id).map(s=>{ const o={id:s.id,nazwa:s.nazwa,sztuki:s.sztuki||0}; const bylo=(G.sektory||[]).find(x=>x.id===s.id); if(bylo&&Array.isArray(bylo.dpGr)) o.dpGr=bylo.dpGr; if(s.kgWoz!=null) o.kgWoz=s.kgWoz; else if(s.udzR!=null&&s.wirt!=null){ o.wirtR=Math.round(s.wirt*s.udzR*10)/10; o.wirtP=Math.round(s.wirt*(1-s.udzR)*10)/10; } else if(s.wirt!=null) o.wirt=s.wirt; return o; });
     const dodatki=(g.dodatki||[]).map(x=>x.tryb==='worek'?{id:x.id,s:x.s,cel:x.cel||'',tryb:'worek',kg:0,worki:x.worki,worekKg:x.worekKg}:{id:x.id,s:x.s,cel:x.cel||'',tryb:'kg',kg:x.kg,worki:1,worekKg:25});
     return Object.assign(G,{nazwa:g.nazwa,opis:g.opis||'',recepturaId:g.recepturaId||'',zadania:g.zadania||1,kolor:g.kolor||G.kolor||'#888',dojna:!!g.dojna,tryb:g.tryb==='kg'?'kg':'szt',sektory,dodatki});
   });
@@ -1788,7 +1822,7 @@ function przywrocDawki(S,kursyZ){
   if(kursyZ){
     const dz=dzis(), d=dzienDoEdycji(dz);
     d.kursy=klon(kursyZ);
-    d.kursy.forEach(k=>k.rozdzial.forEach(r=>{ const s=S.sektory[r.sektorId], g=s?S.grupy[s.grupaId]:null; if(s) r.plan=Math.round(planSek(S,r.sektorId)/(g?.zadania||1)*100)/100; }));
+    d.kursy.forEach(k=>k.rozdzial.forEach(r=>{ const s=S.sektory[r.sektorId], g=s?S.grupy[s.grupaId]:null; if(s) r.plan=Math.round(planWozuSektora(S,d,k,r.sektorId)*100)/100; }));
     const ids=new Set(d.kursy.map(k=>k.id));
     d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>ids.has(a.kursId)));
     saveDzien(dz);
@@ -1826,7 +1860,7 @@ function nowaGrupa(){
 function usunGrupe(gid){ const g=grupa(gid); if(!confirm(`Usunąć grupę „${g.nazwa}” razem z sektorami? Zapisane dni zachowają jej dane.`)) return; D.grupy=D.grupy.filter(x=>x.id!==gid); saveModule('grupy'); render(); }
 function dodajSektor(gid){ const g=grupa(gid); g.sektory.push({id:uid('s'),nazwa:'Sektor '+(g.sektory.length+1),sztuki:0}); saveModule('grupy'); render(); }
 function ustawSektor(gid,sid,pole,v){
-  if(poziom('dawki')<3 && pole!=='sztuki' && pole!=='wirt' && pole!=='kgWoz') return;
+  if(poziom('dawki')<3 && !['sztuki','wirt','wirtR','wirtP','kgWoz'].includes(pole)) return;
   const s=grupa(gid).sektory.find(x=>x.id===sid); if(!s) return;
   if(pole==='kgWoz'){ const n=parseFloatPL(String(v).trim()||'0'); if(!Number.isFinite(n)||n<0){ toast('Wpisz kg TMR na wóz','zly'); render(); return; } s.kgWoz=Math.round(n); saveModule('grupy'); render(); return; }
   let pytaj=null;
@@ -1837,6 +1871,12 @@ function ustawSektor(gid,sid,pole,v){
     if(t==='') delete s.wirt;
     else { const n=parseFloatPL(t); if(!Number.isFinite(n)||n<0){ toast('Wirtualne sztuki: wpisz liczbę albo zostaw puste','zly'); render(); return; }
       const r=Math.round(n); if(r===s.sztuki) delete s.wirt; else s.wirt=r; }
+  }
+  else if(pole==='wirtR'||pole==='wirtP'){
+    const t=String(v).trim();
+    if(t==='') delete s[pole];
+    else { const n=parseFloatPL(t); if(!Number.isFinite(n)||n<0){ toast('Sztuki wirtualne rano/po południu: wpisz liczbę albo zostaw puste','zly'); render(); return; }
+      s[pole]=Math.round(n*10)/10; }
   }
   else { v=v.trim(); if(!v){ render(); return; } s.nazwa=v; }
   saveModule('grupy'); render();
@@ -1855,7 +1895,8 @@ function wierszeDP(){
   D.grupy.forEach(g=>g.sektory.forEach(s=>{
     const mapa=mapaSektoraDP(g,s), brak=mapa.filter(n=>!G.has(n)), kgM=g.tryb==='kg';
     mapa.forEach(n=>(uzycie[n]=uzycie[n]||[]).push(s.nazwa));
-    const nowe=mapa.length&&!brak.length?mapa.reduce((a,n)=>a+G.get(n).szt,0):null;
+    // grupa DP, której nie ma w danych, nie ma żadnej krowy (DairyPlan nie wysyła pustych grup) – liczy się jako 0 szt
+    const nowe=mapa.length&&G.size?mapa.reduce((a,n)=>a+(G.get(n)?.szt||0),0):null;
     const kgT=kgM?(+s.kgWoz||0):null, kgN=kgM&&nowe!=null&&s.sztuki>0&&kgT>0?Math.round(kgT*nowe/s.sztuki):null;
     w.push({g,s,mapa,brak,nowe,kgM,kgT,kgN,zm:nowe!=null&&nowe!==s.sztuki});
   }));
@@ -1883,7 +1924,7 @@ function rysujDP(){
   const ileZm=w.filter(x=>x.zm).length;
   const wiersze=w.map(x=>{ const id=x.s.id, ch=k=>zazn[k]!=null?zazn[k]:null;
     const zm=x.nowe!=null?x.nowe-x.s.sztuki:null;
-    const stan=x.brak.length?`<span class="ostrz">brak w DP: ${x.brak.join(', ')}</span>`:!x.mapa.length?'<span class="cichy">wpisz numer grupy DP</span>':x.wiele.length?`<span class="ostrz">DP ${x.wiele.join(', ')} też w innym sektorze</span>`:'';
+    const stan=x.brak.length?`<span class="ostrz" title="W danych z DairyPlan nie ma żadnej krowy w tej grupie – sektor dostaje 0 szt">pusta w DP: ${x.brak.join(', ')} (0 szt)</span>`:!x.mapa.length?'<span class="cichy">wpisz numer grupy DP</span>':x.wiele.length?`<span class="ostrz">DP ${x.wiele.join(', ')} też w innym sektorze</span>`:'';
     const kg=x.kgM?(x.kgN!=null&&x.kgN!==x.kgT?`<label style="display:flex;gap:5px;align-items:center;white-space:nowrap"><input type="checkbox" id="dp-k-${id}" ${(ch('dp-k-'+id)??(x.zm))?'checked':''}> ${fmt(x.kgT,0)} → <input class="pole num dp-kgv" id="dp-kv-${id}" style="width:72px" inputmode="numeric" value="${kgW['dp-kv-'+id]??x.kgN}"> kg/wóz</label>`:`<span class="cichy">${fmt(x.kgT,0)} kg/wóz</span>`):'<span class="cichy">–</span>';
     return `<tr class="${x.zm?'zm':x.nowe==null?'bez':''}"><td class="l"><input type="checkbox" id="dp-z-${id}" ${x.zm?'':'disabled'} ${x.zm&&(ch('dp-z-'+id)??true)?'checked':''} aria-label="Zmień"></td>
       <td class="l">${esc(x.g.nazwa)}</td><td class="l"><b>${esc(x.s.nazwa)}</b></td>
@@ -2012,7 +2053,7 @@ function naSzt(C,r){
   const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null, st=statRec(C,g?.recepturaId);
   if(!s||s.kgWoz!=null||!(st.kg>0)) return '';
   const z=g?.zadania||1, n=Math.round(Math.max(0,(r.kg||0)-st.balot*udzialWGrupie(C,r.sektorId))/st.kg);
-  return `na ${n} szt.${z===2?' (połowa grupy)':z>2?` (1/${z} grupy)`:''}`;
+  return `na ${n} szt.${z===2?(s.udzR!=null?` (z ${fmt(efSzt(s),0)} na dobę)`:' (połowa grupy)'):z>2?` (1/${z} grupy)`:''}`;
 }
 // Pasek składu wozu: niedojady (pierwsze), świeże składniki w kolejności załadunku, dodatki ręczne
 function segmentyWozu(d,C,k,m,skala,etykiety){
@@ -2033,7 +2074,7 @@ function kartaWozu(d,C,k){
   const gids=[...new Set(k.rozdzial.map(r=>C.sektory[r.sektorId]?.grupaId).filter(Boolean))];
   const kolory=gids.map(g=>C.grupy[g]?.kolor).filter(Boolean);
   const tyt=gids.map(g=>C.grupy[g]?.nazwa).filter(Boolean).join(' + ')||'Pusty wóz';
-  const plan=k.rozdzial.reduce((a,r)=>{ const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null; return a+planSek(C,r.sektorId)/(g?.zadania||1); },0);
+  const plan=k.rozdzial.reduce((a,r)=>{ const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null; return a+(s?planWozuSektora(C,d,k,r.sektorId):0); },0);
   const p=plan>0?m.sw/plan*100:null;
   const mozna=poziom('woz')>=2&&!UI.numWozy;
   const linie=(m.ndN>0?`<div class="kl kl-ndp"><span>♻ Niedojady <span class="cichy">– wsypać jako pierwsze</span></span><b>${fmt(m.ndN,0)} kg</b></div>`:'')+k.rozdzial.map(r=>{ const s=C.sektory[r.sektorId], ns=naSzt(C,r);
@@ -2059,7 +2100,7 @@ function szczegolyWozu(d,C,A,k){
   const pas=kol.length?(kol.length===1?kol[0]:`linear-gradient(90deg,${kol.join(',')})`):'var(--linia)';
   const wiersze=k.rozdzial.map(r=>{
     const s=C.sektory[r.sektorId], g=s?C.grupy[s.grupaId]:null, ns=naSzt(C,r);
-    const planK=planSek(C,r.sektorId)/(g?.zadania||1), p=planK>0?(r.kg||0)/planK*100:null, ndS=(r.kg||0)*f;
+    const planK=planWozuSektora(C,d,k,r.sektorId), p=planK>0?(r.kg||0)/planK*100:null, ndS=(r.kg||0)*f;
     return `<div class="kw" data-swiezy="${k.id}_${r.sektorId}">
       <span class="dot" style="background:${g?.kolor||'#999'}"></span><span><b>${esc(s?.nazwa||'(usunięty sektor)')}</b>${ns||ndS>0.5?`<br><small class="cichy">${ns}${ns&&ndS>0.5?' · ':''}${ndS>0.5?`w tym ♻ ${fmt(ndS,0)} kg`:''}</small>`:''}</span>
       <span class="r ukr">${s?.sztuki??'–'}</span><span class="r ukr">${fmt(planK,0)}</span>
@@ -2130,9 +2171,9 @@ function przeliczDniPoDawkach(){
           d.niedojady.forEach(n=>n.alok=n.alok.filter(a=>!(a.kursId===k.id&&a.sektorId===r.sektorId)));
           return false;
         }
-        const nowy=planSek(C,r.sektorId)/(g.zadania||1);
+        const nowy=planWozuSektora(C,d,k,r.sektorId);
         let stary=r.plan;
-        if(stary==null && S && S.sektory?.[r.sektorId]){ const gg=S.grupy?.[S.sektory[r.sektorId].grupaId]; stary=planSek(S,r.sektorId)/(gg?.zadania||1); }
+        if(stary==null && S && S.sektory?.[r.sektorId]){ const gg=S.grupy?.[S.sektory[r.sektorId].grupaId]; stary=planWozuSektora(S,d,k,r.sektorId); }
         if(stary>0 && Math.abs(nowy-stary)>=0.5){ r.kg=Math.max(0,Math.round((r.kg||0)*nowy/stary)); zm=true; przeliczone++; }
         // sektor był w wozie z planem 0 kg (np. nowy, bez sztuk i kg) – gdy Dawki dadzą mu plan, dostaje plan na wóz
         else if(!(stary>0) && !((r.kg||0)>0) && nowy>=0.5){ r.kg=Math.round(nowy); zm=true; przeliczone++; }
@@ -2146,8 +2187,7 @@ function przeliczDniPoDawkach(){
       if(S.sektory[sid] || d.kursy.some(k=>k.rozdzial.some(r=>r.sektorId===sid))) return;
       const g=C.grupy[s.grupaId]; if(!g?.recepturaId) return;
       const cele=wozyDoNowegoSektora(d,C,s.grupaId); if(!cele.length) return;
-      const pk=planSek(C,sid)/(g.zadania||1);
-      cele.forEach(k=>k.rozdzial.push({sektorId:sid,kg:Math.round(pk),plan:Math.round(pk*100)/100}));
+      cele.forEach(k=>{ const pk=planWozuSektora(C,d,k,sid); k.rozdzial.push({sektorId:sid,kg:Math.round(pk),plan:Math.round(pk*100)/100}); });
       zm=true; dopisane.push(s.nazwa);
     });
     const nowySnap=klon(C), stary=S?(({ts,...x})=>x)(S):null;
@@ -2195,7 +2235,7 @@ function dodajSektorDoKursu(kid,sid,bezZapisu){
   if(k.rozdzial.some(r=>r.sektorId===sid)){ odrzuc(kid); toast(`${s.nazwa} jest już w tym wozie`); return false; }
   k.recepturaId=g.recepturaId;
   // na jeden wóz: dawka dobowa / ile razy dziennie, ale nie więcej niż zostało do rozwiezienia na dobę
-  const planD=planSek(C,sid), planK=planD/(g.zadania||1), juz=przypisaneSektora(d,sid), kg=Math.max(0,Math.round(Math.min(planK,planD-juz)));
+  const planD=planSek(C,sid), planK=planWozuSektora(C,d,k,sid), juz=przypisaneSektora(d,sid), kg=Math.max(0,Math.round(Math.min(planK,planD-juz)));
   k.rozdzial.push({sektorId:sid,kg,plan:Math.round(planK*100)/100});
   UI.swiezy='kurs_'+kid;
   if(kg===0) toast(`${s.nazwa} ma już rozwiezioną dawkę na cały dzień – wpisz kg ręcznie w szczegółach wozu`);
@@ -2270,7 +2310,7 @@ function ulozKursy(){
       const ss=sektoryGrupyC(C,g.id).sort((a,b)=>(dosyp.has(a.id)?1:0)-(dosyp.has(b.id)?1:0));
       let b=null, suma=0;
       ss.forEach(s=>{
-        const pk=planSek(C,s.id)/(g.zadania||1), kg=Math.round(pk); if(kg<=0) return;
+        const pk=planSekZad(C,s.id,z), kg=Math.round(pk); if(kg<=0) return;
         if(!b || (poj>0 && suma+kg>poj && b.rozdzial.length)){ b={id:uid('k'),wozId:D.wozy[0]?.id||'',recepturaId:g.recepturaId,zadanie:z,rozdzial:[]}; kursy.push(b); suma=0; }
         b.rozdzial.push({sektorId:s.id,kg,plan:Math.round(pk*100)/100}); suma+=kg;
       });
@@ -2290,7 +2330,7 @@ function powielWozy(){
   const Cz=kontekst(zr), d=dzienDoEdycji(data), C=kontekst(data);
   d.kursy=kursyWKolejnosci(dz).map(k=>({id:uid('k'),wozId:k.wozId||'',recepturaId:k.recepturaId||'',zadanie:k.zadanie||1,
     rozdzial:k.rozdzial.filter(r=>C.sektory[r.sektorId]).map(r=>{ const s=Cz.sektory[r.sektorId], g=s?Cz.grupy[s.grupaId]:null;
-      return {sektorId:r.sektorId,kg:r.kg||0,plan:r.plan??(s?Math.round(planSek(Cz,r.sektorId)/(g?.zadania||1)*100)/100:null)}; })})).filter(k=>k.rozdzial.length);
+      return {sektorId:r.sektorId,kg:r.kg||0,plan:r.plan??(s?Math.round(planWozuSektora(Cz,dz,k,r.sektorId)*100)/100:null)}; })})).filter(k=>k.rozdzial.length);
   d.kolWozow=d.kursy.map(k=>k.id); d.niedojady.forEach(n=>n.alok=[]); UI.wozOtw=null;
   saveDzien(data);
   if(data>=dzis()) przeliczDniPoDawkach();
@@ -4294,8 +4334,8 @@ function dpGrupyMapa(){
 }
 function dpRozniceDawek(){
   const G=dpGrupyMapa(), w=[]; if(!G.size) return w;
-  D.grupy.forEach(g=>g.sektory.forEach(s=>{ const m=dpSektoraDawek(g,s); if(!m.length||m.some(n=>!G.has(n))) return;
-    const nowe=m.reduce((a,n)=>a+G.get(n).szt,0); if(nowe!==s.sztuki) w.push({g,s,nowe,pr:s.sztuki>0?Math.abs(nowe-s.sztuki)/s.sztuki*100:100}); }));
+  D.grupy.forEach(g=>g.sektory.forEach(s=>{ const m=dpSektoraDawek(g,s); if(!m.length) return;
+    const nowe=m.reduce((a,n)=>a+(G.get(n)?.szt||0),0); if(nowe!==s.sztuki) w.push({g,s,nowe,pr:s.sztuki>0?Math.abs(nowe-s.sztuki)/s.sztuki*100:100}); }));
   return w;
 }
 function dpPoImporcie(){
