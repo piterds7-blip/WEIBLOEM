@@ -24,6 +24,7 @@
   --gl:#24493A; --gl2:#3F7A57; --gl3:#DCE9DF;
   --obj:#6E8B33; --tres:#C9862A; --dod:#4A68A0; --nd:#8A6A3E;
   --ok:#2E7D4F; --zolty:#B8901C; --zly:#B23A2E;
+  --worek:#2F5DA8; --wiadro:#C46A12;
   --font:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   --font-w:'Barlow Condensed','Arial Narrow',var(--font);
 }
@@ -59,6 +60,16 @@ main{max-width:1560px;margin:0 auto;padding:16px 18px 60px}
 .ph{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--linia)}
 .ph h2{font:600 19px/1.2 var(--font-w);margin:0;letter-spacing:.2px}
 .ph .opis{color:var(--tusz2);font-size:13px}
+.odw-sek{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px 6px;font:700 22px/1.2 var(--font-w)}
+.odw-sek span{font:500 14px var(--font);color:var(--tusz2)}
+.odw-sek.worek{color:var(--worek)} .odw-sek.wiadro{color:var(--wiadro)}
+table.odw{border-top:4px solid}
+table.odw.worek{border-top-color:var(--worek)} table.odw.wiadro{border-top-color:var(--wiadro)}
+table.odw td{font-size:18px;font-weight:600;padding:9px 12px}
+table.odw tbody tr:nth-child(even) td{background:var(--pow2)}
+table.odw .duza{font:800 30px/1.05 var(--font);white-space:nowrap}
+table.odw.worek .duza{color:var(--worek)} table.odw.wiadro .duza{color:var(--wiadro)}
+table.odw small{display:block;font:500 13px var(--font);color:var(--tusz2)}
 .ph .prawo{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .pb{padding:12px 14px}
 .przewin{overflow-x:auto}
@@ -2138,21 +2149,48 @@ function dodatkiKursuHTML(C,dods){
   const wB=wiadra.map(w=>`<div class="w">🪣 ${w.poz.map(p=>`<b>${esc(C.sur[p.o.s]?.nazwa||'?')}</b> ${fmt(p.o.kg,1)} kg`).join(' · ')} <span class="waga">${gdzie(w.cel)} · waga z wiadrem: ${w.poz.map(p=>fmt(p.waga,1)).join(' → ')} kg</span></div>`).join('');
   return `<div class="kurs-dod"><span class="tyt">Dodatki ręczne</span>${wW}${wB}</div>`;
 }
-// Tabela odważania dodatków z wiadra na cały dzień (jak arkusz „Dodatki waga”)
-function tabelaDodatkow(d,C){
-  const lista=kursyWKolejnosci(d); let w='';
-  lista.forEach(k=>{
+// Dodatki ręczne dnia do odważania: worki (bez ważenia) i wiadra (odczyt wagi narastająco od tary), w kolejności wozów
+function wierszeOdwazania(d,C){
+  const worki=[], wiadra=[], gdzie=o=>o.cel?(C.sektory[o.cel]?.nazwa||'?')+' (przed wydaniem)':(C.grupy[o.gid]?.nazwa||'');
+  kursyWKolejnosci(d).forEach(k=>{
     const dods=dodatkiKursu(d,C,k); if(!dods.length) return;
     const nr=numerKursu(d,k.id);
-    dods.filter(o=>o.tryb==='worek').forEach(o=>{ w+=`<tr><td class="l">Wóz ${nr}</td><td class="l">${esc(o.cel?C.sektory[o.cel]?.nazwa:C.grupy[o.gid]?.nazwa||'')}${o.cel?' (przed wydaniem)':''}</td><td class="l">${esc(C.sur[o.s]?.nazwa||'?')}</td><td>${o.szt>0?fmt(o.kg/o.szt,3):'–'}</td><td>${fmt(o.szt,0)}</td><td>${fmt(o.kg,1)}</td><td class="l">${fmt(o.worki,0,2)} × worek ${fmt(o.worekKg,0,2)} kg</td></tr>`; });
-    wiadraKursu(dods).forEach(wi=>wi.poz.forEach((p,i)=>{ const o=p.o;
-      w+=`<tr><td class="l">${i?'':'Wóz '+nr}</td><td class="l">${i?'':esc(o.cel?C.sektory[o.cel]?.nazwa:C.grupy[o.gid]?.nazwa||'')+(o.cel?' (przed wydaniem)':'')}</td><td class="l">${esc(C.sur[o.s]?.nazwa||'?')}</td><td>${fmt(o.szt>0?o.kg/o.szt:0,2,3)}</td><td>${fmt(o.szt,0)}</td><td>${fmt(o.kg,2)}</td><td><b>${fmt(p.waga,1)}</b></td></tr>`; }));
+    dods.filter(o=>o.tryb==='worek').forEach(o=>worki.push({nr,o,gdzie:gdzie(o)}));
+    wiadraKursu(dods).forEach(wi=>wi.poz.forEach((p,i)=>wiadra.push({nr,o:p.o,waga:p.waga,dalej:i>0,gdzie:gdzie(p.o)})));
   });
-  return w?`<table class="t"><thead><tr><th class="l">Wóz</th><th class="l">Grupa / sektor</th><th class="l">Produkt</th><th>Dawka<br>kg/szt</th><th>Szt</th><th>Masa produktu<br>kg</th><th>Produkty + wiadro<br>kg (narastająco)</th></tr></thead><tbody>${w}</tbody></table>`:'';
+  return {worki,wiadra};
+}
+// Układ: najpierw worki, potem wiadro; duże cyfry. druk = z kratką do odhaczenia
+function tabelaDodatkow(d,C,druk){
+  const {worki,wiadra}=wierszeOdwazania(d,C); if(!worki.length&&!wiadra.length) return '';
+  const C_=C, nazwa=o=>esc(C_.sur[o.s]?.nazwa||'?'), dawka=o=>o.szt>0?`${fmt(o.kg/o.szt,2,3)} kg/szt × ${fmt(o.szt,0)}`:'';
+  const kratka=druk?'<td class="kr"><span class="box"></span></td>':'', kratkaN=druk?'<th class="kr">✓</th>':'';
+  const tw=worki.length?`<div class="odw-sek worek">🛍 WORKI – wsyp cały worek <span>bez ważenia</span></div>
+    <table class="t odw worek"><thead><tr><th class="l">Wóz</th><th class="l">Grupa / sektor</th><th class="l">Produkt</th><th>Ile</th>${kratkaN}</tr></thead><tbody>${worki.map(x=>`<tr>
+      <td class="l">Wóz ${x.nr}</td><td class="l">${esc(x.gdzie)}</td><td class="l">${nazwa(x.o)}<small>${dawka(x.o)}${dawka(x.o)?' = ':''}${fmt(x.o.kg,1)} kg</small></td>
+      <td class="duza">${fmt(x.o.worki,0,2)} × ${fmt(x.o.worekKg,0,2)} kg</td>${kratka}</tr>`).join('')}</tbody></table>`:'';
+  const td=wiadra.length?`<div class="odw-sek wiadro">🪣 WIADRO – odważ na wadze <span>tara wiadra ${fmt(taraWiadra(),1,2)} kg · kilka produktów w jednym wiadrze = dosypuj do wskazanej wagi</span></div>
+    <table class="t odw wiadro"><thead><tr><th class="l">Wóz</th><th class="l">Grupa / sektor</th><th class="l">Produkt</th><th>Masa produktu</th><th>Waga ma pokazać</th>${kratkaN}</tr></thead><tbody>${wiadra.map(x=>`<tr>
+      <td class="l">Wóz ${x.nr}</td><td class="l">${esc(x.gdzie)}${x.dalej?'<small>to samo wiadro – dosyp</small>':''}</td><td class="l">${nazwa(x.o)}<small>${dawka(x.o)}</small></td>
+      <td>${fmt(x.o.kg,2)} kg</td><td class="duza">${fmt(x.waga,1)} kg</td>${kratka}</tr>`).join('')}</tbody></table>`:'';
+  return tw+td;
 }
 function panelDodatkow(d,C){
   const t=tabelaDodatkow(d,C); if(!t) return '';
-  return `<div class="panel" style="margin-top:4px"><div class="ph"><h2>Dodatki ręczne – odważanie</h2><span class="opis">tara wiadra ${fmt(taraWiadra(),1,2)} kg · kilka produktów w jednym wiadrze = odczyt wagi narastająco · dawki i worki ustawiasz w zakładce Dawki</span></div><div class="przewin">${t}</div></div>`;
+  return `<div class="panel" style="margin-top:4px"><div class="ph"><h2>Dodatki ręczne – odważanie</h2><span class="opis">dawki i worki ustawiasz w zakładce Dawki</span>
+    <span class="prawo"><button class="btn" data-zawsze onclick="drukujDodatki()" title="Wydruk na kartkę do paszarni – z kratkami do odhaczenia">🖨 Drukuj</button></span></div><div class="przewin">${t}</div></div>`;
+}
+function drukujDodatki(){
+  const d=DNI[UI.data], C=kontekst(UI.data), t=d?tabelaDodatkow(d,C,true):'';
+  if(!t){ toast('Brak dodatków ręcznych do wydruku','zly'); return; }
+  const styl=`<style>.odw-sek{font-size:17px;font-weight:bold;margin:14px 0 2px}.odw-sek span{font-size:11px;font-weight:normal;color:#333}
+    .odw-sek.worek{color:#2F5DA8}.odw-sek.wiadro{color:#B05A08}
+    table.odw{border-top:4px solid #2F5DA8;-webkit-print-color-adjust:exact;print-color-adjust:exact}table.odw.wiadro{border-top-color:#C46A12}
+    table.odw td{font-size:15px;font-weight:bold;padding:7px 6px;vertical-align:middle}table.odw th{font-size:11px}
+    table.odw tr{page-break-inside:avoid}table.odw small{display:block;font-size:10px;font-weight:normal;color:#333}
+    table.odw .duza{font-size:24px;white-space:nowrap}table.odw.worek .duza{color:#2F5DA8}table.odw.wiadro .duza{color:#B05A08}
+    td.kr,th.kr{width:34px;text-align:center}.box{display:inline-block;width:20px;height:20px;border:2px solid #111;border-radius:3px}</style>`;
+  drukuj('Dodatki ręczne – odważanie '+UI.data,styl+naglowekDruku('Dodatki ręczne – odważanie',UI.data)+t);
 }
 /* Zmiana w Dawkach (sztuki, wirt. sztuki, receptura, sektory) przechodzi od razu na dziś i dni przyszłe:
    kg w wozach przeliczają się z zachowaniem % planu, a sektor usunięty albo z inną recepturą schodzi z wozu.
